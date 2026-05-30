@@ -12,6 +12,7 @@ backend/
     main.py                     FastAPI app, CORS for localhost:3000, router registration, create_all on startup
     models.py                   ORM models: Interest, Post, Event, post_interests join table
     schemas.py                  Pydantic models: InterestOut, PostOut, EventIn
+    scoring.py                    score_posts() — interest match, format engagement, repeat penalty
     routers/
       interests.py              GET /api/interests
       feed.py                   GET /api/feed

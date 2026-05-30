@@ -1,12 +1,12 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from ..database import get_db
 from ..models import Interest, Post
 from ..schemas import PostOut
+from ..scoring import score_posts
 
 router = APIRouter()
 
@@ -17,13 +17,15 @@ def get_feed(
     interests: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    query = db.query(Post)
+    query = db.query(Post).options(selectinload(Post.interests))
 
     if format:
         query = query.filter(Post.format == format)
 
+    slugs: List[str] = []
     if interests:
         slugs = [s.strip() for s in interests.split(",")]
         query = query.join(Post.interests).filter(Interest.slug.in_(slugs)).distinct()
 
-    return query.order_by(func.random()).all()
+    posts = query.all()
+    return score_posts(posts, slugs, db)
