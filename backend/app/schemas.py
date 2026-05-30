@@ -3,6 +3,12 @@ from typing import List
 from pydantic import BaseModel, ConfigDict, field_validator
 
 
+class EventIn(BaseModel):
+    post_id: int
+    event_type: str
+    duration_ms: int | None = None
+
+
 class InterestOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

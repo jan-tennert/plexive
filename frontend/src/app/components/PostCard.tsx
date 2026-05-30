@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import LikeButton from "./LikeButton"
+import { queueEvent } from "@/app/lib/eventQueue"
 
 export interface Post {
   id: number
@@ -59,6 +60,8 @@ const FORMAT_STYLES = {
 
 type Format = keyof typeof FORMAT_STYLES
 
+const MIN_DWELL_MS = 500
+
 function readTime(text: string): string {
   const words = text.trim().split(/\s+/).length
   const seconds = Math.ceil(words / (200 / 60))
@@ -67,7 +70,8 @@ function readTime(text: string): string {
 }
 
 export default function PostCard({ post }: { post: Post }) {
-  const cardRef = useRef<HTMLDivElement>(null)
+  const cardRef     = useRef<HTMLDivElement>(null)
+  const viewStartRef = useRef<number | null>(null)
   const [visible, setVisible] = useState(false)
   const style = FORMAT_STYLES[post.format as Format] ?? FORMAT_STYLES.facts
 
@@ -81,19 +85,32 @@ export default function PostCard({ post }: { post: Post }) {
     if (!el) return
 
     const observer = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          viewStartRef.current = Date.now()
+          setVisible(true)
+        } else {
+          if (viewStartRef.current !== null) {
+            const duration_ms = Date.now() - viewStartRef.current
+            if (duration_ms >= MIN_DWELL_MS) {
+              queueEvent({ post_id: post.id, event_type: "view", duration_ms })
+            }
+            viewStartRef.current = null
+          }
+          setVisible(false)
+        }
+      },
       { threshold: 0.6 }
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [post.id])
 
   return (
     <div
       ref={cardRef}
       className={`h-[100dvh] relative shrink-0 snap-start [scroll-snap-stop:always] flex flex-col bg-zinc-950 bg-gradient-to-b ${style.glow} via-zinc-950 to-zinc-950 px-5 pt-12 pb-8`}
     >
-      {/* Soft radial bloom behind the headline area */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -101,7 +118,6 @@ export default function PostCard({ post }: { post: Post }) {
         }}
       />
 
-      {/* Format indicator + read time */}
       <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full shrink-0 ${style.dot}`} />
@@ -112,7 +128,6 @@ export default function PostCard({ post }: { post: Post }) {
         <span className="text-zinc-500 text-xs">{readTime(post.body)}</span>
       </div>
 
-      {/* Main content — fades + slides up when card enters view */}
       <div className="flex-1 flex flex-col justify-center relative z-10">
         <div
           className={`transition-all duration-500 ease-out ${
@@ -133,7 +148,6 @@ export default function PostCard({ post }: { post: Post }) {
         </div>
       </div>
 
-      {/* Interest tags */}
       <div className="flex flex-wrap gap-2 relative z-10">
         {post.interests.map((name) => (
           <span
@@ -145,9 +159,8 @@ export default function PostCard({ post }: { post: Post }) {
         ))}
       </div>
 
-      {/* Like button — absolutely positioned so it doesn't affect layout */}
       <div className="absolute bottom-8 right-5 z-10">
-        <LikeButton />
+        <LikeButton postId={post.id} />
       </div>
     </div>
   )

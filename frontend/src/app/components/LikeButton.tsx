@@ -1,15 +1,19 @@
 "use client"
 
 import { useState } from "react"
+import { queueEvent } from "@/app/lib/eventQueue"
 
-export default function LikeButton() {
+export default function LikeButton({ postId }: { postId: number }) {
   const [liked, setLiked] = useState(false)
   const [animating, setAnimating] = useState(false)
 
   function handleClick() {
     const next = !liked
     setLiked(next)
-    if (next) setAnimating(true)
+    if (next) {
+      setAnimating(true)
+      queueEvent({ post_id: postId, event_type: "like" })
+    }
   }
 
   return (

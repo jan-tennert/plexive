@@ -32,3 +32,13 @@ class Post(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     interests = relationship("Interest", secondary=post_interests)
+
+
+class Event(Base):
+    __tablename__ = "events"
+
+    id          = Column(Integer, primary_key=True)
+    post_id     = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    event_type  = Column(String, nullable=False)
+    duration_ms = Column(Integer, nullable=True)
+    created_at  = Column(DateTime, default=datetime.utcnow)
