@@ -5,17 +5,17 @@
 ```
 backend/
   requirements.txt              fastapi, uvicorn, sqlalchemy
-  seed.py                       inserts 7 interests + 18 sample posts into the DB
+  seed.py                       idempotent: get-or-create 145 interests from taxonomy; delete-and-reseed posts from seed_content.json
   deepscroll.db                 SQLite database (gitignored)
   app/
     database.py                 engine, SessionLocal, Base, get_db dependency
     main.py                     FastAPI app, CORS for localhost:3000, router registration, create_all on startup
     models.py                   ORM models: Interest, Post, Event, post_interests join table
     schemas.py                  Pydantic models: InterestOut, PostOut, EventIn
-    scoring.py                    score_posts() — interest match, format engagement, repeat penalty
+    scoring.py                    score_posts() — interest match (tier-scaled), format engagement, repeat penalty
     routers/
       interests.py              GET /api/interests
-      feed.py                   GET /api/feed
+      feed.py                   GET /api/feed — three-tier: direct matches → related co-tags → all remaining
       posts.py                  GET /api/posts/{id}
       events.py                 POST /api/events
 
@@ -31,12 +31,13 @@ frontend/
       InterestPicker.tsx        client — pill selector, requires 2+, saves slugs to localStorage
     post/
       [id]/
-        page.tsx                full-screen detail page, slide-up animation, overscroll-to-close
+        page.tsx                full-screen detail page; structured layout with image, meta, key points, format-specific sections, takeaway, source link; slide-up animation, overscroll-to-close
     components/
-      PostCard.tsx               full-screen snap card, gradient+radial glow, entry animation, dwell tracking
+      PostCard.tsx               full-screen snap card; format-aware layout with image, stat/meta highlight, hook, inline SVG; exports Post interface and FORMAT_STYLES
       LikeButton.tsx             heart toggle, spring pop animation, queues like event
     lib/
       eventQueue.ts             module-level batch queue; flushes every 5s or at 5 events to POST /api/events
+      useWikipediaImage.ts      hook — fetches portrait from Wikipedia REST API for people posts without image_url; returns thumbnail or original size
 
 .claude/skills/commit.md        conventional commit format rules for this project
 ```
@@ -90,10 +91,11 @@ GET  /health                                           → {status: "ok"}
 | file                   | responsibility                                                              |
 |------------------------|-----------------------------------------------------------------------------|
 | page.tsx               | 7-tab feed; each tab is an independent lazy-fetched vertical snap feed      |
-| PostCard.tsx           | full-screen card; IntersectionObserver drives entry animation + dwell timer |
+| PostCard.tsx           | full-screen card; format-aware layout (image, stat, meta, hook, SVG); exports Post interface + FORMAT_STYLES |
 | LikeButton.tsx         | heart toggle with spring pop; fires like event on tap                       |
 | InterestPicker.tsx     | onboarding pill grid; gates entry to feed via localStorage                  |
 | eventQueue.ts          | batches view/like events and POSTs them in groups rather than one-by-one    |
+| useWikipediaImage.ts   | fetches Wikipedia portrait for people posts lacking image_url; thumbnail or original size |
 
 ## CURRENT STATUS
 

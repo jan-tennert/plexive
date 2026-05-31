@@ -1,6 +1,6 @@
 import random
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -18,7 +18,14 @@ from .models import Event, Post
 #   perfectly deterministic on every load.
 
 
-def score_posts(posts: List[Post], interest_slugs: List[str], db: Session) -> List[Post]:
+def score_posts(
+    posts: List[Post],
+    interest_slugs: List[str],
+    db: Session,
+    tier_map: Optional[dict] = None,
+) -> List[Post]:
+    # tier_map: post_id -> tier (1 = direct match, 2 = related, 3 = fallback)
+    # Tier 1 gets full interest bonus, Tier 2 gets half, Tier 3 gets none.
     # TODO: once user authentication exists, pass user_id here and filter
     # events to that user so bonuses reflect individual rather than global engagement.
 
@@ -71,9 +78,12 @@ def score_posts(posts: List[Post], interest_slugs: List[str], db: Session) -> Li
         score = 1.0
 
         # Interest match: post.interests is already eager-loaded by the caller.
+        # Multiply bonus by 1.0 (Tier 1), 0.5 (Tier 2), or 0.0 (Tier 3).
+        tier = tier_map.get(post.id, 1) if tier_map else 1
+        interest_multiplier = {1: 1.0, 2: 0.5, 3: 0.0}.get(tier, 1.0)
         for interest in post.interests:
             if interest.slug in interest_set:
-                score += 2.0
+                score += 2.0 * interest_multiplier
 
         # Format engagement bonus.
         score += format_bonus.get(post.format, 0.0)
