@@ -7,7 +7,8 @@ export default function LikeButton({ postId }: { postId: number }) {
   const [liked, setLiked] = useState(false)
   const [animating, setAnimating] = useState(false)
 
-  function handleClick() {
+  function handleClick(e: React.MouseEvent) {
+    e.stopPropagation()
     const next = !liked
     setLiked(next)
     if (next) {

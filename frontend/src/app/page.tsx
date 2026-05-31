@@ -36,6 +36,17 @@ function TabPage({
   isActivated: boolean
 }) {
   const [posts, setPosts] = useState<Post[] | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (posts === null || !scrollRef.current) return
+    const raw = sessionStorage.getItem("feedScrollPosition")
+    if (!raw) return
+    const { scrollTop, tabId } = JSON.parse(raw)
+    if (tabId !== tab.id) return  // only restore for the tab the user came from
+    scrollRef.current.scrollTop = scrollTop
+    sessionStorage.removeItem("feedScrollPosition")
+  }, [posts, tab.id])
 
   useEffect(() => {
     if (!isActivated || posts !== null || slugs.length === 0) return
@@ -47,7 +58,7 @@ function TabPage({
   }, [isActivated, posts, slugs, tab.format]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="w-full shrink-0 snap-start h-[100dvh] overflow-y-scroll snap-y snap-mandatory overscroll-y-contain [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+    <div ref={scrollRef} className="w-full shrink-0 snap-start h-[100dvh] overflow-y-scroll snap-y snap-mandatory overscroll-y-contain [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
       {!isActivated ? (
         <div className="h-full bg-zinc-950" />
       ) : posts === null ? (
@@ -60,7 +71,7 @@ function TabPage({
           <p className="text-zinc-500 text-sm">Try adjusting your interests</p>
         </div>
       ) : (
-        posts.map((post) => <PostCard key={post.id} post={post} />)
+        posts.map((post) => <PostCard key={post.id} post={post} activeTabId={tab.id} />)
       )}
     </div>
   )
@@ -78,7 +89,7 @@ export default function Home() {
   const tabStripRef     = useRef<HTMLDivElement>(null)
   const isFirstTabCenter = useRef(true)
 
-  // Check localStorage on mount and store interests
+  // Check localStorage on mount, store interests, and restore active tab from sessionStorage
   useEffect(() => {
     const saved = localStorage.getItem("deepscroll_interests")
     if (!saved) {
@@ -86,6 +97,22 @@ export default function Home() {
       return
     }
     setSlugs(JSON.parse(saved))
+
+    const savedTab = sessionStorage.getItem("feedActiveTab")
+    if (savedTab) {
+      const tabIndex = TABS.findIndex((t) => t.id === savedTab)
+      if (tabIndex !== -1) {
+        activeTabRef.current = savedTab
+        setActiveTab(savedTab)
+        setActivatedTabs(new Set(["for-you", savedTab]))
+        sessionStorage.removeItem("feedActiveTab")
+        requestAnimationFrame(() => {
+          if (outerRef.current) {
+            outerRef.current.scrollLeft = tabIndex * outerRef.current.clientWidth
+          }
+        })
+      }
+    }
   }, [router])
 
   // Center the active tab label in the tab bar whenever activeTab changes

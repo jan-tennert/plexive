@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import LikeButton from "./LikeButton"
 import { queueEvent } from "@/app/lib/eventQueue"
 
@@ -13,7 +14,7 @@ export interface Post {
   interests: string[]
 }
 
-const FORMAT_STYLES = {
+export const FORMAT_STYLES = {
   books: {
     label: "BOOKS",
     dot: "bg-amber-400",
@@ -69,7 +70,8 @@ function readTime(text: string): string {
   return `${Math.ceil(seconds / 60)} min read`
 }
 
-export default function PostCard({ post }: { post: Post }) {
+export default function PostCard({ post, activeTabId }: { post: Post; activeTabId: string }) {
+  const router = useRouter()
   const cardRef     = useRef<HTMLDivElement>(null)
   const viewStartRef = useRef<number | null>(null)
   const [visible, setVisible] = useState(false)
@@ -109,6 +111,18 @@ export default function PostCard({ post }: { post: Post }) {
   return (
     <div
       ref={cardRef}
+      onClick={() => {
+        const container = cardRef.current?.parentElement
+        if (container) {
+          sessionStorage.setItem(
+            "feedScrollPosition",
+            JSON.stringify({ scrollTop: container.scrollTop, tabId: activeTabId })
+          )
+        }
+        sessionStorage.setItem("feedActiveTab", activeTabId)
+        router.push(`/post/${post.id}`)
+      }}
+      style={{ cursor: "pointer" }}
       className={`h-[100dvh] relative shrink-0 snap-start [scroll-snap-stop:always] flex flex-col bg-zinc-950 bg-gradient-to-b ${style.glow} via-zinc-950 to-zinc-950 px-5 pt-12 pb-8`}
     >
       <div
