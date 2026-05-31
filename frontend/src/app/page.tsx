@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import PostCard, { type Post } from "@/app/components/PostCard"
+import BottomNav from "@/app/components/BottomNav"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -58,7 +59,7 @@ function TabPage({
   }, [isActivated, posts, slugs, tab.format]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div ref={scrollRef} className="w-full shrink-0 snap-start h-[100dvh] overflow-y-scroll snap-y snap-mandatory overscroll-y-contain [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+    <div ref={scrollRef} className="w-full shrink-0 snap-start h-[100dvh] overflow-y-scroll snap-y snap-mandatory overscroll-y-contain [&::-webkit-scrollbar]:hidden [scrollbar-width:none] pb-14">
       {!isActivated ? (
         <div className="h-full bg-zinc-950" />
       ) : posts === null ? (
@@ -265,6 +266,7 @@ export default function Home() {
           />
         ))}
       </div>
+      <BottomNav activeTab="feed" />
     </PhoneFrame>
   )
 }
