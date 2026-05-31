@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy.orm import Session
 
@@ -86,3 +86,83 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(current_user: User = Depends(get_current_user)):
     return UserOut.model_validate(current_user)
+
+
+class PatchMeRequest(BaseModel):
+    username: str | None = None
+    new_password: str | None = None
+    current_password: str | None = None
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters.")
+        if len(v.encode("utf-8")) > 72:
+            raise ValueError("Password must be 72 bytes or fewer (bcrypt limit).")
+        return v
+
+
+@router.patch("/me", response_model=UserOut)
+def patch_me(
+    body: PatchMeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if body.username is None and body.new_password is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Provide at least one field to update.",
+        )
+
+    if body.new_password is not None:
+        if not body.current_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="current_password is required when changing password.",
+            )
+        if not verify_password(body.current_password, current_user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password is incorrect.",
+            )
+        current_user.password_hash = hash_password(body.new_password)
+
+    if body.username is not None:
+        conflict = (
+            db.query(User)
+            .filter(User.username == body.username, User.id != current_user.id)
+            .first()
+        )
+        if conflict:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken.",
+            )
+        current_user.username = body.username
+
+    db.commit()
+    db.refresh(current_user)
+    return UserOut.model_validate(current_user)
+
+
+class DeleteMeRequest(BaseModel):
+    current_password: str
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_me(
+    body: DeleteMeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not verify_password(body.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect.",
+        )
+    db.delete(current_user)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
