@@ -1,0 +1,66 @@
+import os
+from datetime import datetime, timedelta, timezone
+
+from dotenv import load_dotenv
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
+from .database import get_db
+from .models import User
+
+load_dotenv()
+
+# JWT_SECRET must be set in .env before starting the server — see .env.example
+JWT_SECRET = os.getenv("JWT_SECRET")
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET environment variable is not set. See backend/.env.example.")
+
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_DAYS = 30
+
+_crypt = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_bearer = HTTPBearer()
+
+
+def hash_password(plain: str) -> str:
+    return _crypt.hash(plain)
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return _crypt.verify(plain, hashed)
+
+
+def create_access_token(user_id: int) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+    payload = {"sub": str(user_id), "exp": expire}
+    return jwt.encode(payload, JWT_SECRET, algorithm=ALGORITHM)
+
+
+def decode_access_token(token: str) -> int:
+    credentials_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+        user_id_str: str = payload.get("sub")
+        if user_id_str is None:
+            raise credentials_error
+        return int(user_id_str)
+    except (JWTError, ValueError):
+        raise credentials_error
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: Session = Depends(get_db),
+) -> User:
+    user_id = decode_access_token(credentials.credentials)
+    user = db.query(User).filter(User.id == user_id, User.is_active == True).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    return user

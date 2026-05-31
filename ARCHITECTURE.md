@@ -4,13 +4,15 @@
 
 ```
 backend/
-  requirements.txt              fastapi, uvicorn, sqlalchemy
+  requirements.txt              fastapi, uvicorn, sqlalchemy, passlib[bcrypt], python-jose[cryptography], python-dotenv, email-validator
+  .env.example                  JWT_SECRET template (copy to .env, never commit .env)
   seed.py                       idempotent: get-or-create 145 interests from taxonomy; delete-and-reseed posts from seed_content.json
   deepscroll.db                 SQLite database (gitignored)
   app/
     database.py                 engine, SessionLocal, Base, get_db dependency
     main.py                     FastAPI app, CORS for localhost:3000, router registration, create_all on startup
-    models.py                   ORM models: Interest, Post, Event, post_interests join table
+    models.py                   ORM models: Interest, Post, Event, User, post_interests join table
+    auth.py                     hash_password, verify_password, create_access_token, decode_access_token, get_current_user dependency
     schemas.py                  Pydantic models: InterestOut, PostOut, EventIn
     scoring.py                    score_posts() — interest match (tier-scaled), format engagement, repeat penalty
     routers/
@@ -18,6 +20,7 @@ backend/
       feed.py                   GET /api/feed — three-tier: direct matches → related co-tags → all remaining
       posts.py                  GET /api/posts/{id}
       events.py                 POST /api/events
+      auth.py                   POST /api/auth/register, POST /api/auth/login, GET /api/auth/me
 
 frontend/
   .env.example                  NEXT_PUBLIC_API_URL template
@@ -27,8 +30,8 @@ frontend/
     globals.css                 Tailwind import, Geist font wiring, heart-pop keyframe
     page.tsx                    home feed: 7-tab bar, horizontal snap between tabs, vertical snap within each, real-time indicator
     onboarding/
-      page.tsx                  server component — fetches interests, passes to InterestPicker
-      InterestPicker.tsx        client — pill selector, requires 2+, saves slugs to localStorage
+      page.tsx                  server component — renders InterestPicker (no props)
+      InterestPicker.tsx        client — fetches /api/interests, groups 145 pills into 10 categories, sticky header/footer, saves slugs to localStorage
     post/
       [id]/
         page.tsx                full-screen detail page; structured layout with image, meta, key points, format-specific sections, takeaway, source link; slide-up animation, overscroll-to-close
@@ -76,6 +79,16 @@ Join table linking posts ↔ interests (many-to-many).
 | event_type  | String   | "view" or "like"                         |
 | duration_ms | Integer? | ms card was on screen; null for likes    |
 
+### users
+| column        | type     | description                               |
+|---------------|----------|-------------------------------------------|
+| id            | Integer  | primary key                               |
+| email         | String   | unique, indexed, not null                 |
+| username      | String   | unique, not null                          |
+| password_hash | String   | bcrypt hash; plaintext never stored       |
+| created_at    | DateTime | default now                               |
+| is_active     | Boolean  | default true; false = soft-deleted        |
+
 ## API ENDPOINTS
 
 ```
@@ -84,6 +97,9 @@ GET  /api/feed  ?interests=slug1,slug2  ?format=books  → [{id, format, title, 
 GET  /api/posts/{id}                                   → {id, format, title, body, source, hook, key_points, takeaway, source_url, image_url, image_attribution, related_slugs, details, interests[]}  404 if not found
 POST /api/events  body: [{post_id, event_type, duration_ms?}]  → {stored: N}
 GET  /health                                           → {status: "ok"}
+POST /api/auth/register  body: {email, username, password}  → {access_token, token_type, user: {id, email, username, created_at}}  400 on duplicate email/username
+POST /api/auth/login     body: {email, password}            → {access_token, token_type, user: {id, email, username, created_at}}  401 on bad credentials (same msg for unknown email or wrong password)
+GET  /api/auth/me        Authorization: Bearer <token>      → {id, email, username, created_at}  401 if invalid/missing token
 ```
 
 ## FRONTEND COMPONENTS
@@ -93,7 +109,7 @@ GET  /health                                           → {status: "ok"}
 | page.tsx               | 7-tab feed; each tab is an independent lazy-fetched vertical snap feed      |
 | PostCard.tsx           | full-screen card; format-aware layout (image, stat, meta, hook, SVG); exports Post interface + FORMAT_STYLES |
 | LikeButton.tsx         | heart toggle with spring pop; fires like event on tap                       |
-| InterestPicker.tsx     | onboarding pill grid; gates entry to feed via localStorage                  |
+| InterestPicker.tsx     | onboarding pill grid; 10 category sections + Other; fetches own data; gates entry to feed via localStorage |
 | eventQueue.ts          | batches view/like events and POSTs them in groups rather than one-by-one    |
 | useWikipediaImage.ts   | fetches Wikipedia portrait for people posts lacking image_url; thumbnail or original size |
 
@@ -109,9 +125,10 @@ GET  /health                                           → {status: "ok"}
 - Real-time sliding tab indicator (direct DOM writes, 60fps, color interpolation)
 - Card entry animation (fade + slide-up, respects prefers-reduced-motion)
 - Engagement tracking: dwell time per card, like events, batched to backend
+- User accounts: JWT auth (bcrypt + python-jose), register/login/me endpoints, password min 8 / max 72 bytes
 
 **Next**
-- User accounts and authentication
+- Frontend auth UI (register/login forms, JWT storage, protected routes)
 - Recommendation algorithm using collected events
 - Content management for adding real posts
 - Pagination / infinite scroll

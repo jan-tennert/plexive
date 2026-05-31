@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, JSON, String, Table, Text
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -62,3 +62,14 @@ class Event(Base):
     event_type  = Column(String, nullable=False)
     duration_ms = Column(Integer, nullable=True)
     created_at  = Column(DateTime, default=datetime.utcnow)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id            = Column(Integer, primary_key=True)
+    email         = Column(String, unique=True, nullable=False, index=True)
+    username      = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    created_at    = Column(DateTime, default=datetime.utcnow)
+    is_active     = Column(Boolean, default=True, nullable=False)
