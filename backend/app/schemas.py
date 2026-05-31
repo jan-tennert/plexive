@@ -23,8 +23,16 @@ class PostOut(BaseModel):
     id: int
     format: str
     title: str
-    body: str
+    body: str  # deprecated fallback
     source: str | None
+    hook: str | None = None
+    key_points: list[str] | None = None
+    takeaway: str | None = None
+    source_url: str | None = None
+    image_url: str | None = None
+    image_attribution: str | None = None
+    related_slugs: list[str] | None = None
+    details: dict | None = None
     interests: List[str]
 
     @field_validator("interests", mode="before")

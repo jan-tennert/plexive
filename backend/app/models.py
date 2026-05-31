@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, Text
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -21,15 +21,35 @@ class Interest(Base):
     slug = Column(String, unique=True, nullable=False)
 
 
+# details JSON column — expected keys per format:
+#   books:     author, isbn, publication_year, core_thesis, who_should_read
+#              (image_url holds the Open Library cover)
+#   facts:     stat, context, why_it_matters, visual_svg, visual_type
+#   people:    lifespan, known_for, field, turning_point, legacy, wikipedia_url
+#              (image_url + image_attribution expected to always be filled — Wikipedia portrait)
+#   concepts:  one_line_definition, explanation, concrete_example, how_to_apply,
+#              related_concepts, visual_svg, visual_type
+#              (details.visual_svg holds a raw inline SVG string)
+#   questions: the_question, framing, perspectives (list), reflection_prompt
+#   stories:   setting, narrative, the_twist, aftermath
 class Post(Base):
     __tablename__ = "posts"
 
     id = Column(Integer, primary_key=True)
     format = Column(String, nullable=False)
     title = Column(String, nullable=False)
-    body = Column(Text, nullable=False)
+    body = Column(Text, nullable=False)  # deprecated: use hook/key_points/takeaway/details instead
     source = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    hook               = Column(String, nullable=True)
+    key_points         = Column(JSON,   nullable=True)
+    takeaway           = Column(String, nullable=True)
+    source_url         = Column(String, nullable=True)
+    image_url          = Column(String, nullable=True)
+    image_attribution  = Column(String, nullable=True)
+    related_slugs      = Column(JSON,   nullable=True)
+    details            = Column(JSON,   nullable=True)
 
     interests = relationship("Interest", secondary=post_interests)
 

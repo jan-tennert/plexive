@@ -16,6 +16,7 @@ backend/
     routers/
       interests.py              GET /api/interests
       feed.py                   GET /api/feed
+      posts.py                  GET /api/posts/{id}
       events.py                 POST /api/events
 
 frontend/
@@ -28,6 +29,9 @@ frontend/
     onboarding/
       page.tsx                  server component — fetches interests, passes to InterestPicker
       InterestPicker.tsx        client — pill selector, requires 2+, saves slugs to localStorage
+    post/
+      [id]/
+        page.tsx                full-screen detail page, slide-up animation, overscroll-to-close
     components/
       PostCard.tsx               full-screen snap card, gradient+radial glow, entry animation, dwell tracking
       LikeButton.tsx             heart toggle, spring pop animation, queues like event
@@ -46,12 +50,20 @@ frontend/
 | slug   | String | filter key e.g. "politics"      |
 
 ### posts
-| column  | type    | description                                           |
-|---------|---------|-------------------------------------------------------|
-| format  | String  | one of: books, facts, people, concepts, questions, stories |
-| title   | String  |                                                       |
-| body    | Text    |                                                       |
-| source  | String? | attribution for book posts                            |
+| column            | type    | description                                                   |
+|-------------------|---------|---------------------------------------------------------------|
+| format            | String  | one of: books, facts, people, concepts, questions, stories    |
+| title             | String  |                                                               |
+| body              | Text    | deprecated fallback; use structured fields below              |
+| source            | String? | attribution for book posts                                    |
+| hook              | String? | one compelling opening sentence                               |
+| key_points        | JSON?   | list of 2-4 short bullet strings                              |
+| takeaway          | String? | closing "what you take away" sentence                         |
+| source_url        | String? | link to the original source                                   |
+| image_url         | String? | URL to cover, portrait, or atmospheric image                  |
+| image_attribution | String? | source/license of the image                                   |
+| related_slugs     | JSON?   | list of related post slugs, for future use                    |
+| details           | JSON?   | format-specific fields; keys documented in models.py          |
 
 ### post_interests
 Join table linking posts ↔ interests (many-to-many).
@@ -67,7 +79,8 @@ Join table linking posts ↔ interests (many-to-many).
 
 ```
 GET  /api/interests                                    → [{id, name, slug}]
-GET  /api/feed  ?interests=slug1,slug2  ?format=books  → [{id, format, title, body, source, interests[]}]
+GET  /api/feed  ?interests=slug1,slug2  ?format=books  → [{id, format, title, body, source, hook, key_points, takeaway, source_url, image_url, image_attribution, related_slugs, details, interests[]}]
+GET  /api/posts/{id}                                   → {id, format, title, body, source, hook, key_points, takeaway, source_url, image_url, image_attribution, related_slugs, details, interests[]}  404 if not found
 POST /api/events  body: [{post_id, event_type, duration_ms?}]  → {stored: N}
 GET  /health                                           → {status: "ok"}
 ```
