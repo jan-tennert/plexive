@@ -1,3 +1,7 @@
+---
+description: Commit and push changes using conventional commits format (type(scope): description). Reads the diff, picks the right type (feat/fix/docs/style/refactor/chore), writes a short English message, stages relevant files, commits, and pushes.
+---
+
 # Git Commit Skill
 
 ## Commit Message Format
