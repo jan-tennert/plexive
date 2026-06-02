@@ -62,6 +62,7 @@ class Event(Base):
     event_type  = Column(String, nullable=False)
     duration_ms = Column(Integer, nullable=True)
     created_at  = Column(DateTime, default=datetime.utcnow)
+    user_id     = Column(Integer, ForeignKey("users.id"), nullable=True)
 
 
 class User(Base):

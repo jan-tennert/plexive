@@ -11,18 +11,20 @@ backend/
   app/
     database.py                 engine, SessionLocal, Base, get_db dependency
     main.py                     FastAPI app, CORS for localhost:3000, router registration, create_all on startup
-    models.py                   ORM models: Interest, Post, Event, User, post_interests join table
-    auth.py                     hash_password, verify_password, create_access_token, decode_access_token, get_current_user dependency
+    models.py                   ORM models: Interest, Post, Event (user_id nullable FK), User, Comment, post_interests join table
+    auth.py                     hash_password, verify_password, create_access_token, decode_access_token, get_current_user, get_optional_user (returns User|None, used for optional auth)
     schemas.py                  Pydantic models: InterestOut, PostOut, EventIn
     scoring.py                    score_posts() — interest match (tier-scaled), format engagement, repeat penalty
     routers/
       interests.py              GET /api/interests
       feed.py                   GET /api/feed — three-tier: direct matches → related co-tags → all remaining
       posts.py                  GET /api/posts/{id}
-      events.py                 POST /api/events
+      events.py                 POST /api/events (captures user_id when auth token present; deduplicates "like" events per user+post for auth users); GET /api/posts/{id}/likes → {count, liked}
       auth.py                   POST /api/auth/register, POST /api/auth/login, GET /api/auth/me, PATCH /api/auth/me (update username/password), DELETE /api/auth/me (delete account)
       search.py                 GET /api/search — case-insensitive substring search across title, hook, body, author, known_for, the_question; ranked by title-match then recency; limit 50
-      comments.py               GET /api/posts/{id}/comments (public); POST /api/posts/{id}/comments (auth); DELETE /api/comments/{id} (auth, own comment only)
+      comments.py               GET /api/posts/{id}/comments?count=true → {count} or full list; POST /api/posts/{id}/comments (auth); DELETE /api/comments/{id} (auth, own comment only)
+    lib/
+      savedPosts.ts             getSavedPostIds, savePost, unsavePost, isPostSaved; localStorage key "deepscroll_saved"; server-safe (typeof window check); TODO: replace with backend endpoint
 
 frontend/
   .env.example                  NEXT_PUBLIC_API_URL template
@@ -44,17 +46,19 @@ frontend/
       page.tsx                  search input + format chips + compact result cards; debounced 300ms; navigates to post detail; BottomNav (search active)
     post/
       [id]/
-        page.tsx                full-screen detail page; structured layout with image, meta, key points, format-specific sections, takeaway, source link; slide-up animation, overscroll-to-close
+        page.tsx                full-screen detail page; structured layout with image, meta, key points, format-specific sections, takeaway, source link, comments section; sticky comment bar at bottom with like-only heart button on the right (no count, no share/save); floating action column removed; slide-up animation, overscroll-to-close
     components/
       PostCard.tsx               full-screen snap card; format-aware layout with image, stat/meta highlight, hook, inline SVG; exports Post interface and FORMAT_STYLES
       BottomNav.tsx              fixed bottom nav: Search / Feed (flame) / Profile; active item highlighted; safe-area-inset-bottom aware
-      LikeButton.tsx             heart toggle, spring pop animation, queues like event
+      LikeButton.tsx             heart button (one-way), spring pop animation; liked/count/onToggle/size props
       Providers.tsx              "use client" boundary; wraps children with AuthProvider so layout.tsx stays a Server Component
     lib/
-      eventQueue.ts             module-level batch queue; flushes every 5s or at 5 events to POST /api/events
+      eventQueue.ts             module-level batch queue; flushes every 5s or at 5 events to POST /api/events; exports hasPendingLike/cancelPendingLike so unlike-before-flush can cancel an in-flight event; deduplicates "like" events per post_id within the current queue
       useWikipediaImage.ts      hook — fetches portrait from Wikipedia REST API for people posts without image_url; returns thumbnail or original size
       auth.tsx                  AuthContext + AuthProvider: stores JWT in localStorage under "deepscroll_token", restores session via /api/auth/me on load, exposes user/login/register/logout/updateUser/loading
       api.ts                    apiFetch wrapper: prepends NEXT_PUBLIC_API_URL, attaches Authorization: Bearer header when token present
+      likedPosts.ts             isPostLiked, likePost, unlikePost, getLikedPostIds; localStorage key "deepscroll_liked"; getCachedLikeCount/setCachedLikeCount; key "deepscroll_like_counts"; isLikeSent/markLikeSent/unmarkLikeSent; key "deepscroll_like_sent" tracks posts whose like event reached the backend — used in the server-count reconciliation formula; one-time migration seeds sent-key from liked-key; server-safe; TODO: replace with backend endpoint
+      savedPosts.ts             isPostSaved, savePost, unsavePost, getSavedPostIds; localStorage key "deepscroll_saved"; server-safe; TODO: replace with backend endpoint
 
 .claude/skills/commit.md        conventional commit format rules for this project
 ```
@@ -101,6 +105,7 @@ Join table linking posts ↔ interests (many-to-many).
 | post_id     | FK→posts |                                          |
 | event_type  | String   | "view" or "like"                         |
 | duration_ms | Integer? | ms card was on screen; null for likes    |
+| user_id     | FK→users, nullable | set when auth token present; used by GET /likes to determine liked state |
 
 ### users
 | column        | type     | description                               |
@@ -127,8 +132,10 @@ GET  /api/auth/me        Authorization: Bearer <token>      → {id, email, user
 PATCH /api/auth/me      Authorization: Bearer <token>      body: {username?, new_password?, current_password?}  → updated UserOut  400 on bad current_password or duplicate username
 DELETE /api/auth/me     Authorization: Bearer <token>      body: {current_password}  → 204  400 on bad current_password
 GET  /api/posts/{id}/comments                              → [{id, post_id, username, body, created_at}]  newest first  404 if post not found
+GET  /api/posts/{id}/comments?count=true                   → {count: N}  404 if post not found
 POST /api/posts/{id}/comments  Authorization: Bearer <token>  body: {body}  → CommentOut  201  404 if post not found  422 if body empty or >2000 chars
 DELETE /api/comments/{id}      Authorization: Bearer <token>  → 204  403 if not the comment's author  404 if not found
+GET  /api/posts/{id}/likes                                 → {count: N, liked: bool}  auth optional; liked=true only when token present and user has a like event for this post
 ```
 
 ## SECURITY
@@ -144,10 +151,10 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 | file                   | responsibility                                                              |
 |------------------------|-----------------------------------------------------------------------------|
 | page.tsx               | 7-tab feed; each tab is an independent lazy-fetched vertical snap feed; BottomNav (feed active) |
-| PostCard.tsx           | full-screen card; format-aware layout (image, stat, meta, hook, SVG); exports Post interface + FORMAT_STYLES |
+| PostCard.tsx           | full-screen card; format-aware layout; exports Post interface + FORMAT_STYLES; bottom-right button column (like/comment/save/share); all four buttons use identical div wrapper (gap-1, w-6 h-6 icon); handleLike() shared by small button and double-tap; double-tap on already-liked does nothing; save state via savedPosts.ts with heart-pop animation; share uses paper-plane icon + Web Share API with clipboard fallback + Toast |
 | BottomNav.tsx          | fixed bottom nav: Search / Feed (flame) / Profile; active item highlighted; respects safe-area-inset-bottom |
 | search/page.tsx        | search input + format chips + compact result cards; debounced 300ms; links to post detail; BottomNav (search active) |
-| LikeButton.tsx         | heart toggle with spring pop; fires like event on tap                       |
+| LikeButton.tsx         | controlled heart toggle; liked/count/onToggle/size props; size="md" (w-6 h-6, feed) or "sm" (w-5 h-5, detail); heart-pop spring animation; no internal event queuing (parent handles queueEvent) |
 | InterestPicker.tsx     | onboarding pill grid; 10 category sections + Other; fetches own data; gates entry to feed via localStorage |
 | eventQueue.ts          | batches view/like events and POSTs them in groups rather than one-by-one    |
 | useWikipediaImage.ts   | fetches Wikipedia portrait for people posts lacking image_url; thumbnail or original size |
@@ -155,6 +162,9 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 | api.ts                 | apiFetch: adds Authorization header when token present                      |
 | Providers.tsx          | client boundary so layout.tsx (Server Component) can mount AuthProvider     |
 | profile/page.tsx       | account settings: avatar, identity display, change username/password, sign out, delete account; BottomNav (profile active) |
+| CommentsSection.tsx    | read-only display component; receives comments/currentUsername/onDelete/deletingId as props; relative timestamps (UTC-aware); plain-text only (no dangerouslySetInnerHTML); exports Comment interface |
+| CommentsBottomSheet.tsx | bottom sheet modal for feed card comments; self-contained state (fetch/post/delete); drag-to-close on handle bar; sticky input; fixed overlay with max-w-[430px] sheet |
+| Toast.tsx              | fixed bottom-center pill notification; visible prop controls opacity via CSS transition; pointer-events-none |
 
 ## CURRENT STATUS
 

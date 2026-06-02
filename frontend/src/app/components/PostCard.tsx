@@ -2,9 +2,13 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import LikeButton from "./LikeButton"
-import { queueEvent } from "@/app/lib/eventQueue"
+import CommentsBottomSheet from "./CommentsBottomSheet"
+import Toast from "./Toast"
+import { queueEvent, hasPendingLike, cancelPendingLike } from "@/app/lib/eventQueue"
 import { useWikipediaImage } from "@/app/lib/useWikipediaImage"
+import { apiFetch } from "@/app/lib/api"
+import { savePost, unsavePost, isPostSaved } from "@/app/lib/savedPosts"
+import { likePost, unlikePost, isPostLiked, getCachedLikeCount, setCachedLikeCount, isLikeSent, markLikeSent, unmarkLikeSent } from "@/app/lib/likedPosts"
 
 export interface Post {
   id: number
@@ -140,9 +144,26 @@ function hookText(post: Post): string {
 
 export default function PostCard({ post, activeTabId }: { post: Post; activeTabId: string }) {
   const router = useRouter()
-  const cardRef      = useRef<HTMLDivElement>(null)
-  const viewStartRef = useRef<number | null>(null)
+  const cardRef           = useRef<HTMLDivElement>(null)
+  const viewStartRef      = useRef<number | null>(null)
+  const lastTapRef        = useRef<number>(0)
+  const navTimerRef       = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const likeInteractedRef = useRef(false)
+
   const [visible, setVisible] = useState(false)
+  const [liked, setLiked] = useState(() => isPostLiked(post.id))
+  const [likesCount, setLikesCount] = useState(() =>
+    getCachedLikeCount(post.id) ?? (isPostLiked(post.id) ? 1 : 0)
+  )
+  const [commentsCount, setCommentsCount] = useState(0)
+  const [saved, setSaved] = useState(() => isPostSaved(post.id))
+  const [saveCount, setSaveCount] = useState(0)
+  const [animatingSave, setAnimatingSave] = useState(false)
+  const [animatingLike, setAnimatingLike] = useState(false)
+  const [showComments, setShowComments] = useState(false)
+  const [showHeartAnim, setShowHeartAnim] = useState(false)
+  const [toastVisible, setToastVisible] = useState(false)
+
   const style = FORMAT_STYLES[post.format as Format] ?? FORMAT_STYLES.facts
 
   const pd = (post.details ?? {}) as PersonDetails
@@ -166,6 +187,27 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
   const cardSvg = svgString && svgString.length < 800 ? svgString : null
 
   useEffect(() => {
+    apiFetch(`/api/posts/${post.id}/likes`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!likeInteractedRef.current) {
+          const liked = isPostLiked(post.id)
+          const sent = isLikeSent(post.id)
+          const onServer = sent && !hasPendingLike(post.id)
+          const adjust = (liked && !onServer ? 1 : 0) - (!liked && sent ? 1 : 0)
+          const display = d.count + adjust
+          setLikesCount(display)
+          setCachedLikeCount(post.id, display)
+        }
+      })
+      .catch(() => {})
+    apiFetch(`/api/posts/${post.id}/comments?count=true`)
+      .then((r) => r.json())
+      .then((d) => setCommentsCount(d.count))
+      .catch(() => {})
+  }, [post.id])
+
+  useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setVisible(true)
       return
@@ -179,6 +221,9 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
         if (entry.isIntersecting) {
           viewStartRef.current = Date.now()
           setVisible(true)
+          setLiked(isPostLiked(post.id))
+          const cached = getCachedLikeCount(post.id)
+          if (cached !== null) setLikesCount(cached)
         } else {
           if (viewStartRef.current !== null) {
             const duration_ms = Date.now() - viewStartRef.current
@@ -196,22 +241,105 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
     return () => observer.disconnect()
   }, [post.id])
 
+  function handleLike() {
+    if (isPostLiked(post.id)) return
+    likeInteractedRef.current = true
+    likePost(post.id)
+    setLiked(true)
+    setLikesCount((prev) => { const n = prev + 1; setCachedLikeCount(post.id, n); return n })
+    setAnimatingLike(true)
+    if (!isLikeSent(post.id)) {
+      markLikeSent(post.id)
+      queueEvent({ post_id: post.id, event_type: "like" })
+    }
+    setShowHeartAnim(true)
+  }
+
+  function handleUnlike() {
+    if (!isPostLiked(post.id)) return
+    likeInteractedRef.current = true
+    unlikePost(post.id)
+    setLiked(false)
+    setLikesCount((prev) => { const n = prev - 1; setCachedLikeCount(post.id, n); return n })
+    if (hasPendingLike(post.id)) {
+      cancelPendingLike(post.id)
+      unmarkLikeSent(post.id)
+    }
+  }
+
+  function handleToggleLike() {
+    if (liked) handleUnlike()
+    else handleLike()
+  }
+
+  function handleSaveClick(e: React.MouseEvent) {
+    e.stopPropagation()
+    const next = !saved
+    setSaved(next)
+    if (next) {
+      savePost(post.id)
+      setAnimatingSave(true)
+      setSaveCount((prev) => prev + 1)
+    } else {
+      unsavePost(post.id)
+      setSaveCount((prev) => prev - 1)
+    }
+  }
+
+  function navigate() {
+    const container = cardRef.current?.parentElement
+    if (container) {
+      sessionStorage.setItem(
+        "feedScrollPosition",
+        JSON.stringify({ scrollTop: container.scrollTop, tabId: activeTabId })
+      )
+    }
+    sessionStorage.setItem("feedActiveTab", activeTabId)
+    router.push(`/post/${post.id}`)
+  }
+
+  function handleCardClick() {
+    const now = Date.now()
+    const elapsed = now - lastTapRef.current
+    lastTapRef.current = now
+
+    if (elapsed < 300) {
+      if (navTimerRef.current) {
+        clearTimeout(navTimerRef.current)
+        navTimerRef.current = null
+      }
+      if (!liked) handleLike()
+      return
+    }
+
+    navTimerRef.current = setTimeout(() => {
+      navTimerRef.current = null
+      navigate()
+    }, 300)
+  }
+
+  async function handleShare(e: React.MouseEvent) {
+    e.stopPropagation()
+    const url = window.location.origin + "/post/" + post.id
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: post.title, text: post.hook ?? "", url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        setToastVisible(true)
+        setTimeout(() => setToastVisible(false), 2000)
+      }
+    } catch {
+      // User cancelled share or clipboard failed
+    }
+  }
+
   return (
     <div
       ref={cardRef}
-      onClick={() => {
-        const container = cardRef.current?.parentElement
-        if (container) {
-          sessionStorage.setItem(
-            "feedScrollPosition",
-            JSON.stringify({ scrollTop: container.scrollTop, tabId: activeTabId })
-          )
-        }
-        sessionStorage.setItem("feedActiveTab", activeTabId)
-        router.push(`/post/${post.id}`)
-      }}
+      onClick={handleCardClick}
       style={{ cursor: "pointer" }}
-      className={`h-[100dvh] relative shrink-0 snap-start [scroll-snap-stop:always] flex flex-col bg-zinc-950 bg-gradient-to-b ${style.glow} via-zinc-950 to-zinc-950 px-5 pt-12 pb-8`}
+      className={`h-[100dvh] relative shrink-0 snap-start [scroll-snap-stop:always] flex flex-col bg-zinc-950 bg-gradient-to-b ${style.glow} via-zinc-950 to-zinc-950 pl-5 pr-5 pt-12 pb-8`}
     >
       <div
         className="absolute inset-0 pointer-events-none"
@@ -219,6 +347,23 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           background: `radial-gradient(ellipse 80% 50% at 50% 45%, ${style.radial} 0%, transparent 70%)`,
         }}
       />
+
+      {/* Double-tap heart overlay */}
+      {showHeartAnim && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+          <style>{`@keyframes heartBoom{0%{transform:scale(0);opacity:1}50%{transform:scale(1.3);opacity:1}100%{transform:scale(1);opacity:0}}`}</style>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="w-24 h-24 text-rose-400"
+            style={{ animation: "heartBoom 600ms ease-out forwards" }}
+            onAnimationEnd={() => setShowHeartAnim(false)}
+          >
+            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.218l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+          </svg>
+        </div>
+      )}
 
       {/* Format indicator row */}
       <div className="flex items-center justify-between relative z-10">
@@ -344,8 +489,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
         </div>
       </div>
 
-      {/* Interest tags */}
-      <div className="flex flex-wrap gap-2 relative z-10">
+      {/* Interest tags — absolute, bottom aligned with Share icon, right stops before button column */}
+      <div className="absolute top-[calc(100%-88px)] left-5 right-10 flex flex-wrap gap-2 z-10">
         {post.interests.map((name) => (
           <span
             key={name}
@@ -356,10 +501,104 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
         ))}
       </div>
 
-      {/* Like button */}
-      <div className="absolute bottom-[88px] right-5 z-10">
-        <LikeButton postId={post.id} />
+      {/* Action buttons — bottom-right column, above BottomNav */}
+      <div className="absolute bottom-10 right-3 z-10 flex flex-col items-center gap-1">
+        {/* Like */}
+        <div className="flex flex-col items-center" style={{ height: "48px" }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleToggleLike() }}
+            aria-label={liked ? "Unlike" : "Like"}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill={liked ? "rgb(244,63,94)" : "none"}
+              stroke={liked ? "none" : "currentColor"}
+              strokeWidth={liked ? 0 : 2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`w-6 h-6 text-zinc-400 ${animatingLike ? "heart-pop" : ""}`}
+              onAnimationEnd={() => setAnimatingLike(false)}
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+          <span className="text-xs text-zinc-300 leading-none mt-1">{likesCount}</span>
+        </div>
+
+        {/* Comment */}
+        <div className="flex flex-col items-center" style={{ height: "48px" }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowComments(true) }}
+            aria-label="Comments"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-6 h-6 text-zinc-400"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+          <span className="text-xs text-zinc-300 leading-none mt-1">{commentsCount}</span>
+        </div>
+
+        {/* Save */}
+        <div className="flex flex-col items-center" style={{ height: "48px" }}>
+          <button
+            onClick={handleSaveClick}
+            aria-label={saved ? "Unsave" : "Save"}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill={saved ? "rgb(251,191,36)" : "none"}
+              stroke={saved ? "none" : "currentColor"}
+              strokeWidth={saved ? 0 : 2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`w-6 h-6 text-zinc-400 ${animatingSave ? "heart-pop" : ""}`}
+              onAnimationEnd={() => setAnimatingSave(false)}
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+          <span className="text-xs text-zinc-300 leading-none mt-1">{saveCount}</span>
+        </div>
+
+        {/* Share */}
+        <div className="flex flex-col items-center" style={{ height: "48px" }}>
+          <button
+            onClick={handleShare}
+            aria-label="Share"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-6 h-6 text-zinc-400"
+            >
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+          <span className="text-xs opacity-0 select-none mt-1">0</span>
+        </div>
       </div>
+
+      {/* Comments bottom sheet */}
+      {showComments && (
+        <CommentsBottomSheet postId={post.id} onClose={() => setShowComments(false)} />
+      )}
+
+      {/* Toast for clipboard fallback */}
+      <Toast message="Link copied!" visible={toastVisible} />
     </div>
   )
 }

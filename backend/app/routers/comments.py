@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, field_validator, model_validator
 from sqlalchemy.orm import Session, selectinload
 
@@ -48,11 +48,18 @@ class CommentOut(BaseModel):
         return data
 
 
-@router.get("/posts/{post_id}/comments", response_model=list[CommentOut])
-def list_comments(post_id: int, db: Session = Depends(get_db)):
+@router.get("/posts/{post_id}/comments")
+def list_comments(
+    post_id: int,
+    count: bool = Query(False),
+    db: Session = Depends(get_db),
+):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found.")
+    if count:
+        n = db.query(Comment).filter(Comment.post_id == post_id).count()
+        return {"count": n}
     comments = (
         db.query(Comment)
         .filter(Comment.post_id == post_id)
@@ -60,7 +67,7 @@ def list_comments(post_id: int, db: Session = Depends(get_db)):
         .order_by(Comment.created_at.desc())
         .all()
     )
-    return comments
+    return [CommentOut.model_validate(c) for c in comments]
 
 
 @router.post("/posts/{post_id}/comments", response_model=CommentOut, status_code=status.HTTP_201_CREATED)

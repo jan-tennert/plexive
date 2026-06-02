@@ -2,8 +2,16 @@
 
 import { use, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { type Post, FORMAT_STYLES } from "@/app/components/PostCard"
 import { useWikipediaImage } from "@/app/lib/useWikipediaImage"
+import CommentsSection, { type Comment } from "@/app/components/CommentsSection"
+import Toast from "@/app/components/Toast"
+import { useAuth } from "@/app/lib/auth"
+import { apiFetch } from "@/app/lib/api"
+import { queueEvent, hasPendingLike, cancelPendingLike } from "@/app/lib/eventQueue"
+import { savePost, unsavePost, isPostSaved } from "@/app/lib/savedPosts"
+import { likePost, unlikePost, isPostLiked, getCachedLikeCount, setCachedLikeCount, isLikeSent, markLikeSent, unmarkLikeSent } from "@/app/lib/likedPosts"
 
 interface BookDetails {
   author?: string
@@ -53,15 +61,52 @@ type Format = keyof typeof FORMAT_STYLES
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
+  const { user } = useAuth()
+
   const [post, setPost] = useState<Post | null>(null)
   const [closing, setClosing] = useState(false)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [stickyDraft, setStickyDraft] = useState("")
+  const [posting, setPosting] = useState(false)
+  const [liked, setLiked] = useState(() => isPostLiked(Number(id)))
+  const [likesCount, setLikesCount] = useState(() =>
+    getCachedLikeCount(Number(id)) ?? (isPostLiked(Number(id)) ? 1 : 0)
+  )
+  const [saved, setSaved] = useState(false)
+  const [animatingSave, setAnimatingSave] = useState(false)
+  const [toastVisible, setToastVisible] = useState(false)
+
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const isClosingRef = useRef(false)
+  const stickyInputRef     = useRef<HTMLInputElement>(null)
+  const isClosingRef       = useRef(false)
+  const likeInteractedRef  = useRef(false)
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${id}`)
       .then((r) => r.json())
-      .then(setPost)
+      .then((data: Post) => {
+        setPost(data)
+        setSaved(isPostSaved(data.id))
+      })
+    apiFetch(`/api/posts/${id}/comments`)
+      .then((r) => r.json())
+      .then(setComments)
+      .catch(() => {})
+    apiFetch(`/api/posts/${id}/likes`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!likeInteractedRef.current) {
+          const liked = isPostLiked(Number(id))
+          const sent = isLikeSent(Number(id))
+          const onServer = sent && !hasPendingLike(Number(id))
+          const adjust = (liked && !onServer ? 1 : 0) - (!liked && sent ? 1 : 0)
+          const display = d.count + adjust
+          setLikesCount(display)
+          setCachedLikeCount(Number(id), display)
+        }
+      })
+      .catch(() => {})
   }, [id])
 
   const pd = post ? (post.details ?? {}) as PersonDetails : {} as PersonDetails
@@ -102,7 +147,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     }
 
     function onTouchEnd(e: TouchEvent) {
-      const dx = e.changedTouches[0].clientX - startX  // positive = swiping right
+      const dx = e.changedTouches[0].clientX - startX
       const dy = Math.abs(e.changedTouches[0].clientY - startY)
       if (dx > 80 && dx > dy) close()
     }
@@ -114,6 +159,91 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       el.removeEventListener("touchend",   onTouchEnd)
     }
   }, []) // runs once; close() only calls stable setters
+
+  function handleToggleLike() {
+    if (!post) return
+    likeInteractedRef.current = true
+    if (isPostLiked(post.id)) {
+      unlikePost(post.id)
+      setLiked(false)
+      setLikesCount((prev) => { const n = prev - 1; setCachedLikeCount(post.id, n); return n })
+      if (hasPendingLike(post.id)) {
+        cancelPendingLike(post.id)
+        unmarkLikeSent(post.id)
+      }
+    } else {
+      likePost(post.id)
+      setLiked(true)
+      setLikesCount((prev) => { const n = prev + 1; setCachedLikeCount(post.id, n); return n })
+      if (!isLikeSent(post.id)) {
+        markLikeSent(post.id)
+        queueEvent({ post_id: post.id, event_type: "like" })
+      }
+    }
+  }
+
+  function handleSaveToggle() {
+    if (!post) return
+    const next = !saved
+    setSaved(next)
+    if (next) {
+      savePost(post.id)
+      setAnimatingSave(true)
+    } else {
+      unsavePost(post.id)
+    }
+  }
+
+  async function handleDelete(commentId: number) {
+    if (deletingId !== null) return
+    setDeletingId(commentId)
+    try {
+      const r = await apiFetch(`/api/comments/${commentId}`, { method: "DELETE" })
+      if (r.ok) setComments((prev) => prev.filter((c) => c.id !== commentId))
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  async function handlePostComment(body: string) {
+    if (posting) return
+    setPosting(true)
+    try {
+      const r = await apiFetch(`/api/posts/${id}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ body }),
+      })
+      if (!r.ok) return
+      const created: Comment = await r.json()
+      setComments((prev) => [created, ...prev])
+    } finally {
+      setPosting(false)
+    }
+  }
+
+  async function handleStickySubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const body = stickyDraft.trim()
+    if (!body) return
+    setStickyDraft("")
+    await handlePostComment(body)
+  }
+
+  async function handleShare() {
+    if (!post) return
+    const url = window.location.origin + "/post/" + post.id
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: post.title, text: post.hook ?? "", url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        setToastVisible(true)
+        setTimeout(() => setToastVisible(false), 2000)
+      }
+    } catch {
+      // User cancelled share or clipboard failed
+    }
+  }
 
   const style = post
     ? FORMAT_STYLES[post.format as Format] ?? {
@@ -151,6 +281,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             }
           `}</style>
 
+          {/* Back button */}
           <button
             onClick={close}
             className="absolute top-4 left-4 z-10 w-11 h-11 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
@@ -170,6 +301,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             </svg>
           </button>
 
+          <Toast message="Link copied!" visible={toastVisible} />
+
+          {/* Scrollable content */}
           <div
             ref={scrollContainerRef}
             className="flex-1 overflow-y-auto px-6 pt-16 pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
@@ -285,7 +419,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   <p className="text-lg text-zinc-200 leading-relaxed mb-6">{post.hook}</p>
                 )}
 
-                {/* SVG visual — always full size on detail page */}
+                {/* SVG visual */}
                 {(cd.visual_svg || fd.visual_svg) && (
                   <div
                     className="w-full max-w-[360px] mx-auto my-6"
@@ -468,6 +602,13 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   ))}
                 </div>
 
+                {/* Comments list */}
+                <CommentsSection
+                  comments={comments}
+                  currentUsername={user?.username}
+                  onDelete={handleDelete}
+                  deletingId={deletingId}
+                />
 
               </>
             ) : (
@@ -476,6 +617,66 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               </div>
             )}
           </div>
+
+          {/* Sticky comment bar with integrated action buttons */}
+          <div className="flex-none border-t border-zinc-800/50 bg-zinc-950/95 backdrop-blur-md">
+            <div className="flex items-center gap-2 px-3 py-2">
+              {/* Left: comment input or sign-in prompt */}
+              <div className="flex-1 min-w-0">
+                {user ? (
+                  <form onSubmit={handleStickySubmit}>
+                    <input
+                      ref={stickyInputRef}
+                      value={stickyDraft}
+                      onChange={(e) => setStickyDraft(e.target.value)}
+                      placeholder="Add a comment..."
+                      maxLength={2000}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-full px-4 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-600"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!stickyDraft.trim() || posting}
+                      className="sr-only"
+                    >
+                      Post
+                    </button>
+                  </form>
+                ) : (
+                  <p className="text-sm text-zinc-500 py-1">
+                    <Link
+                      href="/login"
+                      className="text-zinc-400 hover:text-white underline transition-colors"
+                    >
+                      Sign in
+                    </Link>{" "}
+                    to comment
+                  </p>
+                )}
+              </div>
+
+              {/* Right: like button only */}
+              {post && (
+                <button
+                  onClick={handleToggleLike}
+                  className="w-11 h-11 flex items-center justify-center"
+                  aria-label={liked ? "Unlike" : "Like"}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill={liked ? "rgb(244,63,94)" : "none"}
+                    stroke={liked ? "none" : "currentColor"}
+                    strokeWidth={liked ? 0 : 2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-5 h-5 text-zinc-400"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
