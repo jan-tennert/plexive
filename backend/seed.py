@@ -1,6 +1,12 @@
 import json
 import os
+import secrets
+import sys
 
+from dotenv import load_dotenv
+from passlib.context import CryptContext
+
+from app.auth import hash_password
 from app.database import Base, SessionLocal, engine
 from app.models import Interest, Post, User, post_interests
 
@@ -44,6 +50,15 @@ NAME_EXCEPTIONS = {
     "money-everyday": "Personal Finance",
 }
 
+SEED_INTEREST_SLUGS = [
+    "psychology", "behavioral-economics", "decision-making", "neuroscience",
+]
+
+SEED_EMAIL = "marlo07drews@gmail.com"
+SEED_USERNAME = "Marlo"
+SEED_POST_FORMAT = "books"
+SEED_POST_TITLE = "Thinking, Fast and Slow"
+
 
 def slug_to_name(slug):
     if slug in NAME_EXCEPTIONS:
@@ -51,65 +66,107 @@ def slug_to_name(slug):
     return slug.replace("-", " ").title()
 
 
+def _get_or_create_marlo(db) -> User:
+    marlo = db.query(User).filter_by(email=SEED_EMAIL).first()
+    if marlo:
+        if not marlo.is_verified:
+            marlo.is_verified = True
+            db.commit()
+        return marlo
+
+    # Load seed password from .env; generate if absent
+    env_path = os.path.join(os.path.dirname(__file__), ".env")
+    load_dotenv(env_path)
+    password = os.environ.get("SEED_ADMIN_PASSWORD", "").strip()
+
+    if not password:
+        password = secrets.token_urlsafe(16)
+        print(
+            "\n"
+            "WARNING: SEED_ADMIN_PASSWORD is not set in backend/.env.\n"
+            f"         Generated seed password: {password}\n"
+            "         Save this now — it will not be shown again.\n"
+            "         Add SEED_ADMIN_PASSWORD=<password> to backend/.env\n"
+            "         and re-run seed.py to use a stable password.\n"
+        )
+        if not sys.stdin.isatty():
+            print("ERROR: Running non-interactively without SEED_ADMIN_PASSWORD set. Exiting.")
+            sys.exit(1)
+
+    marlo = User(
+        email=SEED_EMAIL,
+        username=SEED_USERNAME,
+        password_hash=hash_password(password),
+        is_active=True,
+        is_verified=True,
+    )
+    db.add(marlo)
+    db.commit()
+    db.refresh(marlo)
+    print(f"Created user @{SEED_USERNAME} ({SEED_EMAIL})")
+    return marlo
+
+
 db = SessionLocal()
 
-# Phase 1: get-or-create interests (idempotent — skips slugs already in DB)
+# Phase 1: get-or-create interests (idempotent)
 created_count = 0
 for slug in SLUGS:
     if db.query(Interest).filter_by(slug=slug).first() is None:
         db.add(Interest(name=slug_to_name(slug), slug=slug))
         created_count += 1
 db.commit()
+print(f"Interests: {created_count} created (rest already existed)")
 
-# Phase 2: clear posts, then reseed from seed_content.json
-db.execute(post_interests.delete())
-db.query(Post).delete()
-db.commit()
+# Phase 2: ensure Marlo exists and is verified
+marlo = _get_or_create_marlo(db)
 
+# Phase 3: seed the Kahneman Books post (upsert — update if already present)
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-json_path = os.path.join(project_root, "seed_content.json")
-with open(json_path, encoding="utf-8") as f:
-    data = json.load(f)
+example_path = os.path.join(
+    project_root, "docs", "content-structure", "examples", "books_example.json"
+)
+with open(example_path, encoding="utf-8") as f:
+    example = json.load(f)
 
-post_count = 0
-for item in data["posts"]:
+feed_card = example["feed_card"]
+sections = example["sections"]
+
+existing = (
+    db.query(Post)
+    .filter_by(format=SEED_POST_FORMAT, title=SEED_POST_TITLE)
+    .first()
+)
+
+if existing:
+    existing.feed_card = feed_card
+    existing.sections = sections
+    existing.title = feed_card["title"]
+    existing.status = "published"
+    db.commit()
+    print(f"Updated existing Books post: {SEED_POST_TITLE}.")
+else:
+    # Resolve interest objects; skip any slug not in DB
     interests = []
-    for slug in item.get("interests", []):
+    for slug in SEED_INTEREST_SLUGS:
         interest = db.query(Interest).filter_by(slug=slug).first()
-        if interest is None:
-            print(f"Warning: interest slug '{slug}' not found in DB, skipping")
-        else:
+        if interest:
             interests.append(interest)
+        else:
+            print(f"Warning: interest slug '{slug}' not found, skipping")
 
     post = Post(
-        format=item["format"],
-        title=item["title"],
-        body=item.get("body", ""),
-        source=item.get("source"),
-        hook=item.get("hook"),
-        key_points=item.get("key_points"),
-        takeaway=item.get("takeaway"),
-        source_url=item.get("source_url"),
-        image_url=item.get("image_url"),
-        image_attribution=item.get("image_attribution"),
-        details=item.get("details"),
-        interests=interests,
+        format=SEED_POST_FORMAT,
+        title=feed_card["title"],
+        feed_card=feed_card,
+        sections=sections,
+        author_id=marlo.id,
+        status="published",
+        is_user_content=False,
     )
+    post.interests = interests
     db.add(post)
-    post_count += 1
-
-db.commit()
-
-# Phase 3: assign seed posts to Marlo's account and set is_verified=True
-marlo = db.query(User).filter_by(email="marlo07drews@gmail.com").first()
-if marlo:
-    marlo.is_verified = True
-    db.query(Post).filter(Post.author_id == None).update({"author_id": marlo.id})
     db.commit()
-    print(f"Assigned seed posts to user {marlo.id} (@{marlo.username}) and set is_verified=True")
-else:
-    print("marlo07drews@gmail.com not found — seed posts remain unassigned")
+    print(f"Seeded 1 Books post: {SEED_POST_TITLE}.")
 
 db.close()
-
-print(f"Seeded {created_count} interests, {post_count} posts")

@@ -1,0 +1,217 @@
+// books_skeleton.jsonc
+// Deepscroll — Books format skeleton.
+// Every REQUIRED section must be present. OPTIONAL sections: include only if
+// they add real value for this book. Sections render in `order` field order.
+// See DEEPSCROLL_CONTENT_STRUCTURE.md for full spec, STYLE_GUIDE_LONGFORM.md
+// for prose rules. Do not repeat opening formulas across items in a list —
+// vary sentence structure.
+
+{
+  // ─── FEED CARD ──────────────────────────────────────────────────────
+  // What the user sees before tapping. Cover + title + author + essence
+  // + 3 teasers + meta. Designed to make tapping irresistible without
+  // promising what the post does not deliver.
+  "feed_card": {
+    "cover_url": "",          // string | null — Open Library or similar
+    "title": "",              // string
+    "author": "",             // string
+    "essence": "",            // string — ONE sentence, max ~18 words. States
+                              // what the book IS, not what it argues. Must
+                              // contain a "you" hook or a surprising claim.
+    "teasers": ["", "", ""],  // array[3], ca. 5–15 words each. Claims, questions,
+                              // or striking facts — never category labels.
+                              // Vary structure across the three (e.g. one
+                              // question, one fact...).
+    "post_reading_time_min": 0, // integer
+    "post_difficulty": 1,       // 1=accessible, 2=moderate, 3=demanding
+    "year": 0,                  // integer — original publication year
+    "genre": ""                 // string
+  },
+
+  // ─── SECTIONS ───────────────────────────────────────────────────────
+  "sections": [
+
+    // ── PART 1 — OPENING (~90s read) ─────────────────────────────────
+
+    {
+      "type": "essence",  // REQUIRED
+      "order": 1,
+      "content": ""       // string — same as feed_card.essence
+    },
+
+    {
+      "type": "quiz_badge",  // REQUIRED
+      "order": 2,
+      "content": ""          // string — format: "🎯 N questions at the end, earn Elo"
+    },
+
+    {
+      "type": "voices",  // REQUIRED — "Voices from the Book"
+      "order": 3,
+      "content": [       // array[3–4]. Three roles, not three of the same:
+                         // one thesis quote, one vivid/concrete quote,
+                         // one short punch quote. All verbatim from book.
+        {
+          "quote": "",         // string — 1–3 sentences, must stand alone
+          "attribution": ""    // string — max ~5 words ("— on belief")
+        },
+        { "quote": "", "attribution": "" },
+        { "quote": "", "attribution": "" }
+      ]
+    },
+
+    {
+      "type": "at_a_glance",  // REQUIRED — visual info card
+      "order": 4,
+      "content": {
+        "genre": "",                  // string
+        "year": 0,                    // integer
+        "country": "",                // string
+        "pages": 0,                   // integer
+        "reading_ease": 1,            // 1–3 — difficulty of the BOOK
+        "post_reading_time_min": 0,   // integer — same as feed_card
+        "post_difficulty": 1,         // 1–3 — same as feed_card
+        "best_for": ""                // string — one specific reader profile
+      }
+    },
+
+    // ── PART 2 — OVERVIEW (~2 min read) ──────────────────────────────
+
+    {
+      "type": "why_endures",  // OPTIONAL — only with sharp, specific answer
+      "order": 5,
+      "content": ""           // string — 2–3 sentences on what makes THIS
+                              // book special among books on its topic.
+    },
+
+    {
+      "type": "heart",  // REQUIRED — "The Heart of It"
+      "order": 6,
+      "content": ""     // string — 4–6 sentences. Central argument (non-
+                        // fiction) or central question (fiction). Reader
+                        // who stops here still gets the essence.
+    },
+
+    {
+      "type": "structure",  // OPTIONAL — book's architecture
+      "order": 7,
+      "content": [          // array of strings, one per major section/part.
+                            // Vary sentence structure across items — do not
+                            // start every item with "Part X" or the same
+                            // verb. Each item describes what that part
+                            // covers in one sentence.
+        ""
+      ]
+    },
+
+    // ── PART 3 — CORE ─────────────────────────────────────────────────
+
+    {
+      "type": "core_ideas",  // REQUIRED — "The Core Ideas"
+      "order": 8,
+      "content": [           // array[6–12]. Each item: title is a claim
+                             // (not a label), body is 3–6 sentences of
+                             // prose starting with a concrete example
+                             // before the abstraction.
+        {
+          "title": "",         // string — pointed claim with a verb, 4–10 words
+          "body": "",          // string — 3–6 sentences, concrete first
+          "in_practice": "",   // string | omit — OPTIONAL, non-fiction only.
+                               // ONE direct imperative sentence: what to do
+                               // now. Begin with the action verb or the
+                               // situation. No "Tomorrow:" or other formula.
+          "visual_svg": "",    // string | omit — per SVG_STANDARD.md
+          "image_url": "",     // string | omit — Wikimedia or similar
+          "quote": ""          // string | omit — supporting quote from book
+        }
+      ]
+    },
+
+    // ── PART 4 — WHAT STAYS WITH YOU ──────────────────────────────────
+
+    {
+      "type": "takeaway",  // REQUIRED — "What Stays With You"
+      "order": 9,
+      "content": {
+        "framing": "framework",  // "framework" (non-fiction) | "question" (fiction)
+        "body": "",              // string
+                                 // framework: one rule/tool/model usable now
+                                 // question: one central question + how the
+                                 // book treats it (2–3 sentences)
+        "visual_svg": ""         // string | omit — recommended for framework
+      }
+    },
+
+    // ── PART 5 — TEST YOURSELF ────────────────────────────────────────
+
+    {
+      "type": "quiz",  // REQUIRED
+      "order": 10,
+      "content": [     // array[5–10]. Tests understanding, not trivia.
+                       // Distractors must be plausible misconceptions.
+        {
+          "question": "",
+          "options": ["", "", "", ""],  // exactly 4
+          "answer_index": 0,            // 0–3
+          "explanation": ""             // explains the LOGIC of the correct
+                                        // answer, not why others are wrong
+        }
+      ]
+    },
+
+    {
+      "type": "related_posts",  // OPTIONAL — right after quiz
+      "order": 11,
+      "content": [              // array[3]
+        {
+          "post_id": "",        // string — empty if not yet known
+          "title": "",          // string
+          "format": "",         // "books"|"facts"|"people"|"concepts"|
+                                // "questions"|"stories"|"academy"
+          "mini_teaser": ""     // string — one sentence
+        }
+      ]
+    },
+
+    // ── PART 6 — CONTEXT (smaller typography, secondary) ─────────────
+
+    {
+      "type": "world_context",  // OPTIONAL — "The World It Came From"
+      "order": 12,
+      "content": ""             // string — era, intellectual movement, what
+                                // was new when published. Longer for
+                                // classics, shorter or skip for modern.
+    },
+
+    {
+      "type": "author_context",  // OPTIONAL — "About the Author"
+      "order": 13,
+      "content": {
+        "body": "",              // string — 2–3 sentences, book-relevant only
+        "image_url": "",         // string | omit
+        "image_attribution": "", // string | omit — required if image_url present
+        "wikipedia_url": ""      // string | omit
+      }
+    },
+
+    {
+      "type": "critique",  // OPTIONAL — "Critique & Limitations"
+      "order": 14,
+      "content": ""        // string — name the camps, not vague "some have
+                           // argued". Specific people, specific findings.
+    },
+
+    {
+      "type": "sources",  // REQUIRED — "Sources & Further Reading"
+      "order": 15,
+      "content": [        // array[1–10]
+        {
+          "label": "",    // string — human-readable reference
+          "url": "",      // string — full URL
+          "type": ""      // "wikipedia"|"paper"|"book"|"article"|"database"
+        }
+      ]
+    }
+
+  ]
+}

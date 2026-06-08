@@ -1,16 +1,61 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from ..auth import get_current_user, get_optional_user
 from ..database import get_db
-from ..models import Interest, Post
+from ..models import Comment, Event, Interest, Post
 from ..rate_limit import check_rate_limit
 from ..sanitize import sanitize_svg_text
 from ..schemas import PostCreate, PostOut
 
 router = APIRouter()
+
+
+def _attach_counts(post: Post, db: Session) -> Post:
+    """Add like_count and comment_count as plain attributes for PostOut serialization."""
+    like_count = (
+        db.query(func.count(Event.id))
+        .filter(Event.post_id == post.id, Event.event_type == "like")
+        .scalar()
+    ) or 0
+    comment_count = (
+        db.query(func.count(Comment.id))
+        .filter(Comment.post_id == post.id)
+        .scalar()
+    ) or 0
+    post.like_count = like_count
+    post.comment_count = comment_count
+    return post
+
+
+def _attach_counts_many(posts: list[Post], db: Session) -> list[Post]:
+    return [_attach_counts(p, db) for p in posts]
+
+
+def _sanitize_sections_svgs(sections: list) -> list:
+    """Re-sanitize any visual_svg strings found anywhere in the sections array."""
+    sanitized = []
+    for section in sections:
+        section = dict(section) if not isinstance(section, dict) else section.copy()
+        content = section.get("content")
+        if isinstance(content, dict):
+            content = content.copy()
+            if "visual_svg" in content and content["visual_svg"]:
+                content["visual_svg"] = sanitize_svg_text(str(content["visual_svg"]))
+            section["content"] = content
+        elif isinstance(content, list):
+            new_items = []
+            for item in content:
+                if isinstance(item, dict) and "visual_svg" in item and item["visual_svg"]:
+                    item = item.copy()
+                    item["visual_svg"] = sanitize_svg_text(str(item["visual_svg"]))
+                new_items.append(item)
+            section["content"] = new_items
+        sanitized.append(section)
+    return sanitized
 
 
 # IMPORTANT: /posts/mine must be registered before /posts/{post_id} so FastAPI
@@ -20,13 +65,14 @@ def get_my_posts(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return (
+    posts = (
         db.query(Post)
         .options(selectinload(Post.interests), selectinload(Post.author))
         .filter(Post.author_id == current_user.id)
         .order_by(Post.created_at.desc())
         .all()
     )
+    return _attach_counts_many(posts, db)
 
 
 @router.post("/posts", response_model=PostOut, status_code=201)
@@ -45,26 +91,20 @@ def create_post(
             raise HTTPException(status_code=400, detail=f"Unknown interest slug: {slug!r}")
         interest_objects.append(interest)
 
-    # Defense-in-depth: re-sanitize visual_svg even if it came from our own upload endpoint
-    details = dict(data.details) if data.details else None
-    if details and "visual_svg" in details:
-        try:
-            details["visual_svg"] = sanitize_svg_text(str(details["visual_svg"]))
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=f"Invalid SVG in details: {exc}")
+    # Convert sections to dicts, then re-sanitize SVGs (defense-in-depth)
+    sections_list = [s.model_dump() for s in data.sections]
+    try:
+        sections_list = _sanitize_sections_svgs(sections_list)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid SVG in sections: {exc}")
 
     post = Post(
         format=data.format,
         title=data.title,
-        body="",  # deprecated field; kept non-null for schema compatibility
-        hook=data.hook,
-        key_points=data.key_points,
-        takeaway=data.takeaway,
-        source=data.source,
-        source_url=data.source_url,
-        image_url=data.image_url,
-        details=details,
+        feed_card=data.feed_card,
+        sections=sections_list,
         author_id=current_user.id,
+        is_user_content=True,
         status="published" if current_user.is_verified else "pending",
     )
     post.interests = interest_objects
@@ -73,13 +113,13 @@ def create_post(
     db.refresh(post)
     post_id = post.id
 
-    # Re-query to load relationships for PostOut serialization
-    return (
+    post = (
         db.query(Post)
         .options(selectinload(Post.interests), selectinload(Post.author))
         .filter(Post.id == post_id)
         .first()
     )
+    return _attach_counts(post, db)
 
 
 @router.get("/posts/{post_id}", response_model=PostOut)
@@ -101,4 +141,4 @@ def get_post(
         if current_user is None or post.author_id != current_user.id:
             raise HTTPException(status_code=404, detail="Post not found")
 
-    return post
+    return _attach_counts(post, db)

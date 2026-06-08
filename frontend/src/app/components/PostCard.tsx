@@ -5,73 +5,12 @@ import { useRouter } from "next/navigation"
 import CommentsBottomSheet from "./CommentsBottomSheet"
 import Toast from "./Toast"
 import { queueEvent, hasPendingLike, cancelPendingLike } from "@/app/lib/eventQueue"
-import { useWikipediaImage } from "@/app/lib/useWikipediaImage"
 import { apiFetch } from "@/app/lib/api"
 import { savePost, unsavePost, isPostSaved } from "@/app/lib/savedPosts"
 import { likePost, unlikePost, isPostLiked, getCachedLikeCount, setCachedLikeCount, isLikeSent, markLikeSent, unmarkLikeSent } from "@/app/lib/likedPosts"
+import type { Post } from "@/types/post"
 
-export interface Post {
-  id: number
-  format: string
-  title: string
-  body: string
-  source: string | null
-  hook: string | null
-  key_points: string[] | null
-  takeaway: string | null
-  source_url: string | null
-  image_url: string | null
-  image_attribution: string | null
-  related_slugs: string[] | null
-  details: Record<string, unknown> | null
-  interests: string[]
-  author_username?: string | null
-  author_is_verified?: boolean | null
-  status?: string
-  is_user_content?: boolean
-}
-
-interface BookDetails {
-  author?: string
-  isbn?: string
-  publication_year?: number
-  core_thesis?: string
-  who_should_read?: string
-}
-
-interface FactDetails {
-  stat?: string
-  context?: string
-  why_it_matters?: string
-  visual_svg?: string
-  visual_type?: string
-}
-
-interface PersonDetails {
-  lifespan?: string
-  known_for?: string
-  field?: string
-  turning_point?: string
-  legacy?: string
-  wikipedia_url?: string
-}
-
-interface ConceptDetails {
-  one_line_definition?: string
-  explanation?: string
-  concrete_example?: string
-  how_to_apply?: string
-  related_concepts?: string[]
-  visual_svg?: string
-  visual_type?: string
-}
-
-interface QuestionDetails {
-  the_question?: string
-  framing?: string
-  perspectives?: string[]
-  reflection_prompt?: string
-}
+export type { Post }
 
 export const FORMAT_STYLES = {
   books: {
@@ -122,28 +61,31 @@ export const FORMAT_STYLES = {
     radial: "rgba(251,146,60,0.09)",
     accent: "#fb923c",
   },
+  academy: {
+    label: "ACADEMY",
+    dot: "bg-indigo-400",
+    text: "text-indigo-400",
+    glow: "from-indigo-500/40",
+    radial: "rgba(129,140,248,0.09)",
+    accent: "#818cf8",
+  },
 } as const
 
 type Format = keyof typeof FORMAT_STYLES
 
 const MIN_DWELL_MS = 500
 
-function readTime(post: Post): string {
-  const text =
-    [post.hook, ...(post.key_points ?? []), post.takeaway].filter(Boolean).join(" ") ||
-    post.body
-  const words = text.trim().split(/\s+/).length
-  const seconds = Math.ceil(words / (200 / 60))
-  if (seconds < 60) return `${seconds} sec read`
-  return `${Math.ceil(seconds / 60)} min read`
-}
-
-function hookText(post: Post): string {
-  if (post.format === "concepts") {
-    const d = (post.details ?? {}) as ConceptDetails
-    return d.one_line_definition ?? post.hook ?? post.body.slice(0, 120)
-  }
-  return post.hook ?? post.body.slice(0, 120)
+function DotScale({ value }: { value: 1 | 2 | 3 }) {
+  return (
+    <span className="flex gap-0.5">
+      {[1, 2, 3].map((i) => (
+        <span
+          key={i}
+          className={`inline-block w-1.5 h-1.5 rounded-full ${i <= value ? "bg-amber-400" : "bg-zinc-600"}`}
+        />
+      ))}
+    </span>
+  )
 }
 
 export default function PostCard({ post, activeTabId }: { post: Post; activeTabId: string }) {
@@ -157,9 +99,9 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
   const [visible, setVisible] = useState(false)
   const [liked, setLiked] = useState(() => isPostLiked(post.id))
   const [likesCount, setLikesCount] = useState(() =>
-    getCachedLikeCount(post.id) ?? (isPostLiked(post.id) ? 1 : 0)
+    getCachedLikeCount(post.id) ?? post.like_count
   )
-  const [commentsCount, setCommentsCount] = useState(0)
+  const [commentsCount, setCommentsCount] = useState(post.comment_count)
   const [saved, setSaved] = useState(() => isPostSaved(post.id))
   const [saveCount, setSaveCount] = useState(0)
   const [animatingSave, setAnimatingSave] = useState(false)
@@ -169,26 +111,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
   const [toastVisible, setToastVisible] = useState(false)
 
   const style = FORMAT_STYLES[post.format as Format] ?? FORMAT_STYLES.facts
-
-  const pd = (post.details ?? {}) as PersonDetails
-  const fd = (post.details ?? {}) as FactDetails
-  const bd = (post.details ?? {}) as BookDetails
-  const qd = (post.details ?? {}) as QuestionDetails
-  const cd = (post.details ?? {}) as ConceptDetails
-
-  const { imageUrl: wikiThumb } = useWikipediaImage(
-    post.format === "people" && !post.image_url ? pd.wikipedia_url : null,
-    "thumbnail"
-  )
-  const personImageUrl = post.image_url ?? wikiThumb
-
-  const svgString =
-    post.format === "concepts"
-      ? (cd.visual_svg ?? null)
-      : post.format === "facts"
-      ? (fd.visual_svg ?? null)
-      : null
-  const cardSvg = svgString && svgString.length < 800 ? svgString : null
+  const fc = post.feed_card
 
   useEffect(() => {
     apiFetch(`/api/posts/${post.id}/likes`)
@@ -204,10 +127,6 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           setCachedLikeCount(post.id, display)
         }
       })
-      .catch(() => {})
-    apiFetch(`/api/posts/${post.id}/comments?count=true`)
-      .then((r) => r.json())
-      .then((d) => setCommentsCount(d.count))
       .catch(() => {})
   }, [post.id])
 
@@ -327,7 +246,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
     const url = window.location.origin + "/post/" + post.id
     try {
       if (navigator.share) {
-        await navigator.share({ title: post.title, text: post.hook ?? "", url })
+        await navigator.share({ title: post.title, text: fc?.essence ?? "", url })
       } else {
         await navigator.clipboard.writeText(url)
         setToastVisible(true)
@@ -377,7 +296,9 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             {style.label}
           </span>
         </div>
-        <span className="text-zinc-500 text-xs">{readTime(post)}</span>
+        {post.format === "books" && fc?.post_reading_time_min ? (
+          <span className="text-zinc-500 text-xs">{fc.post_reading_time_min} min read</span>
+        ) : null}
       </div>
 
       {/* Card body — centered vertically */}
@@ -387,40 +308,20 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
           }`}
         >
-          <div className="bg-zinc-900/50 rounded-2xl px-5 py-6 flex flex-col gap-3">
-
-            {/* facts: big stat above title */}
-            {post.format === "facts" && fd.stat && (
-              <p className={`text-4xl font-black leading-none ${style.text}`}>{fd.stat}</p>
-            )}
-
-            {/* Full-width image for non-books, non-people formats */}
-            {post.image_url && post.format !== "books" && post.format !== "people" && (
-              <div
-                className="w-full rounded-lg overflow-hidden"
-                style={{ maxHeight: 160, background: `${style.accent}26` }}
-              >
-                <img
-                  src={post.image_url}
-                  alt=""
-                  loading="lazy"
-                  className="w-full object-cover"
-                  style={{ maxHeight: 160 }}
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
-                />
-              </div>
-            )}
-
-            {/* people: portrait circle + title side by side */}
-            {post.format === "people" ? (
-              <div className="flex items-center gap-3">
-                {personImageUrl && (
-                  <div
-                    className="shrink-0 rounded-full overflow-hidden"
-                    style={{ width: 64, height: 64, background: `${style.accent}26` }}
-                  >
+          {post.format === "books" && fc ? (
+            <div className="bg-zinc-900/50 rounded-2xl px-5 py-5 flex flex-col gap-3">
+              {/* Title row + cover */}
+              <div className="flex gap-3 items-start">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
+                    {fc.title}
+                  </h2>
+                  <p className="text-amber-400 text-sm font-medium mt-1">{fc.author}</p>
+                </div>
+                {fc.cover_url && (
+                  <div className="shrink-0 rounded-lg overflow-hidden shadow-lg w-16 h-24 bg-zinc-800">
                     <img
-                      src={personImageUrl}
+                      src={fc.cover_url}
                       alt=""
                       loading="lazy"
                       className="w-full h-full object-cover"
@@ -428,83 +329,46 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
                     />
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-4xl font-bold tracking-tight text-white leading-[1.1]">
-                    {post.title}
-                  </h2>
+              </div>
+
+              {/* Essence */}
+              <p className="text-zinc-300 text-sm leading-relaxed">{fc.essence}</p>
+
+              {/* Teasers */}
+              {fc.teasers && fc.teasers.length > 0 && (
+                <div className="mt-3 mb-1 space-y-1">
+                  {fc.teasers.map((teaser, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-amber-400 text-sm mt-0.5 shrink-0">→</span>
+                      <span className="text-sm text-zinc-300/70 leading-snug">{teaser}</span>
+                    </div>
+                  ))}
                 </div>
+              )}
+
+              {/* Metadata bar */}
+              <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
+                <DotScale value={fc.post_difficulty} />
+                <span className="text-zinc-500 text-xs">{fc.year}</span>
+                <span className="text-zinc-600 text-xs">·</span>
+                <span className="text-zinc-500 text-xs">{fc.genre}</span>
               </div>
-            ) : post.format === "books" ? (
-              /* books: title + float-right cover */
-              <div className="flex gap-3 items-start">
-                <h2 className="flex-1 text-3xl font-bold tracking-tight text-white leading-[1.1]">
-                  {post.title}
-                </h2>
-                {post.image_url && (
-                  <div
-                    className="shrink-0 rounded-lg overflow-hidden"
-                    style={{ maxWidth: 120, background: `${style.accent}26` }}
-                  >
-                    <img
-                      src={post.image_url}
-                      alt=""
-                      loading="lazy"
-                      className="object-cover"
-                      style={{ maxWidth: 120 }}
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
-                    />
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* All other formats: plain title */
-              <h2 className="text-4xl font-bold tracking-tight text-white leading-[1.1]">
-                {post.format === "questions" && qd.the_question
-                  ? qd.the_question
-                  : post.title}
+            </div>
+          ) : (
+            /* Fallback for non-Books formats */
+            <div className="bg-zinc-900/50 rounded-2xl px-5 py-6 flex flex-col gap-3">
+              <h2 className="text-3xl font-bold tracking-tight text-white leading-snug">
+                {post.title}
               </h2>
-            )}
-
-            {/* people: lifespan + known_for below title */}
-            {post.format === "people" && (pd.lifespan || pd.known_for) && (
-              <p className="text-zinc-400 text-sm">
-                {[pd.lifespan, pd.known_for].filter(Boolean).join(" · ")}
-              </p>
-            )}
-
-            {/* books: author below title */}
-            {post.format === "books" && bd.author && (
-              <p className="text-zinc-400 text-sm">{bd.author}</p>
-            )}
-
-            {/* Hook line — skipped for questions since the_question is the hook */}
-            {post.format !== "questions" && (
-              <p className="text-zinc-300 text-base leading-relaxed">{hookText(post)}</p>
-            )}
-
-            {/* Inline SVG for concepts and facts (only if short enough for card) */}
-            {cardSvg && (
-              post.is_user_content
-                ? (
-                  <img
-                    src={`data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(cardSvg)))}`}
-                    alt=""
-                    className="w-full"
-                    style={{ maxHeight: 180 }}
-                  />
-                ) : (
-                  /* seed/official SVG — controlled content, dangerouslySetInnerHTML intentional */
-                  <div
-                    style={{ color: "#e4e4e7", width: "100%", maxHeight: 180, overflow: "hidden" }}
-                    dangerouslySetInnerHTML={{ __html: cardSvg }}
-                  />
-                )
-            )}
-          </div>
+              {fc?.essence && (
+                <p className="text-zinc-300 text-base leading-relaxed">{fc.essence}</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Interest tags — absolute, bottom aligned with Share icon, right stops before button column */}
+      {/* Interest tags */}
       <div className="absolute top-[calc(100%-88px)] left-5 right-10 flex flex-wrap gap-2 z-10">
         {post.interests.map((name) => (
           <span
@@ -516,7 +380,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
         ))}
       </div>
 
-      {/* Action buttons — bottom-right column, above BottomNav */}
+      {/* Action buttons */}
       <div className="absolute bottom-10 right-3 z-10 flex flex-col items-center gap-1">
         {/* Like */}
         <div className="flex flex-col items-center" style={{ height: "48px" }}>
@@ -586,10 +450,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
 
         {/* Share */}
         <div className="flex flex-col items-center" style={{ height: "48px" }}>
-          <button
-            onClick={handleShare}
-            aria-label="Share"
-          >
+          <button onClick={handleShare} aria-label="Share">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -607,12 +468,10 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
         </div>
       </div>
 
-      {/* Comments bottom sheet */}
       {showComments && (
         <CommentsBottomSheet postId={post.id} onClose={() => setShowComments(false)} />
       )}
 
-      {/* Toast for clipboard fallback */}
       <Toast message="Link copied!" visible={toastVisible} />
     </div>
   )

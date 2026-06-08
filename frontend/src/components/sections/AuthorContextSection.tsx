@@ -1,0 +1,50 @@
+import type { AuthorContextContent } from "../../types/post"
+
+interface Props {
+  content: AuthorContextContent
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" className="inline ml-1 mb-0.5">
+      <path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3M9 2h5m0 0v5m0-5L7 10" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export default function AuthorContextSection({ content }: Props) {
+  return (
+    <div className="px-5 py-6">
+      <div className={`flex gap-4 ${content.image_url ? "items-start" : ""}`}>
+        {content.image_url && (
+          <div className="shrink-0">
+            <img
+              src={content.image_url}
+              alt=""
+              className="w-16 h-16 rounded-full object-cover bg-zinc-700"
+            />
+            {content.image_attribution && (
+              <p className="text-xs text-zinc-600 mt-1 text-center max-w-[4rem]">
+                {content.image_attribution}
+              </p>
+            )}
+          </div>
+        )}
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-zinc-400 leading-relaxed">{content.body}</p>
+          {content.wikipedia_url && (
+            <a
+              href={content.wikipedia_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Wikipedia
+              <ExternalLinkIcon />
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

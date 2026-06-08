@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 .venv/
 *.db
+backend/deepscroll.db.legacy_*
 .env
 
 # Node / Next.js

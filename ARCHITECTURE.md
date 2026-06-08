@@ -6,14 +6,14 @@
 backend/
   requirements.txt              fastapi, uvicorn, sqlalchemy, passlib[bcrypt], python-jose[cryptography], python-dotenv, email-validator
   .env.example                  JWT_SECRET template (copy to .env, never commit .env)
-  seed.py                       idempotent: get-or-create 145 interests from taxonomy; delete-and-reseed posts from seed_content.json; Phase 3 assigns all seed posts to marlo07drews@gmail.com and sets is_verified=True on that account
+  seed.py                       idempotent: get-or-create 145 interests from taxonomy; reads SEED_ADMIN_PASSWORD from backend/.env; get-or-create @Marlo (marlo07drews@gmail.com, is_verified=True); upserts 1 Books post from docs/content-structure/examples/books_example.json (Kahneman "Thinking, Fast and Slow") — updates feed_card/sections/title/status if already present; legacy DB preserved as deepscroll.db.legacy_*
   deepscroll.db                 SQLite database (gitignored)
   app/
     database.py                 engine, SessionLocal, Base, get_db dependency
     main.py                     FastAPI app, CORS for localhost:3000, router registration, create_all on startup
-    models.py                   ORM models: Interest, Post (author_id FK→users nullable, status string default "published", image_path; author_username and author_is_verified properties), Event (user_id nullable FK), User (posts relationship, is_verified boolean default false, is_private boolean default false, bio string nullable), Follow (follower_id FK→users, following_id FK→users, status "pending"|"accepted", created_at; UniqueConstraint uq_follow), Comment, post_interests join table
+    models.py                   ORM models: Interest, Post (feed_card JSON not null, sections JSON not null, is_user_content Boolean not null default False, author_id FK→users nullable; indexes on format/status/created_at; author_username and author_is_verified as properties), Event (user_id nullable FK), User (posts relationship, is_verified boolean default false, is_private boolean default false, bio string nullable), Follow (follower_id FK→users, following_id FK→users, status "pending"|"accepted", created_at; UniqueConstraint uq_follow), Comment, post_interests join table
     auth.py                     hash_password, verify_password, create_access_token, decode_access_token, get_current_user, get_optional_user (returns User|None, used for optional auth)
-    schemas.py                  Pydantic models: UserOut (id, email, username, created_at, is_verified, is_private, bio), InterestOut, PostOut (author_username, author_is_verified, status, is_user_content), PostCreate, EventIn, UploadResponse, SvgUploadResponse
+    schemas.py                  Pydantic v2 models: 15 section types with Literal discriminator → AnySection union; BooksFeedCard; PostCreate (Books required sections: essence/quiz_badge/voices/at_a_glance/heart/core_ideas/takeaway/quiz/sources; image_url recursive check for /uploads/ prefix); PostOut (feed_card dict, sections list[dict], is_user_content bool, like_count int, comment_count int); UserOut, InterestOut, EventIn, UploadResponse, SvgUploadResponse
     sanitize.py                 validate_image() — chunked read, magic-byte check, animated-GIF reject, Pillow re-encode; sanitize_svg() / sanitize_svg_text() — defusedxml XXE check, lxml element+attribute whitelist, dangerous-pattern rejection
     upload_config.py            UPLOAD_DIR (absolute path at repo root/user_uploads/), size limits (5 MB images, 512 KB SVGs)
     rate_limit.py               in-memory per-user rate limiter (dict of timestamps); check_rate_limit(user_id, key, max, window_secs)
@@ -25,11 +25,11 @@ backend/
       events.py                 POST /api/events (captures user_id when auth token present; deduplicates "like" events per user+post for auth users); GET /api/posts/{id}/likes → {count, liked}
       auth.py                   POST /api/auth/register, POST /api/auth/login, GET /api/auth/me, PATCH /api/auth/me (update username/password/is_private/bio), DELETE /api/auth/me (delete account)
       follows.py                POST /api/users/{username}/follow; DELETE /api/users/{username}/follow; POST /api/users/{username}/follow/accept; DELETE /api/users/{username}/follow/reject; GET /api/users/{username}/followers; GET /api/users/{username}/following; GET /api/users/{username}/follow-requests (auth, own only); GET /api/users/{username}/profile (no auth, returns counts + follow_status)
-      search.py                 GET /api/search — case-insensitive substring search across title, hook, body, author, known_for, the_question; ranked by title-match then recency; limit 50
+      search.py                 GET /api/search — Python-side search across post.title, feed_card.essence, feed_card.author, heart section content, core_ideas title+body; ranked by title-match then recency; limit 50
       comments.py               GET /api/posts/{id}/comments?count=true → {count} or full list; POST /api/posts/{id}/comments (auth); DELETE /api/comments/{id} (auth, own comment only)
       uploads.py                POST /api/upload/image (10/hr, validate_image, UUID filename); POST /api/upload/svg (10/hr, sanitize_svg, returns svg_content string not URL)
       admin.py                  PATCH /api/admin/users/{user_id}/verify — sets is_verified=True; caller must be authenticated and is_verified; 403 otherwise
-      posts.py                  GET /api/posts/mine (auth, any status); POST /api/posts (auth, 20/day, status="published" if verified else "pending"); GET /api/posts/{id} (pending visible to author only)
+      posts.py                  GET /api/posts/mine (auth, any status); POST /api/posts (auth, 20/day, status="published" if verified else "pending", sets is_user_content=True, sanitizes visual_svg fields); GET /api/posts/{id} (pending visible to author only); _attach_counts() helper adds like_count+comment_count as Python attributes before Pydantic serialization
       stats.py                  GET /api/stats/global (no auth, all platform analytics); GET /api/stats/me (auth, personal stats — my_streak/my_milestones/my_engagement_score computed server-side)
     lib/
       savedPosts.ts             getSavedPostIds, savePost, unsavePost, isPostSaved; localStorage key "deepscroll_saved"; server-safe (typeof window check); TODO: replace with backend endpoint
@@ -59,14 +59,14 @@ frontend/
     search/
       page.tsx                  search input + format chips + compact result cards; debounced 300ms; navigates to post detail; BottomNav (search active); attribution (@user or Deepscroll) below title in result cards
     create/
-      page.tsx                  3-step post creation wizard: format selection (6 cards), duplicate check (debounced search), structured form with image/SVG upload; submits to POST /api/posts; success screen links to /my-posts; BottomNav (create active)
+      page.tsx                  3-step Books creation wizard: step 1 — 7 format cards (only Books enabled, rest "coming soon"); step 2 — duplicate check; step 3 — Books form with Feed Card block, interest picker (1–5 required), 15 section accordions (9 required / 6 optional); submits {format, title, feed_card, sections, interests} to POST /api/posts; success screen links to /my-posts; BottomNav (create active)
     my-posts/
-      page.tsx                  lists the current user's own posts with format badge, status badge (pending/published), and relative timestamps; fetches GET /api/posts/mine; empty state links to /create; BottomNav (create active); attribution (@username + inline blue verified badge if is_verified) below title in post list cards
+      page.tsx                  lists the current user's own posts with cover thumbnail (from feed_card.cover_url), title, author, format badge, status badge, timestamps; fetches GET /api/posts/mine; empty state links to /create; BottomNav (create active)
     saved-posts/
       page.tsx                  bookmarked posts: reads IDs from localStorage via getSavedPostIds, fetches each via GET /api/posts/{id} (auth optional; pending author-only posts load correctly), renders as full-screen snap-scroll PostCards; skips missing/deleted posts silently; empty state with bookmark icon; BottomNav (profile active)
     post/
       [id]/
-        page.tsx                full-screen detail page; structured layout with image, meta, key points, format-specific sections, takeaway, source link, comments section; sticky comment bar at bottom with like-only heart button on the right (no count, no share/save); floating action column removed; slide-up animation, overscroll-to-close; attribution line below format badge (Submitted by @user + inline blue verified badge if author_is_verified; Deepscroll + violet verified icon for seed/official)
+        page.tsx                full-screen detail page; header: format badge, attribution, cover image (Books), title, author, interest tags; SectionRenderer renders all 15 section types in order; sticky comment bar with like + save + share buttons; slide-up animation, swipe-right-to-close; attribution: Submitted by @user (blue verified badge) for user content; Deepscroll + violet badge for seed/official
     components/
       PostCard.tsx               full-screen snap card; format-aware layout with image, stat/meta highlight, hook, inline SVG; exports Post interface and FORMAT_STYLES
       BottomNav.tsx              fixed bottom nav: Search / Stats / Feed (flame) / Create (plus-circle, center, white when logged in) / Profile; 5 buttons; active item highlighted; safe-area-inset-bottom aware
@@ -92,23 +92,17 @@ frontend/
 | slug   | String | filter key e.g. "politics"      |
 
 ### posts
-| column            | type    | description                                                   |
-|-------------------|---------|---------------------------------------------------------------|
-| format            | String  | one of: books, facts, people, concepts, questions, stories    |
-| title             | String  |                                                               |
-| body              | Text    | deprecated fallback; use structured fields below              |
-| source            | String? | attribution for book posts                                    |
-| hook              | String? | one compelling opening sentence                               |
-| key_points        | JSON?   | list of 2-4 short bullet strings                              |
-| takeaway          | String? | closing "what you take away" sentence                         |
-| source_url        | String? | link to the original source                                   |
-| image_url         | String? | URL to cover, portrait, or atmospheric image                  |
-| image_attribution | String? | source/license of the image                                   |
-| related_slugs     | JSON?   | list of related post slugs, for future use                    |
-| details           | JSON?   | format-specific fields; keys documented in models.py          |
-| author_id         | Int FK? | FK→users.id; null = official/seed content                    |
-| status            | String  | "published" (default, seed) or "pending" (user submission)    |
-| image_path        | String? | server filesystem path to uploaded image file                 |
+| column          | type    | description                                                             |
+|-----------------|---------|-------------------------------------------------------------------------|
+| id              | Integer | primary key                                                             |
+| format          | String  | one of: books, facts, people, concepts, questions, stories, academy     |
+| title           | String  | book/post title                                                         |
+| feed_card       | JSON    | format-specific card data (BooksFeedCard: cover_url, title, author, essence, teasers, post_reading_time_min, post_difficulty, year, genre) |
+| sections        | JSON    | ordered array of {type, order, content} objects; 15 types for Books    |
+| is_user_content | Boolean | False for seed/official posts; True for user submissions (controls SVG rendering) |
+| author_id       | Int FK? | FK→users.id; set for all posts including seeds                         |
+| status          | String  | "published" (default, seed) or "pending" (unverified user submission)  |
+| created_at      | DateTime| indexed                                                                 |
 
 ### post_interests
 Join table linking posts ↔ interests (many-to-many).
@@ -157,8 +151,8 @@ Unique constraint: (follower_id, following_id)
 
 ```
 GET  /api/interests                                    → [{id, name, slug}]
-GET  /api/feed  ?interests=slug1,slug2  ?format=books  → [{id, format, title, body, source, hook, key_points, takeaway, source_url, image_url, image_attribution, related_slugs, details, interests[]}]
-GET  /api/posts/{id}                                   → {id, format, title, body, source, hook, key_points, takeaway, source_url, image_url, image_attribution, related_slugs, details, interests[]}  404 if not found
+GET  /api/feed  ?interests=slug1,slug2  ?format=books  → [PostOut]  PostOut: {id, format, title, feed_card, sections, author_id, author_username, author_is_verified, status, created_at, is_user_content, like_count, comment_count, interests[]}
+GET  /api/posts/{id}                                   → PostOut  404 if not found
 GET  /api/search  ?q=...  ?format=books                → [{...PostOut}]  limit 50, title matches ranked first; empty list if q is blank
 POST /api/events  body: [{post_id, event_type, duration_ms?}]  → {stored: N}
 GET  /health                                           → {status: "ok"}
@@ -174,7 +168,7 @@ DELETE /api/comments/{id}      Authorization: Bearer <token>  → 204  403 if no
 GET  /api/posts/{id}/likes                                 → {count: N, liked: bool}  auth optional; liked=true only when token present and user has a like event for this post
 POST /api/upload/image  Authorization: Bearer <token>      multipart file field "file"  → {url: "/uploads/images/{uuid}.ext"}  10/hr rate limit  validates magic bytes + Pillow re-encode
 POST /api/upload/svg    Authorization: Bearer <token>      multipart file field "file"  → {svg_content: "<sanitized SVG>"}  10/hr rate limit  defusedxml+lxml whitelist sanitization
-POST /api/posts         Authorization: Bearer <token>      body: PostCreate JSON        → PostOut 201  status="pending"  20/day rate limit  unknown interest slug → 400
+POST /api/posts         Authorization: Bearer <token>      body: {format, title, feed_card, sections, interests}  → PostOut 201  status="pending"  20/day rate limit  Books requires 9 sections; image_url must use /uploads/ prefix; unknown interest slug → 400
 GET  /api/posts/mine    Authorization: Bearer <token>                                   → [PostOut]  all statuses  ordered by created_at DESC
 PATCH /api/admin/users/{user_id}/verify  Authorization: Bearer <token>                 → UserOut  sets is_verified=True  403 if caller is not verified  404 if user not found
 GET  /api/stats/global                                                                  → GlobalStats JSON (no auth)
@@ -216,8 +210,26 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 
 | file                   | responsibility                                                              |
 |------------------------|-----------------------------------------------------------------------------|
-| page.tsx               | 7-tab feed; each tab is an independent lazy-fetched vertical snap feed; BottomNav (feed active) |
-| PostCard.tsx           | full-screen card; format-aware layout; exports Post interface + FORMAT_STYLES; bottom-right button column (like/comment/save/share); all four buttons use identical div wrapper (gap-1, w-6 h-6 icon); handleLike() shared by small button and double-tap; double-tap on already-liked does nothing; save state via savedPosts.ts with heart-pop animation; share uses paper-plane icon + Web Share API with clipboard fallback + Toast |
+| page.tsx               | 8-tab feed (For You, Books, Facts, People, Ideas, Q&A, Stories, Academy — no Following tab); each tab is an independent lazy-fetched vertical snap feed; format tabs show EmptyState when empty; BottomNav (feed active) |
+| PostCard.tsx           | full-screen card; Books layout uses feed_card (cover, title, author, essence, teasers as amber-arrow rows one per teaser, metadata bar with DotScale difficulty); re-exports Post type from @/types/post; re-exports FORMAT_STYLES (8 formats including academy); like_count and comment_count initialized from PostOut; no separate counts fetch for comments |
+| types/post.ts          | TypeScript interfaces: Post, BooksFeedCard, Section, SectionType, VoiceItem, AtAGlanceBooksContent, CoreIdeaItem, TakeawayContent, QuizItem, RelatedPostItem, SourceItem, AuthorContextContent |
+| SectionRenderer.tsx    | dispatch component; sorts sections by order; switches on type to render named sub-component; passes isUserContent down to SVG-rendering sections; console.warn on unknown type |
+| sections/EssenceSection.tsx | large centered text, min-height 140px |
+| sections/QuizBadgeSection.tsx | amber pill badge |
+| sections/VoicesSection.tsx | blockquotes with serif font, attribution footer |
+| sections/AtAGlanceSection.tsx | 2-column grid, DotScale for reading_ease and post_difficulty, best_for full-width |
+| sections/WhyEnduresSection.tsx | prose with left amber border |
+| sections/HeartSection.tsx | standard prose |
+| sections/StructureSection.tsx | numbered list with amber numbers |
+| sections/CoreIdeasSection.tsx | per-idea: amber title h2, body, SVG block (w-full max-w-[360px] wrapper so flex context doesn't collapse it; dangerouslySetInnerHTML if !isUserContent, base64 img if isUserContent; color #e4e4e7 for currentColor), image, pull-quote, amber callout for in_practice |
+| sections/TakeawaySection.tsx | framework framing: amber card; question framing: large centered amber text; optional SVG |
+| sections/QuizSectionPlaceholder.tsx | client component; "Reveal answer" expand; answer highlighted in amber; "Quiz scoring coming soon" note |
+| sections/RelatedPostsSection.tsx | horizontal scroll row; post_id empty → non-clickable with "Coming soon" label |
+| sections/WorldContextSection.tsx | secondary text with heading |
+| sections/AuthorContextSection.tsx | portrait + text + Wikipedia external link |
+| sections/CritiqueSection.tsx | secondary text with heading |
+| sections/SourcesSection.tsx | type badge (W/P/B/A/D) + label + external link icon |
+| EmptyState.tsx         | format-aware inline SVG icon + "coming soon" message; used by format tabs when posts.length === 0 |
 | BottomNav.tsx          | fixed bottom nav: Search / Stats / Feed (flame) / Create (plus-circle, white when logged in) / Profile; 5 buttons; active item highlighted; safe-area-inset-bottom aware |
 | saved-posts/page.tsx   | bookmarked posts feed: reads IDs from localStorage, fetches each via GET /api/posts/{id}, snap-scroll PostCards; skips missing posts; empty state; BottomNav (profile active) |
 | search/page.tsx        | search input + format chips + compact result cards; debounced 300ms; links to post detail; shows inline verified badge next to author_username if author_is_verified; BottomNav (search active) |
@@ -237,21 +249,24 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 ## CURRENT STATUS
 
 **Built**
-- FastAPI backend with SQLite, CORS, 3 API endpoints
-- SQLAlchemy models: Interest, Post, Event
-- Seed script: 7 interests, 18 real-content posts across all formats
+- FastAPI backend with SQLite, CORS, full API
+- Section-based post schema: feed_card JSON + sections JSON array; old per-format fields removed
+- 15 section types for Books format (validated via Pydantic v2 discriminated union)
+- Seed script: 145 interests + 1 Books post (Kahneman "Thinking, Fast and Slow"); reads SEED_ADMIN_PASSWORD from .env
+- Legacy DB preserved as backend/deepscroll.db.legacy_*
 - Onboarding: interest picker → slugs saved to localStorage → gates feed
-- Feed: 7-tab horizontal swipe (Instagram-style) + vertical snap scroll per tab
-- Per-tab lazy fetch with in-memory cache (no re-fetch on tab revisit)
-- Real-time sliding tab indicator (direct DOM writes, 60fps, color interpolation)
-- Card entry animation (fade + slide-up, respects prefers-reduced-motion)
-- Engagement tracking: dwell time per card, like events, batched to backend
-- User accounts: JWT auth (bcrypt + python-jose), register/login/me endpoints, password min 8 / max 72 bytes
-- Frontend auth UI: AuthContext, login/register pages, JWT in localStorage, session restore, account indicator in feed
-- Profile page: account settings with inline forms, PATCH/DELETE /api/auth/me backend endpoints, profile icon in tab bar
+- Feed: 8-tab horizontal swipe (For You + 7 formats, no Following tab) + vertical snap scroll per tab
+- EmptyState component for format tabs with no posts yet
+- Books feed card: cover, title, author, essence, 3 teasers, difficulty DotScale, year/genre
+- Detail page: SectionRenderer renders all 15 section types in order (SVG security: dangerouslySetInnerHTML for seed, base64 img for user)
+- Create page: 3-step Books wizard with Feed Card block + interest picker (1–5) + 15 section accordions
+- My-posts page: cover thumbnail + title + author + status from feed_card
+- User accounts: JWT auth, register/login, follow system, public profiles, comments, likes, saves
+- Stats page, verification system, saved posts
 
 **Next**
-- Recommendation algorithm using collected events
-- Content management for adding real posts
+- Content for formats other than Books (facts, people, concepts, questions, stories, academy)
+- Quiz scoring implementation
+- Recommendation algorithm improvements
 - Pagination / infinite scroll
 - PostgreSQL migration

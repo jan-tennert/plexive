@@ -1,0 +1,69 @@
+import type { Section } from "../types/post"
+import EssenceSection from "./sections/EssenceSection"
+import QuizBadgeSection from "./sections/QuizBadgeSection"
+import VoicesSection from "./sections/VoicesSection"
+import AtAGlanceSection from "./sections/AtAGlanceSection"
+import WhyEnduresSection from "./sections/WhyEnduresSection"
+import HeartSection from "./sections/HeartSection"
+import StructureSection from "./sections/StructureSection"
+import CoreIdeasSection from "./sections/CoreIdeasSection"
+import TakeawaySection from "./sections/TakeawaySection"
+import QuizSectionPlaceholder from "./sections/QuizSectionPlaceholder"
+import RelatedPostsSection from "./sections/RelatedPostsSection"
+import WorldContextSection from "./sections/WorldContextSection"
+import AuthorContextSection from "./sections/AuthorContextSection"
+import CritiqueSection from "./sections/CritiqueSection"
+import SourcesSection from "./sections/SourcesSection"
+
+interface Props {
+  sections: Section[]
+  isUserContent: boolean
+  format: string
+}
+
+export default function SectionRenderer({ sections, isUserContent }: Props) {
+  const sorted = [...sections].sort((a, b) => a.order - b.order)
+
+  return (
+    <div className="flex flex-col divide-y divide-zinc-800/60">
+      {sorted.map((section, i) => {
+        const c = section.content
+        switch (section.type) {
+          case "essence":
+            return <EssenceSection key={i} content={c as string} />
+          case "quiz_badge":
+            return <QuizBadgeSection key={i} content={c as string} />
+          case "voices":
+            return <VoicesSection key={i} content={c as any} />
+          case "at_a_glance":
+            return <AtAGlanceSection key={i} content={c as any} />
+          case "why_endures":
+            return <WhyEnduresSection key={i} content={c as string} />
+          case "heart":
+            return <HeartSection key={i} content={c as string} />
+          case "structure":
+            return <StructureSection key={i} content={c as string[]} />
+          case "core_ideas":
+            return <CoreIdeasSection key={i} content={c as any} isUserContent={isUserContent} />
+          case "takeaway":
+            return <TakeawaySection key={i} content={c as any} isUserContent={isUserContent} />
+          case "quiz":
+            return <QuizSectionPlaceholder key={i} content={c as any} />
+          case "related_posts":
+            return <RelatedPostsSection key={i} content={c as any} />
+          case "world_context":
+            return <WorldContextSection key={i} content={c as string} />
+          case "author_context":
+            return <AuthorContextSection key={i} content={c as any} />
+          case "critique":
+            return <CritiqueSection key={i} content={c as string} />
+          case "sources":
+            return <SourcesSection key={i} content={c as any} />
+          default:
+            console.warn(`SectionRenderer: unknown section type "${section.type}"`)
+            return null
+        }
+      })}
+    </div>
+  )
+}

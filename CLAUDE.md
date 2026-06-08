@@ -8,6 +8,17 @@ Open source social media app that replaces doomscrolling with valuable content.
 - Database: SQLite (PostgreSQL later)
 - License: AGPL v3
 
+## Content Model
+
+Posts use a `sections` JSON array and a `feed_card` JSON object. The old per-format fields (`hook`, `key_points`, `details`, `body`, etc.) are removed.
+
+- Full schema spec: `docs/content-structure/DEEPSCROLL_CONTENT_STRUCTURE.md`
+- Books skeleton: `docs/content-structure/skeletons/books_skeleton.jsonc`
+- Books example: `docs/content-structure/examples/books_example.json`
+- Style guide: `docs/content-structure/STYLE_GUIDE_LONGFORM.md`
+
+SVG security: `is_user_content=false` (seed/official) uses `dangerouslySetInnerHTML`; `is_user_content=true` (user submissions) uses a base64 `<img>` data URL. This applies in `SectionRenderer` (CoreIdeasSection, TakeawaySection) and `PostCard`.
+
 ## Rules
 - All code comments in English
 - No emojis in code or comments

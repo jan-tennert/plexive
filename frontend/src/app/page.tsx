@@ -2,22 +2,22 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import PostCard, { type Post } from "@/app/components/PostCard"
+import PostCard from "@/app/components/PostCard"
 import BottomNav from "@/app/components/BottomNav"
-import { useAuth } from "@/app/lib/auth"
+import EmptyState from "@/components/EmptyState"
+import type { Post } from "@/types/post"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 const TABS = [
-  { id: "following", label: "Following", format: null,        indicator: "bg-sky-400",     rgb: [ 56, 189, 248] },
-  { id: "for-you",   label: "For You",  format: null,        indicator: "bg-white",       rgb: [255, 255, 255] },
-  { id: "books",     label: "Books",    format: "books",     indicator: "bg-amber-400",   rgb: [251, 191,  36] },
-  { id: "facts",     label: "Facts",    format: "facts",     indicator: "bg-cyan-400",    rgb: [ 34, 211, 238] },
-  { id: "people",    label: "People",   format: "people",    indicator: "bg-rose-400",    rgb: [251, 113, 133] },
-  { id: "concepts",  label: "Ideas",    format: "concepts",  indicator: "bg-violet-400",  rgb: [167, 139, 250] },
-  { id: "questions", label: "Q&A",      format: "questions", indicator: "bg-emerald-400", rgb: [ 52, 211, 153] },
-  { id: "stories",   label: "Stories",  format: "stories",   indicator: "bg-orange-400",  rgb: [251, 146,  60] },
+  { id: "for-you",   label: "For You",  format: null,        accent: "#ffffff", indicator: "bg-white",       rgb: [255, 255, 255] },
+  { id: "books",     label: "Books",    format: "books",     accent: "#fbbf24", indicator: "bg-amber-400",   rgb: [251, 191,  36] },
+  { id: "facts",     label: "Facts",    format: "facts",     accent: "#22d3ee", indicator: "bg-cyan-400",    rgb: [ 34, 211, 238] },
+  { id: "people",    label: "People",   format: "people",    accent: "#fb7185", indicator: "bg-rose-400",    rgb: [251, 113, 133] },
+  { id: "concepts",  label: "Ideas",    format: "concepts",  accent: "#a78bfa", indicator: "bg-violet-400",  rgb: [167, 139, 250] },
+  { id: "questions", label: "Q&A",      format: "questions", accent: "#34d399", indicator: "bg-emerald-400", rgb: [ 52, 211, 153] },
+  { id: "stories",   label: "Stories",  format: "stories",   accent: "#fb923c", indicator: "bg-orange-400",  rgb: [251, 146,  60] },
+  { id: "academy",   label: "Academy",  format: "academy",   accent: "#818cf8", indicator: "bg-indigo-400",  rgb: [129, 140, 248] },
 ] as const
 
 const HALF_IND = 8 // half of w-4 (16px indicator width)
@@ -47,7 +47,7 @@ function TabPage({
     const raw = sessionStorage.getItem("feedScrollPosition")
     if (!raw) return
     const { scrollTop, tabId } = JSON.parse(raw)
-    if (tabId !== tab.id) return  // only restore for the tab the user came from
+    if (tabId !== tab.id) return
     scrollRef.current.scrollTop = scrollTop
     sessionStorage.removeItem("feedScrollPosition")
   }, [posts, tab.id])
@@ -69,6 +69,10 @@ function TabPage({
         <div className="h-full flex items-center justify-center bg-zinc-950">
           <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
         </div>
+      ) : posts.length === 0 && tab.format ? (
+        <div className="h-full flex items-center justify-center bg-zinc-950">
+          <EmptyState format={tab.format} accentColor={tab.accent} />
+        </div>
       ) : posts.length === 0 ? (
         <div className="h-full flex flex-col items-center justify-center gap-3 bg-zinc-950">
           <p className="text-white font-semibold">Nothing here yet</p>
@@ -81,58 +85,13 @@ function TabPage({
   )
 }
 
-function FollowingTabPage({ isActivated }: { isActivated: boolean }) {
-  const { user } = useAuth()
-  const [posts, setPosts] = useState<Post[] | null>(null)
-
-  useEffect(() => {
-    if (!isActivated || !user || posts !== null) return
-    const token = localStorage.getItem("deepscroll_token")
-    fetch(`${API_URL}/api/feed/following`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((r) => r.json())
-      .then((data: Post[]) => setPosts(data))
-  }, [isActivated, user, posts])
-
-  return (
-    <div className="w-full shrink-0 snap-start h-[100dvh] overflow-y-scroll snap-y snap-mandatory overscroll-y-contain [&::-webkit-scrollbar]:hidden [scrollbar-width:none] pb-14">
-      {!isActivated ? (
-        <div className="h-full bg-zinc-950" />
-      ) : !user ? (
-        <div className="h-full flex flex-col items-center justify-center gap-4 bg-zinc-950 px-8 text-center">
-          <p className="text-white font-semibold">Log in to see posts from people you follow</p>
-          <Link href="/login" className="bg-white text-zinc-950 rounded-full px-6 py-2.5 text-sm font-semibold">Log in</Link>
-        </div>
-      ) : posts === null ? (
-        <div className="h-full flex items-center justify-center bg-zinc-950">
-          <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
-        </div>
-      ) : posts.length === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center gap-3 bg-zinc-950 px-8 text-center">
-          <svg className="w-10 h-10 text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <line x1="19" y1="8" x2="19" y2="14" />
-            <line x1="22" y1="11" x2="16" y2="11" />
-          </svg>
-          <p className="text-white font-semibold">Not following anyone yet</p>
-          <p className="text-zinc-500 text-sm">Discover people on their profile pages.</p>
-        </div>
-      ) : (
-        posts.map((post) => <PostCard key={post.id} post={post} activeTabId="following" />)
-      )}
-    </div>
-  )
-}
-
 export default function Home() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState("following")
-  const [activatedTabs, setActivatedTabs] = useState<Set<string>>(new Set(["following"]))
+  const [activeTab, setActiveTab] = useState("for-you")
+  const [activatedTabs, setActivatedTabs] = useState<Set<string>>(new Set(["for-you"]))
   const [slugs, setSlugs] = useState<string[]>([])
   const outerRef        = useRef<HTMLDivElement>(null)
-  const activeTabRef    = useRef("following")
+  const activeTabRef    = useRef("for-you")
   const tabRefs         = useRef<Record<string, HTMLButtonElement | null>>({})
   const indicatorRef    = useRef<HTMLDivElement>(null)
   const tabStripRef     = useRef<HTMLDivElement>(null)
@@ -153,7 +112,7 @@ export default function Home() {
       if (tabIndex !== -1) {
         activeTabRef.current = savedTab
         setActiveTab(savedTab)
-        setActivatedTabs(new Set(["following", savedTab]))
+        setActivatedTabs(new Set(["for-you", savedTab]))
         sessionStorage.removeItem("feedActiveTab")
         requestAnimationFrame(() => {
           if (outerRef.current) {
@@ -305,18 +264,14 @@ export default function Home() {
         ref={outerRef}
         className="h-full flex flex-row overflow-x-scroll overflow-y-hidden snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
       >
-        {TABS.map((tab) =>
-          tab.id === "following" ? (
-            <FollowingTabPage key="following" isActivated={activatedTabs.has("following")} />
-          ) : (
-            <TabPage
-              key={tab.id}
-              tab={tab}
-              slugs={slugs}
-              isActivated={activatedTabs.has(tab.id)}
-            />
-          )
-        )}
+        {TABS.map((tab) => (
+          <TabPage
+            key={tab.id}
+            tab={tab}
+            slugs={slugs}
+            isActivated={activatedTabs.has(tab.id)}
+          />
+        ))}
       </div>
       <BottomNav activeTab="feed" />
     </PhoneFrame>

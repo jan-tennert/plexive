@@ -1,0 +1,20 @@
+interface Props {
+  content: string[]
+}
+
+export default function StructureSection({ content }: Props) {
+  return (
+    <div className="px-5 py-6">
+      <ol className="flex flex-col gap-3">
+        {content.map((item, i) => (
+          <li key={i} className="flex gap-3 items-start">
+            <span className="text-amber-400 font-semibold text-sm min-w-[1.25rem] pt-0.5">
+              {i + 1}.
+            </span>
+            <span className="text-base text-zinc-300 leading-relaxed">{item}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}

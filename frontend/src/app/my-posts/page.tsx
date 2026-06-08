@@ -6,14 +6,7 @@ import { useAuth } from "@/app/lib/auth"
 import { apiFetch } from "@/app/lib/api"
 import { FORMAT_STYLES } from "@/app/components/PostCard"
 import BottomNav from "@/app/components/BottomNav"
-
-interface MyPost {
-  id: number
-  format: string
-  title: string
-  status: string
-  created_at: string
-}
+import type { Post } from "@/types/post"
 
 function relativeTime(iso: string): string {
   const date = new Date(iso.endsWith("Z") ? iso : iso + "Z")
@@ -29,7 +22,7 @@ function relativeTime(iso: string): string {
 export default function MyPostsPage() {
   const router = useRouter()
   const { user, loading } = useAuth()
-  const [posts, setPosts] = useState<MyPost[] | null>(null)
+  const [posts, setPosts] = useState<Post[] | null>(null)
   const [fetchError, setFetchError] = useState("")
 
   useEffect(() => {
@@ -40,7 +33,7 @@ export default function MyPostsPage() {
     if (!user) return
     apiFetch("/api/posts/mine")
       .then((r) => r.json())
-      .then((data: MyPost[]) => setPosts(data))
+      .then((data: Post[]) => setPosts(data))
       .catch(() => setFetchError("Failed to load posts."))
   }, [user])
 
@@ -100,7 +93,20 @@ export default function MyPostsPage() {
                     onClick={() => router.push(`/post/${post.id}`)}
                     className="w-full text-left bg-zinc-900/60 rounded-2xl px-4 py-3 flex items-start gap-3"
                   >
-                    <span className={`w-2 h-2 rounded-full mt-2 shrink-0 ${style?.dot ?? "bg-zinc-500"}`} />
+                    {/* Cover thumbnail */}
+                    <div className="shrink-0 w-10 h-14 rounded-lg overflow-hidden bg-zinc-800">
+                      {post.feed_card?.cover_url ? (
+                        <img
+                          src={post.feed_card.cover_url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
+                        />
+                      ) : (
+                        <span className={`w-full h-full flex items-center justify-center text-lg ${style?.dot ?? "bg-zinc-700"}`} />
+                      )}
+                    </div>
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         {style && (
@@ -118,17 +124,11 @@ export default function MyPostsPage() {
                         )}
                       </div>
                       <p className="text-white font-semibold text-sm mt-0.5 line-clamp-2">{post.title}</p>
-                      <p className="flex items-center gap-1 text-zinc-600 text-xs mt-0.5">
-                        @{user.username}
-                        {user.is_verified && (
-                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Verified" className="flex-shrink-0">
-                            <circle cx="8" cy="8" r="8" fill="#60a5fa"/>
-                            <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
-                      </p>
+                      {post.feed_card?.author && (
+                        <p className="text-zinc-500 text-xs mt-0.5 truncate">{post.feed_card.author}</p>
+                      )}
                       {post.created_at && (
-                        <p className="text-zinc-500 text-xs mt-1">{relativeTime(post.created_at)}</p>
+                        <p className="text-zinc-600 text-xs mt-1">{relativeTime(post.created_at)}</p>
                       )}
                     </div>
                   </button>

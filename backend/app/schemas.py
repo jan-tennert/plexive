@@ -1,8 +1,12 @@
 from datetime import datetime
-from typing import List, Literal
+from typing import Annotated, List, Literal, Union
 
-from pydantic import BaseModel, ConfigDict, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+
+# ---------------------------------------------------------------------------
+# Auth / interests
+# ---------------------------------------------------------------------------
 
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -30,53 +34,303 @@ class InterestOut(BaseModel):
     slug: str
 
 
-class PostOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+# ---------------------------------------------------------------------------
+# Section content sub-models (used in PostCreate validation)
+# ---------------------------------------------------------------------------
 
-    id: int
-    format: str
-    title: str
-    body: str  # deprecated fallback
-    source: str | None
-    hook: str | None = None
-    key_points: list[str] | None = None
-    takeaway: str | None = None
-    source_url: str | None = None
-    image_url: str | None = None
-    image_attribution: str | None = None
-    related_slugs: list[str] | None = None
-    details: dict | None = None
-    interests: List[str]
-    author_id: int | None = None
-    author_username: str | None = None
-    author_is_verified: bool | None = None
-    status: str = "published"
-    created_at: datetime | None = None
+class VoiceItem(BaseModel):
+    quote: str
+    attribution: str
 
-    @computed_field
-    @property
-    def is_user_content(self) -> bool:
-        return self.author_id is not None
 
-    @field_validator("interests", mode="before")
+class AtAGlanceBooks(BaseModel):
+    genre: str
+    year: int
+    country: str
+    pages: int
+    reading_ease: int
+    post_reading_time_min: int
+    post_difficulty: int
+    best_for: str
+
+    @field_validator("reading_ease", "post_difficulty")
     @classmethod
-    def extract_names(cls, v):
-        if v and hasattr(v[0], "name"):
-            return [interest.name for interest in v]
+    def validate_scale(cls, v: int) -> int:
+        if v not in (1, 2, 3):
+            raise ValueError("must be 1, 2, or 3")
+        return v
+
+    @field_validator("post_reading_time_min")
+    @classmethod
+    def validate_reading_time(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError("must be greater than 0")
         return v
 
 
-class PostCreate(BaseModel):
-    format: Literal["books", "facts", "people", "concepts", "questions", "stories"]
+class CoreIdeaItem(BaseModel):
     title: str
-    hook: str
-    key_points: list[str]
-    takeaway: str | None = None
-    source: str | None = None
-    source_url: str | None = None
-    interests: list[str]
+    body: str
+    in_practice: str | None = None
+    visual_svg: str | None = None
     image_url: str | None = None
-    details: dict | None = None
+    quote: str | None = None
+
+
+class TakeawayContent(BaseModel):
+    framing: Literal["framework", "question"]
+    body: str
+    visual_svg: str | None = None
+
+
+class QuizItem(BaseModel):
+    question: str
+    options: list[str]
+    answer_index: int
+    explanation: str
+
+    @field_validator("options")
+    @classmethod
+    def validate_options(cls, v: list[str]) -> list[str]:
+        if len(v) != 4:
+            raise ValueError("quiz options must have exactly 4 items")
+        return v
+
+    @field_validator("answer_index")
+    @classmethod
+    def validate_answer_index(cls, v: int) -> int:
+        if v not in (0, 1, 2, 3):
+            raise ValueError("answer_index must be 0, 1, 2, or 3")
+        return v
+
+
+class RelatedPostItem(BaseModel):
+    post_id: str
+    title: str
+    format: str
+    mini_teaser: str
+
+
+class SourceItem(BaseModel):
+    label: str
+    url: str
+    type: Literal["wikipedia", "paper", "book", "article", "database"]
+
+
+class AuthorContextContent(BaseModel):
+    body: str
+    image_url: str | None = None
+    image_attribution: str | None = None
+    wikipedia_url: str | None = None
+
+
+# ---------------------------------------------------------------------------
+# Section type models (discriminated union on "type")
+# ---------------------------------------------------------------------------
+
+class EssenceSection(BaseModel):
+    type: Literal["essence"]
+    order: int = Field(ge=1)
+    content: str
+
+
+class QuizBadgeSection(BaseModel):
+    type: Literal["quiz_badge"]
+    order: int = Field(ge=1)
+    content: str
+
+
+class VoicesSection(BaseModel):
+    type: Literal["voices"]
+    order: int = Field(ge=1)
+    content: list[VoiceItem]
+
+    @field_validator("content")
+    @classmethod
+    def validate_voices(cls, v: list[VoiceItem]) -> list[VoiceItem]:
+        if not 3 <= len(v) <= 4:
+            raise ValueError("voices must have 3 or 4 items")
+        return v
+
+
+class AtAGlanceSection(BaseModel):
+    type: Literal["at_a_glance"]
+    order: int = Field(ge=1)
+    content: dict
+
+
+class WhyEnduresSection(BaseModel):
+    type: Literal["why_endures"]
+    order: int = Field(ge=1)
+    content: str
+
+
+class HeartSection(BaseModel):
+    type: Literal["heart"]
+    order: int = Field(ge=1)
+    content: str
+
+
+class StructureSection(BaseModel):
+    type: Literal["structure"]
+    order: int = Field(ge=1)
+    content: list[str]
+
+
+class CoreIdeasSection(BaseModel):
+    type: Literal["core_ideas"]
+    order: int = Field(ge=1)
+    content: list[CoreIdeaItem]
+
+    @field_validator("content")
+    @classmethod
+    def validate_core_ideas(cls, v: list[CoreIdeaItem]) -> list[CoreIdeaItem]:
+        if not 6 <= len(v) <= 12:
+            raise ValueError(
+                f"section 'core_ideas' must have between 6 and 12 items, got {len(v)}"
+            )
+        return v
+
+
+class TakeawaySection(BaseModel):
+    type: Literal["takeaway"]
+    order: int = Field(ge=1)
+    content: TakeawayContent
+
+
+class QuizSection(BaseModel):
+    type: Literal["quiz"]
+    order: int = Field(ge=1)
+    content: list[QuizItem]
+
+    @field_validator("content")
+    @classmethod
+    def validate_quiz(cls, v: list[QuizItem]) -> list[QuizItem]:
+        if not 5 <= len(v) <= 10:
+            raise ValueError(
+                f"section 'quiz' must have between 5 and 10 questions, got {len(v)}"
+            )
+        return v
+
+
+class RelatedPostsSection(BaseModel):
+    type: Literal["related_posts"]
+    order: int = Field(ge=1)
+    content: list[RelatedPostItem]
+
+    @field_validator("content")
+    @classmethod
+    def validate_related(cls, v: list[RelatedPostItem]) -> list[RelatedPostItem]:
+        if len(v) != 3:
+            raise ValueError("related_posts must have exactly 3 items")
+        return v
+
+
+class WorldContextSection(BaseModel):
+    type: Literal["world_context"]
+    order: int = Field(ge=1)
+    content: str
+
+
+class AuthorContextSection(BaseModel):
+    type: Literal["author_context"]
+    order: int = Field(ge=1)
+    content: AuthorContextContent
+
+
+class CritiqueSection(BaseModel):
+    type: Literal["critique"]
+    order: int = Field(ge=1)
+    content: str
+
+
+class SourcesSection(BaseModel):
+    type: Literal["sources"]
+    order: int = Field(ge=1)
+    content: list[SourceItem]
+
+    @field_validator("content")
+    @classmethod
+    def validate_sources(cls, v: list[SourceItem]) -> list[SourceItem]:
+        if not 1 <= len(v) <= 10:
+            raise ValueError("sources must have 1-10 items")
+        return v
+
+
+AnySection = Annotated[
+    Union[
+        EssenceSection,
+        QuizBadgeSection,
+        VoicesSection,
+        AtAGlanceSection,
+        WhyEnduresSection,
+        HeartSection,
+        StructureSection,
+        CoreIdeasSection,
+        TakeawaySection,
+        QuizSection,
+        RelatedPostsSection,
+        WorldContextSection,
+        AuthorContextSection,
+        CritiqueSection,
+        SourcesSection,
+    ],
+    Field(discriminator="type"),
+]
+
+BOOKS_REQUIRED_SECTIONS = {
+    "essence", "quiz_badge", "voices", "at_a_glance",
+    "heart", "core_ideas", "takeaway", "quiz", "sources",
+}
+
+
+# ---------------------------------------------------------------------------
+# Feed card models
+# ---------------------------------------------------------------------------
+
+class BooksFeedCard(BaseModel):
+    cover_url: str | None = None
+    title: str
+    author: str
+    essence: str
+    teasers: list[str]
+    post_reading_time_min: int
+    post_difficulty: int
+    year: int
+    genre: str
+
+    @field_validator("teasers")
+    @classmethod
+    def validate_teasers(cls, v: list[str]) -> list[str]:
+        if len(v) != 3:
+            raise ValueError("teasers must have exactly 3 items")
+        return v
+
+    @field_validator("post_difficulty")
+    @classmethod
+    def validate_difficulty(cls, v: int) -> int:
+        if v not in (1, 2, 3):
+            raise ValueError("post_difficulty must be 1, 2, or 3")
+        return v
+
+    @field_validator("post_reading_time_min")
+    @classmethod
+    def validate_reading_time(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError("post_reading_time_min must be greater than 0")
+        return v
+
+
+# ---------------------------------------------------------------------------
+# Post schemas
+# ---------------------------------------------------------------------------
+
+class PostCreate(BaseModel):
+    format: Literal["books", "facts", "people", "concepts", "questions", "stories", "academy"]
+    title: str
+    feed_card: dict
+    sections: list[AnySection]
+    interests: list[str]
 
     @field_validator("title")
     @classmethod
@@ -86,47 +340,6 @@ class PostCreate(BaseModel):
             raise ValueError("title must be 1-200 characters")
         return v
 
-    @field_validator("hook")
-    @classmethod
-    def validate_hook(cls, v: str) -> str:
-        if not 1 <= len(v) <= 500:
-            raise ValueError("hook must be 1-500 characters")
-        return v
-
-    @field_validator("key_points")
-    @classmethod
-    def validate_key_points(cls, v: list[str]) -> list[str]:
-        if not 1 <= len(v) <= 6:
-            raise ValueError("key_points must have 1-6 items")
-        for point in v:
-            if not 1 <= len(point) <= 300:
-                raise ValueError("each key point must be 1-300 characters")
-        return v
-
-    @field_validator("takeaway")
-    @classmethod
-    def validate_takeaway(cls, v: str | None) -> str | None:
-        if v is not None and len(v) > 500:
-            raise ValueError("takeaway must be at most 500 characters")
-        return v
-
-    @field_validator("source")
-    @classmethod
-    def validate_source(cls, v: str | None) -> str | None:
-        if v is not None and len(v) > 300:
-            raise ValueError("source must be at most 300 characters")
-        return v
-
-    @field_validator("source_url")
-    @classmethod
-    def validate_source_url(cls, v: str | None) -> str | None:
-        if v is not None:
-            if len(v) > 300:
-                raise ValueError("source_url must be at most 300 characters")
-            if not (v.startswith("http://") or v.startswith("https://")):
-                raise ValueError("source_url must start with http:// or https://")
-        return v
-
     @field_validator("interests")
     @classmethod
     def validate_interests(cls, v: list[str]) -> list[str]:
@@ -134,11 +347,64 @@ class PostCreate(BaseModel):
             raise ValueError("interests must have 1-10 items")
         return v
 
-    @field_validator("image_url")
+    @model_validator(mode="after")
+    def validate_books_sections(self) -> "PostCreate":
+        if self.format != "books":
+            return self
+        # Validate feed card shape for books
+        BooksFeedCard(**self.feed_card)
+        # Check all required section types are present
+        present = {s.type for s in self.sections}
+        missing = BOOKS_REQUIRED_SECTIONS - present
+        if missing:
+            missing_list = ", ".join(sorted(missing))
+            raise ValueError(f"section(s) required for Books format: {missing_list}")
+        # Validate image_url in sections: user content must use /uploads/ prefix
+        for section in self.sections:
+            section_dict = section.model_dump()
+            _check_image_urls(section_dict)
+        return self
+
+
+def _check_image_urls(data: dict) -> None:
+    """Recursively verify any image_url in user-submitted content uses /uploads/."""
+    for key, value in data.items():
+        if key == "image_url" and isinstance(value, str) and value:
+            if not value.startswith("/uploads/"):
+                raise ValueError(
+                    "image_url must reference our upload endpoint (/uploads/...)"
+                )
+        elif isinstance(value, dict):
+            _check_image_urls(value)
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    _check_image_urls(item)
+
+
+class PostOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    format: str
+    title: str
+    feed_card: dict
+    sections: list[dict]
+    author_id: int | None = None
+    author_username: str | None = None
+    author_is_verified: bool | None = None
+    status: str = "published"
+    created_at: datetime | None = None
+    is_user_content: bool = False
+    like_count: int = 0
+    comment_count: int = 0
+    interests: List[str] = []
+
+    @field_validator("interests", mode="before")
     @classmethod
-    def validate_image_url(cls, v: str | None) -> str | None:
-        if v is not None and not v.startswith("/uploads/"):
-            raise ValueError("image_url must reference a file from our upload endpoint (/uploads/...)")
+    def extract_interest_names(cls, v):
+        if v and hasattr(v[0], "name"):
+            return [interest.name for interest in v]
         return v
 
 

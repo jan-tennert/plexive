@@ -1,0 +1,22 @@
+import type { VoiceItem } from "../../types/post"
+
+interface Props {
+  content: VoiceItem[]
+}
+
+export default function VoicesSection({ content }: Props) {
+  return (
+    <div className="px-5 py-6 flex flex-col gap-5">
+      {content.map((voice, i) => (
+        <blockquote key={i} className="border-l-2 border-zinc-600 pl-4">
+          <p className="text-lg font-serif text-zinc-100 leading-relaxed">
+            &ldquo;{voice.quote}&rdquo;
+          </p>
+          <footer className="mt-2 text-sm italic text-zinc-400">
+            &mdash; {voice.attribution}
+          </footer>
+        </blockquote>
+      ))}
+    </div>
+  )
+}
