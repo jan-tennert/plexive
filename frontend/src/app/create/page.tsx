@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/app/lib/auth"
 import { apiFetch } from "@/app/lib/api"
 import { FORMAT_STYLES } from "@/app/components/PostCard"
-import type { Post } from "@/types/post"
+import { fcStr, type Post } from "@/types/post"
 import { CATEGORIES } from "@/app/onboarding/InterestPicker"
 import BottomNav from "@/app/components/BottomNav"
 
@@ -537,7 +537,7 @@ export default function CreatePage() {
                       <button key={post.id} onClick={() => window.open(`/post/${post.id}`, "_blank")} className="w-full text-left bg-zinc-900/60 rounded-2xl px-4 py-3">
                         {style && <span className={`text-xs font-medium ${style.text}`}>{style.label}</span>}
                         <p className="text-white font-semibold text-sm mt-0.5 line-clamp-2">{post.title}</p>
-                        {post.feed_card?.essence && <p className="text-zinc-400 text-xs mt-1 line-clamp-2">{post.feed_card.essence}</p>}
+                        {fcStr(post.feed_card, "essence") && <p className="text-zinc-400 text-xs mt-1 line-clamp-2">{fcStr(post.feed_card, "essence")}</p>}
                       </button>
                     )
                   })}

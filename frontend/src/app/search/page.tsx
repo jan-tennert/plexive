@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { type Post, FORMAT_STYLES } from "@/app/components/PostCard"
+import { fcStr } from "@/types/post"
 import { apiFetch } from "@/app/lib/api"
 import BottomNav from "@/app/components/BottomNav"
 
@@ -20,7 +21,7 @@ const FORMAT_CHIPS = [
 type FormatValue = (typeof FORMAT_CHIPS)[number]["value"]
 
 function Snippet({ post }: { post: Post }) {
-  const text = post.hook ?? post.body ?? ""
+  const text = fcStr(post.feed_card, "essence") || fcStr(post.feed_card, "headline")
   const snippet = text.length > 120 ? text.slice(0, 120) + "…" : text
   return <p className="text-zinc-400 text-xs mt-1 line-clamp-2">{snippet}</p>
 }

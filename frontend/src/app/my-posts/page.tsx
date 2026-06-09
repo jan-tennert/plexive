@@ -6,7 +6,7 @@ import { useAuth } from "@/app/lib/auth"
 import { apiFetch } from "@/app/lib/api"
 import { FORMAT_STYLES } from "@/app/components/PostCard"
 import BottomNav from "@/app/components/BottomNav"
-import type { Post } from "@/types/post"
+import { fcStr, type Post } from "@/types/post"
 
 function relativeTime(iso: string): string {
   const date = new Date(iso.endsWith("Z") ? iso : iso + "Z")
@@ -95,9 +95,9 @@ export default function MyPostsPage() {
                   >
                     {/* Cover thumbnail */}
                     <div className="shrink-0 w-10 h-14 rounded-lg overflow-hidden bg-zinc-800">
-                      {post.feed_card?.cover_url ? (
+                      {fcStr(post.feed_card, "cover_url") ? (
                         <img
-                          src={post.feed_card.cover_url}
+                          src={fcStr(post.feed_card, "cover_url")}
                           alt=""
                           className="w-full h-full object-cover"
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
@@ -124,8 +124,8 @@ export default function MyPostsPage() {
                         )}
                       </div>
                       <p className="text-white font-semibold text-sm mt-0.5 line-clamp-2">{post.title}</p>
-                      {post.feed_card?.author && (
-                        <p className="text-zinc-500 text-xs mt-0.5 truncate">{post.feed_card.author}</p>
+                      {fcStr(post.feed_card, "author") && (
+                        <p className="text-zinc-500 text-xs mt-0.5 truncate">{fcStr(post.feed_card, "author")}</p>
                       )}
                       {post.created_at && (
                         <p className="text-zinc-600 text-xs mt-1">{relativeTime(post.created_at)}</p>

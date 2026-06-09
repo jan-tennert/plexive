@@ -8,7 +8,7 @@ import { queueEvent, hasPendingLike, cancelPendingLike } from "@/app/lib/eventQu
 import { apiFetch } from "@/app/lib/api"
 import { savePost, unsavePost, isPostSaved } from "@/app/lib/savedPosts"
 import { likePost, unlikePost, isPostLiked, getCachedLikeCount, setCachedLikeCount, isLikeSent, markLikeSent, unmarkLikeSent } from "@/app/lib/likedPosts"
-import type { Post } from "@/types/post"
+import { fcNum, fcStr, type Post } from "@/types/post"
 
 export type { Post }
 
@@ -246,7 +246,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
     const url = window.location.origin + "/post/" + post.id
     try {
       if (navigator.share) {
-        await navigator.share({ title: post.title, text: fc?.essence ?? "", url })
+        await navigator.share({ title: post.title, text: fcStr(fc, "essence"), url })
       } else {
         await navigator.clipboard.writeText(url)
         setToastVisible(true)
@@ -296,8 +296,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             {style.label}
           </span>
         </div>
-        {post.format === "books" && fc?.post_reading_time_min ? (
-          <span className="text-zinc-500 text-xs">{fc.post_reading_time_min} min read</span>
+        {post.format === "books" && fcNum(fc, "post_reading_time_min") ? (
+          <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
         ) : null}
       </div>
 
@@ -318,10 +318,10 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
                   </h2>
                   <p className="text-amber-400 text-sm font-medium mt-1">{fc.author as string}</p>
                 </div>
-                {fc.cover_url && (
+                {fcStr(fc, "cover_url") && (
                   <div className="shrink-0 rounded-lg overflow-hidden shadow-lg w-16 h-24 bg-zinc-800">
                     <img
-                      src={fc.cover_url as string}
+                      src={fcStr(fc, "cover_url")}
                       alt=""
                       loading="lazy"
                       className="w-full h-full object-cover"
@@ -369,16 +369,16 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  {fc.role && (
+                  {fcStr(fc, "role") && (
                     <p className="text-xs font-semibold tracking-widest text-rose-400 uppercase mb-0.5">
-                      {fc.role as string}
+                      {fcStr(fc, "role")}
                     </p>
                   )}
                   <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
                     {fc.name as string}
                   </h2>
-                  {fc.lifespan && (
-                    <p className="text-zinc-500 text-xs mt-0.5">{fc.lifespan as string}</p>
+                  {fcStr(fc, "lifespan") && (
+                    <p className="text-zinc-500 text-xs mt-0.5">{fcStr(fc, "lifespan")}</p>
                   )}
                 </div>
               </div>
@@ -398,15 +398,15 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
 
               <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
                 <DotScale value={fc.post_difficulty as 1 | 2 | 3} />
-                {fc.post_reading_time_min && (
-                  <span className="text-zinc-500 text-xs">{fc.post_reading_time_min as number} min read</span>
+                {fcNum(fc, "post_reading_time_min") > 0 && (
+                  <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
                 )}
               </div>
             </div>
           ) : post.format === "facts" && fc ? (
             <div className="bg-zinc-900/50 rounded-2xl px-5 py-5 flex flex-col gap-3">
-              {fc.field && (
-                <p className="text-xs font-semibold tracking-widest text-cyan-600 uppercase">{fc.field as string}</p>
+              {fcStr(fc, "field") && (
+                <p className="text-xs font-semibold tracking-widest text-cyan-600 uppercase">{fcStr(fc, "field")}</p>
               )}
               <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
                 {fc.headline as string}
@@ -425,8 +425,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
 
               <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
                 <DotScale value={fc.post_difficulty as 1 | 2 | 3} />
-                {fc.post_reading_time_min && (
-                  <span className="text-zinc-500 text-xs">{fc.post_reading_time_min as number} min read</span>
+                {fcNum(fc, "post_reading_time_min") > 0 && (
+                  <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
                 )}
               </div>
             </div>
@@ -436,8 +436,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               <h2 className="text-3xl font-bold tracking-tight text-white leading-snug">
                 {post.title}
               </h2>
-              {fc?.essence && (
-                <p className="text-zinc-300 text-base leading-relaxed">{fc.essence as string}</p>
+              {fcStr(fc, "essence") && (
+                <p className="text-zinc-300 text-base leading-relaxed">{fcStr(fc, "essence")}</p>
               )}
             </div>
           )}

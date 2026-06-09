@@ -167,6 +167,7 @@ export default function Home() {
     }
 
     function onSettled() {
+      if (!el) return
       // Restore a brief transition so the final snap feels smooth
       if (indicatorRef.current) {
         indicatorRef.current.style.transition =
@@ -193,16 +194,18 @@ export default function Home() {
       }
     }
 
-    // Fallback: 50ms debounce for older browsers
+    // Fallback: 50ms debounce for older browsers.
+    // Cast needed: lib.dom assumes scrollend always exists, narrowing el to never here.
+    const legacyEl = el as HTMLDivElement
     let timer: ReturnType<typeof setTimeout>
     function onScroll() {
       clearTimeout(timer)
       timer = setTimeout(onSettled, 50)
     }
-    el.addEventListener("scroll", onScroll, { passive: true })
+    legacyEl.addEventListener("scroll", onScroll, { passive: true })
     return () => {
-      el.removeEventListener("scroll", updateIndicator)
-      el.removeEventListener("scroll", onScroll)
+      legacyEl.removeEventListener("scroll", updateIndicator)
+      legacyEl.removeEventListener("scroll", onScroll)
       clearTimeout(timer)
     }
   }, [])

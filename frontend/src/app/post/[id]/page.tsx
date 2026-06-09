@@ -4,7 +4,7 @@ import { use, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { FORMAT_STYLES } from "@/app/components/PostCard"
-import type { Post } from "@/types/post"
+import { fcStr, type Post } from "@/types/post"
 import SectionRenderer from "@/components/SectionRenderer"
 import CommentsSection, { type Comment } from "@/app/components/CommentsSection"
 import Toast from "@/app/components/Toast"
@@ -180,7 +180,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     const url = window.location.origin + "/post/" + post.id
     try {
       if (navigator.share) {
-        await navigator.share({ title: post.title, text: post.feed_card?.essence ?? "", url })
+        await navigator.share({ title: post.title, text: fcStr(post.feed_card, "essence"), url })
       } else {
         await navigator.clipboard.writeText(url)
         setToastVisible(true)
@@ -293,11 +293,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   </div>
 
                   {/* Books cover */}
-                  {post.format === "books" && post.feed_card?.cover_url && (
+                  {post.format === "books" && fcStr(post.feed_card, "cover_url") && (
                     <div className="flex justify-center mb-5">
                       <div className="rounded-xl overflow-hidden shadow-xl w-32 h-48 bg-zinc-800">
                         <img
-                          src={post.feed_card.cover_url}
+                          src={fcStr(post.feed_card, "cover_url")}
                           alt=""
                           className="w-full h-full object-cover"
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
@@ -312,9 +312,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   </h1>
 
                   {/* Author (Books) */}
-                  {post.format === "books" && post.feed_card?.author && (
+                  {post.format === "books" && fcStr(post.feed_card, "author") && (
                     <p className="text-amber-400 text-sm font-medium mb-4">
-                      {post.feed_card.author}
+                      {fcStr(post.feed_card, "author")}
                     </p>
                   )}
 
