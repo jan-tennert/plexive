@@ -4,11 +4,10 @@ import secrets
 import sys
 
 from dotenv import load_dotenv
-from passlib.context import CryptContext
 
 from app.auth import hash_password
 from app.database import Base, SessionLocal, engine
-from app.models import Interest, Post, User, post_interests
+from app.models import Interest, Post, User
 
 Base.metadata.create_all(bind=engine)
 
