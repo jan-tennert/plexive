@@ -8,6 +8,7 @@ import { FORMAT_IDS, FORMAT_STYLES, type FormatId } from "@/lib/formats"
 import { fcStr, type Post } from "@/types/post"
 import { CATEGORIES } from "@/app/onboarding/InterestPicker"
 import BottomNav from "@/app/components/BottomNav"
+import Spinner from "@/components/Spinner"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -539,7 +540,7 @@ export default function CreatePage() {
                   className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-3 text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-600"
                 />
               </div>
-              {searchLoading && <div className="flex justify-center py-4"><div className="w-5 h-5 border-2 border-zinc-700 border-t-white rounded-full animate-spin" /></div>}
+              {searchLoading && <div className="flex justify-center py-4"><Spinner size="sm" /></div>}
               {!searchLoading && searchResults.length > 0 && (
                 <div className="flex flex-col gap-2 mb-4">
                   {searchResults.map((post) => {

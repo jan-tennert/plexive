@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import PostCard from "@/app/components/PostCard"
 import BottomNav from "@/app/components/BottomNav"
 import EmptyState from "@/components/EmptyState"
+import Spinner from "@/components/Spinner"
 import type { Post } from "@/types/post"
 import { FORMAT_IDS, FORMAT_STYLES, type FormatId } from "@/lib/formats"
 
@@ -76,7 +77,7 @@ function TabPage({
         <div className="h-full bg-zinc-950" />
       ) : posts === null ? (
         <div className="h-full flex items-center justify-center bg-zinc-950">
-          <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+          <Spinner />
         </div>
       ) : posts.length === 0 && tab.format ? (
         <div className="h-full flex items-center justify-center bg-zinc-950">

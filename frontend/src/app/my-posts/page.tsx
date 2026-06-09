@@ -6,18 +6,9 @@ import { useAuth } from "@/app/lib/auth"
 import { apiFetch } from "@/app/lib/api"
 import { FORMAT_STYLES, type FormatId } from "@/lib/formats"
 import BottomNav from "@/app/components/BottomNav"
+import Spinner from "@/components/Spinner"
+import { relativeTime } from "@/app/lib/relativeTime"
 import { fcStr, type Post } from "@/types/post"
-
-function relativeTime(iso: string): string {
-  const date = new Date(iso.endsWith("Z") ? iso : iso + "Z")
-  const diff = Date.now() - date.getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 60) return `${mins}m ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
-}
 
 export default function MyPostsPage() {
   const router = useRouter()
@@ -65,7 +56,7 @@ export default function MyPostsPage() {
           {/* Loading */}
           {posts === null && !fetchError && (
             <div className="flex justify-center pt-16">
-              <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+              <Spinner />
             </div>
           )}
 

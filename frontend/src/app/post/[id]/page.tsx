@@ -7,6 +7,7 @@ import { formatStyle } from "@/lib/formats"
 import { fcStr, type Post } from "@/types/post"
 import SectionRenderer from "@/components/SectionRenderer"
 import CommentsSection, { type Comment } from "@/app/components/CommentsSection"
+import VerifiedBadge from "@/components/VerifiedBadge"
 import Toast from "@/app/components/Toast"
 import { useAuth } from "@/app/lib/auth"
 import { apiFetch } from "@/app/lib/api"
@@ -266,20 +267,12 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                         <Link href={`/profile/${post.author_username}`} className="hover:text-zinc-300 transition-colors">
                           @{post.author_username}
                         </Link>
-                        {post.author_is_verified && (
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-label="Verified" className="flex-shrink-0">
-                            <circle cx="8" cy="8" r="8" fill="#60a5fa"/>
-                            <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
+                        {post.author_is_verified && <VerifiedBadge size={16} />}
                       </span>
                     ) : !post.is_user_content ? (
                       <>
                         <span className="text-zinc-500 text-xs">Deepscroll</span>
-                        <svg viewBox="0 0 16 16" className="w-3 h-3 text-violet-400" fill="currentColor">
-                          <circle cx="8" cy="8" r="8" />
-                          <path d="M5 8.5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                        </svg>
+                        <VerifiedBadge size={12} variant="official" />
                       </>
                     ) : null}
                   </div>
@@ -327,7 +320,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 <SectionRenderer
                   sections={post.sections}
                   isUserContent={post.is_user_content}
-                  format={post.format}
                 />
 
                 {/* Comments list */}

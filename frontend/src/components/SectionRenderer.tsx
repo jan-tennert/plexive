@@ -37,7 +37,6 @@ import TheirWorldSection from "./sections/TheirWorldSection"
 interface Props {
   sections: Section[]
   isUserContent: boolean
-  format: string
 }
 
 export default function SectionRenderer({ sections, isUserContent }: Props) {

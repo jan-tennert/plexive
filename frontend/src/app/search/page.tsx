@@ -8,6 +8,8 @@ import { fcStr } from "@/types/post"
 import { FORMAT_IDS, FORMAT_STYLES, type FormatId } from "@/lib/formats"
 import { apiFetch } from "@/app/lib/api"
 import BottomNav from "@/app/components/BottomNav"
+import VerifiedBadge from "@/components/VerifiedBadge"
+import Spinner from "@/components/Spinner"
 
 const FORMAT_CHIPS: { label: string; value: FormatId | "" }[] = [
   { label: "All", value: "" },
@@ -141,7 +143,7 @@ export default function SearchPage() {
         <div className="absolute inset-0 top-[108px] overflow-y-auto pb-14 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] px-3">
           {loading ? (
             <div className="flex justify-center pt-16">
-              <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+              <Spinner />
             </div>
           ) : !query.trim() ? (
             <div className="flex flex-col items-center justify-center pt-20 text-center px-6">
@@ -168,12 +170,7 @@ export default function SearchPage() {
                         @{post.author_username}
                       </Link>
                     ) : "Deepscroll"}
-                    {post.is_user_content && post.author_is_verified && (
-                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Verified" className="flex-shrink-0">
-                        <circle cx="8" cy="8" r="8" fill="#60a5fa"/>
-                        <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
+                    {post.is_user_content && post.author_is_verified && <VerifiedBadge size={14} />}
                   </p>
                   <Snippet post={post} />
                 </button>

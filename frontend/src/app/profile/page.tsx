@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/app/lib/auth"
 import { apiFetch } from "@/app/lib/api"
 import BottomNav from "@/app/components/BottomNav"
+import VerifiedBadge from "@/components/VerifiedBadge"
 
 export default function ProfilePage() {
   const { user, loading, logout, updateUser } = useAuth()
@@ -220,12 +221,7 @@ export default function ProfilePage() {
           </div>
           <p className="flex items-center gap-1.5 text-white text-xl font-semibold">
             @{user.username}
-            {user.is_verified && (
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Verified" className="flex-shrink-0">
-                <circle cx="8" cy="8" r="8" fill="#60a5fa"/>
-                <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
+            {user.is_verified && <VerifiedBadge size={20} />}
           </p>
           <p className="text-zinc-500 text-sm mt-1">{user.email}</p>
           <button onClick={() => router.push("/my-posts")} className="text-zinc-400 text-sm mt-2">
@@ -289,12 +285,7 @@ export default function ProfilePage() {
                     <div key={req.username} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-1.5">
                         <span className="text-white text-sm font-medium">@{req.username}</span>
-                        {req.is_verified && (
-                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-label="Verified">
-                            <circle cx="8" cy="8" r="8" fill="#60a5fa"/>
-                            <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
+                        {req.is_verified && <VerifiedBadge size={14} />}
                       </div>
                       <div className="flex gap-2">
                         <button
