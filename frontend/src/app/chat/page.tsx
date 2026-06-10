@@ -22,8 +22,8 @@ interface UserResult {
 function ConversationAvatar({ conv, me }: { conv: Conversation; me: string }) {
   if (conv.is_group) {
     return (
-      <div className="w-[48px] h-[48px] rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-zinc-400">
+      <div className="w-[48px] h-[48px] rounded-full bg-surface-3 border border-edge flex items-center justify-center shrink-0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-ink-dim">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -90,15 +90,15 @@ function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated
   }
 
   return (
-    <div className="absolute inset-0 z-40 bg-zinc-950 flex flex-col">
+    <div className="absolute inset-0 z-40 bg-surface-0 flex flex-col">
       <div className="px-3 pt-3 pb-2">
         <div className="flex items-center gap-2">
-          <button onClick={onClose} className="shrink-0 w-9 h-9 flex items-center justify-center text-zinc-400" aria-label="Close">
+          <button onClick={onClose} className="shrink-0 w-9 h-9 flex items-center justify-center text-ink-dim hover:text-ink transition-colors duration-150 cursor-pointer" aria-label="Close">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
-          <p className="text-white font-semibold text-sm">New chat</p>
+          <p className="font-serif text-ink font-medium text-base">New chat</p>
         </div>
         <input
           type="search"
@@ -106,7 +106,7 @@ function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search people you follow…"
           autoFocus
-          className="mt-2 w-full bg-zinc-900 rounded-xl text-white placeholder:text-zinc-500 text-sm px-4 py-2.5 focus:outline-none"
+          className="field mt-2 text-sm py-2.5"
         />
         {selected.length > 0 && (
           <div className="flex gap-2 mt-2 flex-wrap">
@@ -114,11 +114,11 @@ function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated
               <button
                 key={u.username}
                 onClick={() => toggle(u)}
-                className="flex items-center gap-1.5 bg-zinc-800 rounded-full pl-1 pr-2.5 py-1 text-xs text-white"
+                className="flex items-center gap-1.5 bg-surface-2 border border-edge rounded-full pl-1 pr-2.5 py-1 text-xs text-ink cursor-pointer"
               >
                 <Avatar username={u.username} avatarUrl={u.avatar_url} size={20} />
                 @{u.username}
-                <span className="text-zinc-500">×</span>
+                <span className="text-ink-muted">×</span>
               </button>
             ))}
           </div>
@@ -130,10 +130,10 @@ function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated
             onChange={(e) => setGroupName(e.target.value)}
             placeholder="Group name (optional)"
             maxLength={80}
-            className="mt-2 w-full bg-zinc-900 rounded-xl text-white placeholder:text-zinc-500 text-sm px-4 py-2.5 focus:outline-none"
+            className="field mt-2 text-sm py-2.5"
           />
         )}
-        {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+        {error && <p className="text-bad text-xs mt-2">{error}</p>}
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
@@ -143,16 +143,16 @@ function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated
             <button
               key={u.username}
               onClick={() => toggle(u)}
-              className="w-full flex items-center gap-3 py-2.5 text-left"
+              className="w-full flex items-center gap-3 py-2.5 text-left cursor-pointer"
             >
               <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} />
-              <span className="flex-1 flex items-center gap-1.5 text-white text-sm font-medium truncate">
+              <span className="flex-1 flex items-center gap-1.5 text-ink text-sm font-medium truncate">
                 @{u.username}
                 {u.is_verified && <VerifiedBadge size={14} />}
               </span>
-              <span className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "bg-white border-white" : "border-zinc-600"}`}>
+              <span className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "bg-lamp border-lamp" : "border-edge-strong"}`}>
                 {isSelected && (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#09090b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-surface-0)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
                 )}
@@ -161,7 +161,7 @@ function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated
           )
         })}
         {query.trim() && results.length === 0 && (
-          <p className="text-zinc-500 text-xs text-center pt-8">No accounts found</p>
+          <p className="text-ink-muted text-xs text-center pt-8">No accounts found</p>
         )}
       </div>
 
@@ -169,7 +169,7 @@ function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated
         <button
           onClick={start}
           disabled={selected.length === 0 || busy}
-          className="w-full bg-white text-zinc-950 rounded-xl py-2.5 text-sm font-semibold disabled:opacity-40"
+          className="btn btn-primary w-full py-2.5"
         >
           {busy ? "Starting…" : selected.length > 1 ? "Start group chat" : "Start chat"}
         </button>
@@ -203,15 +203,15 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-[100dvh] bg-zinc-950 flex justify-center">
+    <div className="h-[100dvh] bg-surface-0 flex justify-center">
       <div className="w-full max-w-[430px] h-[100dvh] relative flex flex-col">
 
         <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-          <h1 className="text-white font-bold text-lg">Chats</h1>
+          <h1 className="font-serif text-ink font-medium text-xl">Chats</h1>
           {user && (
             <button
               onClick={() => setShowNew(true)}
-              className="w-9 h-9 flex items-center justify-center text-zinc-300"
+              className="w-9 h-9 flex items-center justify-center text-ink-dim hover:text-ink transition-colors duration-150 cursor-pointer"
               aria-label="New chat"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -225,8 +225,8 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto pb-14 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
           {!authLoading && !user ? (
             <div className="h-full flex flex-col items-center justify-center gap-3 px-8 text-center">
-              <p className="text-white font-semibold">Message people you follow</p>
-              <Link href="/login" className="bg-white text-zinc-950 rounded-xl px-5 py-2 text-sm font-semibold">
+              <p className="font-serif text-ink font-medium text-lg">Message people you follow</p>
+              <Link href="/login" className="btn btn-primary px-5 py-2">
                 Log in
               </Link>
             </div>
@@ -236,9 +236,9 @@ export default function ChatPage() {
             </div>
           ) : conversations.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center gap-3 px-8 text-center">
-              <p className="text-white font-semibold">No chats yet</p>
-              <p className="text-zinc-500 text-sm">Start a conversation with someone you follow.</p>
-              <button onClick={() => setShowNew(true)} className="bg-white text-zinc-950 rounded-xl px-5 py-2 text-sm font-semibold">
+              <p className="font-serif text-ink font-medium text-lg">No chats yet</p>
+              <p className="text-ink-muted text-sm">Start a conversation with someone you follow.</p>
+              <button onClick={() => setShowNew(true)} className="btn btn-primary px-5 py-2">
                 New chat
               </button>
             </div>
@@ -247,19 +247,19 @@ export default function ChatPage() {
               <button
                 key={conv.id}
                 onClick={() => router.push(`/chat/${conv.id}`)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-zinc-900"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer active:bg-surface-1 hover:bg-surface-1 transition-colors duration-150"
               >
                 <ConversationAvatar conv={conv} me={user?.username ?? ""} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="text-white text-sm font-semibold truncate">{conv.name}</p>
+                    <p className="text-ink text-sm font-semibold truncate">{conv.name}</p>
                     {conv.last_message?.created_at && (
-                      <span className="text-zinc-600 text-xs shrink-0">{relativeTime(conv.last_message.created_at)}</span>
+                      <span className="text-ink-faint text-xs shrink-0 font-mono">{relativeTime(conv.last_message.created_at)}</span>
                     )}
                   </div>
-                  <p className="text-zinc-500 text-xs truncate">{preview(conv)}</p>
+                  <p className="text-ink-muted text-xs truncate">{preview(conv)}</p>
                   {conv.is_group && (
-                    <p className="text-zinc-700 text-xs truncate">{subtitle(conv.participants)}</p>
+                    <p className="text-ink-faint text-xs truncate">{subtitle(conv.participants)}</p>
                   )}
                 </div>
               </button>

@@ -71,9 +71,9 @@ export default function ConversationPage() {
 
   if (!authLoading && !user) {
     return (
-      <div className="h-[100dvh] bg-zinc-950 flex flex-col items-center justify-center gap-3 px-8 text-center">
-        <p className="text-white font-semibold">Log in to see your messages</p>
-        <Link href="/login" className="bg-white text-zinc-950 rounded-xl px-5 py-2 text-sm font-semibold">
+      <div className="h-[100dvh] bg-surface-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
+        <p className="font-serif text-ink font-medium text-lg">Log in to see your messages</p>
+        <Link href="/login" className="btn btn-primary px-5 py-2">
           Log in
         </Link>
       </div>
@@ -85,14 +85,14 @@ export default function ConversationPage() {
     : null
 
   return (
-    <div className="h-[100dvh] bg-zinc-950 flex justify-center">
+    <div className="h-[100dvh] bg-surface-0 flex justify-center">
       <div className="w-full max-w-[430px] h-[100dvh] flex flex-col">
 
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-2.5 border-b border-edge">
           <button
             onClick={() => router.push("/chat")}
-            className="shrink-0 w-9 h-9 flex items-center justify-center text-zinc-400"
+            className="shrink-0 w-9 h-9 flex items-center justify-center text-ink-dim hover:text-ink transition-colors duration-150 cursor-pointer"
             aria-label="Back to chats"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -103,15 +103,15 @@ export default function ConversationPage() {
             <Avatar username={headerAvatarUser.username} avatarUrl={headerAvatarUser.avatar_url} size={32} />
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-semibold truncate">{conversation?.name ?? "Chat"}</p>
+            <p className="text-ink text-sm font-semibold truncate">{conversation?.name ?? "Chat"}</p>
             {conversation?.is_group && (
-              <p className="text-zinc-600 text-xs truncate">
+              <p className="text-ink-faint text-xs truncate">
                 {conversation.participants.map((p) => `@${p.username}`).join(", ")}
               </p>
             )}
           </div>
           {status !== "open" && (
-            <span className="text-zinc-600 text-xs shrink-0">
+            <span className="text-ink-faint text-xs shrink-0">
               {status === "connecting" ? "connecting…" : "offline"}
             </span>
           )}
@@ -121,7 +121,7 @@ export default function ConversationPage() {
         <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1.5 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
           {notFound ? (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-zinc-500 text-sm">Conversation not found.</p>
+              <p className="text-ink-muted text-sm">Conversation not found.</p>
             </div>
           ) : messages === null ? (
             <div className="flex-1 flex items-center justify-center">
@@ -129,7 +129,7 @@ export default function ConversationPage() {
             </div>
           ) : messages.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-zinc-500 text-sm">Say hello</p>
+              <p className="text-ink-muted text-sm">Say hello</p>
             </div>
           ) : (
             messages.map((m, i) => {
@@ -141,11 +141,11 @@ export default function ConversationPage() {
               return (
                 <div key={m.id} className={`flex flex-col ${own ? "items-end" : "items-start"}`}>
                   {showSender && (
-                    <p className="text-zinc-500 text-xs px-2 pt-1">@{m.sender_username}</p>
+                    <p className="text-ink-muted text-xs px-2 pt-1">@{m.sender_username}</p>
                   )}
                   <div
                     className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap break-words ${
-                      own ? "bg-white text-zinc-950" : "bg-zinc-800 text-zinc-100"
+                      own ? "bg-ink text-surface-0" : "bg-surface-2 text-ink-body"
                     }`}
                   >
                     {m.body}
@@ -162,7 +162,7 @@ export default function ConversationPage() {
           className="px-3 py-2 border-t border-edge"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
         >
-          {error && <p className="text-red-400 text-xs pb-1.5">{error}</p>}
+          {error && <p className="text-bad text-xs pb-1.5">{error}</p>}
           <div className="flex items-end gap-2">
             <textarea
               value={draft}
@@ -176,12 +176,12 @@ export default function ConversationPage() {
               placeholder="Message…"
               rows={1}
               maxLength={MESSAGE_MAX_CHARS}
-              className="flex-1 bg-zinc-900 rounded-xl text-white placeholder:text-zinc-500 text-sm px-4 py-2.5 focus:outline-none resize-none max-h-32"
+              className="field flex-1 text-sm py-2.5 resize-none max-h-32"
             />
             <button
               onClick={handleSend}
               disabled={!draft.trim() || status !== "open" || notFound}
-              className="shrink-0 w-10 h-10 rounded-full bg-white text-zinc-950 flex items-center justify-center disabled:opacity-40"
+              className="btn btn-primary shrink-0 w-10 h-10 rounded-full p-0"
               aria-label="Send message"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
