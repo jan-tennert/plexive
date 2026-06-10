@@ -1,7 +1,8 @@
+import re
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile, status
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy.orm import Session
 
@@ -15,11 +16,28 @@ from ..upload_config import UPLOAD_DIR
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+# Forward-only: applies to new registrations and username changes. Existing
+# accounts with other formats keep working (no retroactive enforcement).
+USERNAME_RE = re.compile(r"^[A-Za-z0-9._-]{3,30}$")
+USERNAME_RULE = "Username must be 3-30 characters: letters, numbers, dots, dashes or underscores."
+
+
+def _client_ip(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
 
 class RegisterRequest(BaseModel):
     email: EmailStr
     username: str
     password: str
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        v = v.strip()
+        if not USERNAME_RE.fullmatch(v):
+            raise ValueError(USERNAME_RULE)
+        return v
 
     @field_validator("password")
     @classmethod
@@ -44,7 +62,8 @@ class TokenResponse(BaseModel):
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-def register(body: RegisterRequest, db: Session = Depends(get_db)):
+def register(body: RegisterRequest, request: Request, db: Session = Depends(get_db)):
+    check_rate_limit(f"ip:{_client_ip(request)}", "register", 10, 3600)
     if db.query(User).filter(User.email == body.email).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered.")
     if db.query(User).filter(User.username == body.username).first():
@@ -64,7 +83,10 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest, db: Session = Depends(get_db)):
+def login(body: LoginRequest, request: Request, db: Session = Depends(get_db)):
+    # Slow down credential stuffing: per-IP and per-target-email limits.
+    check_rate_limit(f"ip:{_client_ip(request)}", "login", 30, 300)
+    check_rate_limit(f"email:{body.email.lower()}", "login", 10, 300)
     user = db.query(User).filter(User.email == body.email, User.is_active == True).first()
     # use the same error whether the email is unknown or the password is wrong
     # to avoid leaking which field was incorrect
@@ -107,6 +129,16 @@ class PatchMeRequest(BaseModel):
     def validate_bio(cls, v: str | None) -> str | None:
         if v is not None and len(v) > 160:
             raise ValueError("bio must be 160 characters or fewer.")
+        return v
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        v = v.strip()
+        if not USERNAME_RE.fullmatch(v):
+            raise ValueError(USERNAME_RULE)
         return v
 
 

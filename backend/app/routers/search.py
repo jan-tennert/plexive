@@ -1,15 +1,24 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session, selectinload
 
 from ..auth import get_optional_user
 from ..database import get_db
 from ..models import Follow, Post, User
 from ..post_counts import attach_counts
+from ..rate_limit import check_rate_limit
 from ..schemas import PostOut
 
 router = APIRouter()
+
+# Search scans posts in Python; cap query length and per-client volume.
+QUERY_MAX_CHARS = 100
+
+
+def _limit_search(request: Request, user: Optional[User], key: str) -> None:
+    identity = user.id if user else f"ip:{request.client.host if request.client else 'unknown'}"
+    check_rate_limit(identity, key, 60, 60)
 
 
 def _post_matches(post: Post, q_lower: str) -> bool:
@@ -46,12 +55,15 @@ def _post_matches(post: Post, q_lower: str) -> bool:
 
 @router.get("/search", response_model=List[PostOut])
 def search_posts(
+    request: Request,
     q: str = "",
     format: Optional[str] = None,
+    current_user: Optional[User] = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
-    if not q.strip():
+    if not q.strip() or len(q) > QUERY_MAX_CHARS:
         return []
+    _limit_search(request, current_user, "search_posts")
 
     q_lower = q.strip().lower()
 
@@ -78,13 +90,15 @@ def search_posts(
 
 @router.get("/search/users")
 def search_users(
+    request: Request,
     q: str = "",
     current_user: Optional[User] = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
     q = q.strip()
-    if not q:
+    if not q or len(q) > QUERY_MAX_CHARS:
         return []
+    _limit_search(request, current_user, "search_users")
 
     matches = (
         db.query(User)

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from ..auth import get_current_user, get_optional_user
 from ..database import get_db
 from ..models import Follow, Post, User
+from ..rate_limit import check_rate_limit
 
 router = APIRouter(prefix="/users", tags=["follows"])
 
@@ -53,6 +54,7 @@ def follow_user(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    check_rate_limit(current_user.id, "follow", 60, 3600)
     target = _get_target(username, db)
 
     if target.id == current_user.id:
@@ -139,7 +141,8 @@ def get_followers(
     target = _get_target(username, db)
 
     if target.is_private:
-        if current_user is None or not _is_following(current_user.id, target.id, db):
+        is_self = current_user is not None and current_user.id == target.id
+        if not is_self and (current_user is None or not _is_following(current_user.id, target.id, db)):
             return []
 
     follows = db.query(Follow).filter(
@@ -158,7 +161,8 @@ def get_following(
     target = _get_target(username, db)
 
     if target.is_private:
-        if current_user is None or not _is_following(current_user.id, target.id, db):
+        is_self = current_user is not None and current_user.id == target.id
+        if not is_self and (current_user is None or not _is_following(current_user.id, target.id, db)):
             return []
 
     follows = db.query(Follow).filter(

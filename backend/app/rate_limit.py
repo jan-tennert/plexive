@@ -1,13 +1,15 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from fastapi import HTTPException
 
 _counters: Dict[str, List[float]] = defaultdict(list)
 
 
-def check_rate_limit(user_id: int, key: str, max_count: int, window_seconds: int) -> None:
+def check_rate_limit(user_id: Union[int, str], key: str, max_count: int, window_seconds: int) -> None:
+    # user_id is usually a numeric user id; unauthenticated endpoints pass a
+    # string identity instead (e.g. "ip:1.2.3.4" or "email:a@b.c").
     now = datetime.utcnow().timestamp()
     bucket = f"{user_id}:{key}"
     cutoff = now - window_seconds
