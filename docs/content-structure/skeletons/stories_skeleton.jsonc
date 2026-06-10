@@ -1,0 +1,498 @@
+// stories_skeleton.jsonc
+// Deepscroll — Stories format skeleton.
+//
+// Every REQUIRED section must be present. OPTIONAL sections: include only
+// when they add genuine depth for this specific story, never as padding.
+//
+// Three principles distinguish the Stories format:
+//   1. The narrative IS the substance. Other formats explain or argue;
+//      Stories tells. Part 2 (Setting → Chapters → Turn → Aftermath) is
+//      written as scenic prose in third person, past tense, and carries the
+//      whole post. Reflection comes only AFTER the story is told, never woven
+//      through it. Pacing matters more than structure: a chapter can run long
+//      or short to build tension toward the turn.
+//   2. SPOILER DISCIPLINE is the rule that overrides all others. Stories is
+//      the only format where the pivotal moment must not appear in the early
+//      sections. The feed_card headline, the teasers, the cold_open, the
+//      setting, and at_a_glance set atmosphere and stakes WITHOUT revealing
+//      the turn or the outcome. The pivot lives in the_turn and nowhere
+//      earlier. The target feeling pre-tap is "I need to know what happened",
+//      never "I already know what happened, now the details".
+//   3. True stories only. Verifiable historical events are strongly
+//      preferred over fiction or legend: a documented true-crime case, a
+//      scientific-discovery moment, a personal saga, a political turning
+//      point. Distinguish what is documented from what is contested (that is
+//      what the OPTIONAL unanswered section is for). Cite real sources. Do
+//      not invent quotes, scenes, or figures to fill a gap in the record.
+//
+// Section order follows the spec exactly:
+//   Part 1 (Opening):    cold_open → quiz_badge → at_a_glance
+//   Part 2 (The Story):  setting → chapters → the_turn → the_aftermath
+//   Part 3 (Reflection): what_it_means → what_we_learn? → unanswered?
+//   Part 4 (Test):       quiz → related_posts?
+//   Part 5 (Context):    cast? → historical_context? → sources
+//
+// ━━━ LENGTH RULE (applies to every length range below) ━━━━━━━━━━━━━━━
+// All sentence counts, word counts, and chapter counts in this file are
+// GUIDELINES, not hard limits. A story whose tension needs seven chapters
+// gets seven; one that lands in three gets three. Pacing serves the story,
+// not a target number. The only HARD constraints are structural, fixed by
+// the UI and the scoring system: chapters length 3–7, quiz length 5–10,
+// quiz options length exactly 4 per question, related_posts length exactly
+// 3 (when included), and cast length 2–4 (when included).
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
+// See DEEPSCROLL_CONTENT_STRUCTURE.md (Stories section) for the full spec,
+// STYLE_GUIDE_LONGFORM.md for prose rules (em-dashes banned in all
+// user-facing text; vocabulary blacklist applies). The narrative voice is
+// third-person past-tense scenic; "you"/"we" appear only in the reflection
+// sections, never in the story itself. SVG_STANDARD.md governs any diagram.
+// Visuals are usually period PHOTOGRAPHS of place, people, or artifact, with
+// image_attribution required on every image (Wikimedia compliance); an SVG is
+// rare here and only earns its place as a map or timeline. Accent: orange-400
+// #fb923c.
+
+{
+  // ─── FEED CARD ──────────────────────────────────────────────────────
+  // What the user sees before tapping. A temporal frame, an atmospheric
+  // headline, a strong lead image, and three stakes-and-atmosphere teasers.
+  // SPOILER DISCIPLINE APPLIES IN FULL HERE: nothing on this card may reveal
+  // the turn or the ending. The card promises a STORY, not information. The
+  // reader should feel "I want to be inside this", not "now I know the gist".
+  "feed_card": {
+    "era_label": "",            // string — small label above the headline that
+                                // sets the temporal frame instantly: "1944",
+                                // "Ancient Rome", "The Cold War", "Last Year".
+                                // A date or named period, not a teaser.
+    "headline": "",             // string — the hook line. Past tense, scenic,
+                                // sets stakes and atmosphere. Example: "A man
+                                // bought a wooden box at a flea market in 2007.
+                                // The contents would unmake a fortune." It must
+                                // NOT reveal the turn or the outcome: promise of
+                                // story, not promise of information. No
+                                // em-dashes; the renderer does not transform
+                                // feed-card text.
+    "lead_image_url": null,     // string | null — a historical photo with strong
+                                // visual presence (Wikimedia or royalty-free).
+                                // The single most important pre-click element
+                                // after the headline. Set to null (not "") when
+                                // no honest period image exists. Must not be a
+                                // visual spoiler of the turn. NOTE: the feed-card
+                                // schema has no attribution field, so prefer a
+                                // public-domain or CC0 image here; if a licence
+                                // requires visible credit, surface that image
+                                // again inside a section (e.g. setting) where
+                                // image_attribution exists, and carry the credit
+                                // there.
+    "teasers": ["", "", ""],    // array[3], ~6 words each. ATMOSPHERE AND STAKES,
+                                // never events. "A century of silence", "What
+                                // three witnesses saw", "The letter that
+                                // survived". A teaser that names what happens
+                                // breaks the format. Vary structure across the
+                                // three; none may spoil the turn.
+    "post_reading_time_min": 0, // integer — honest estimate; 5–17 min range for
+                                // Stories posts. Match the real read length; do
+                                // not undersell to lure.
+    "post_difficulty": 1,       // 1=accessible, 2=moderate, 3=demanding. A
+                                // single-thread personal saga lands at 1; a
+                                // case with many players and contested
+                                // documents at 3.
+    "era": "",                  // string — the period the story sits in, fuller
+                                // than era_label if useful: "1880s London",
+                                // "Late Bronze Age", "Post-war Vienna".
+    "category": ""              // string — one of "true crime", "historical
+                                // mystery", "scientific discovery", "personal
+                                // saga", "political turning point", or another
+                                // honest category. Sets the reader's
+                                // expectation of the kind of story.
+  },
+
+  // ─── SECTIONS ───────────────────────────────────────────────────────
+  "sections": [
+
+    // ── PART 1 — THE OPENING (~60 sec read) ──────────────────────────
+    // Drops the reader into the story and orients them. SPOILER DISCIPLINE
+    // governs all three sections here: they build immersion and stakes
+    // without pre-telling the turn. A reader who stops after at_a_glance
+    // should be hooked but still ignorant of what happens.
+
+    {
+      "type": "cold_open",  // REQUIRED — the film's opening shot. The first
+      "order": 1,           // thing inside the post: it drops the reader into a
+                            // single moment with no exposition, pure immersion.
+                            // It is a hook by atmosphere, not by spoiler.
+      "content": ""         // string — 2–4 sentences max. Render one vivid
+                            // moment, in third person past tense. No backstory,
+                            // no "this is the story of", no foreshadowing of the
+                            // turn. Show the reader a door, do not tell them
+                            // what is behind it. No em-dashes; no ta-da framings
+                            // ("Picture this:", "Here's the thing:").
+    },
+
+    {
+      "type": "quiz_badge",  // REQUIRED — signposts that a graded quiz waits at
+      "order": 2,            // the end. Pure retention signal, no story content
+                             // of its own: it gives the reader a reason to scroll
+                             // past the reflection to "earn Elo". Keep it; posts
+                             // without it lose the pull.
+      "content": ""          // string — format: "🎯 N questions at the end, earn
+                             // Elo" where N matches the actual quiz array length
+                             // below. Note the COMMA: the em-dash ban applies to
+                             // this string too (it is user-facing), so do not
+                             // write "end — earn Elo". Keep N in sync if the quiz
+                             // grows or shrinks.
+    },
+
+    {
+      "type": "at_a_glance",  // REQUIRED — a compact metadata card. Generic
+      "order": 3,             // container: the renderer iterates the key-value
+                              // pairs. CRUCIALLY it carries NO plot summary
+                              // field, by design: surfacing the gist here would
+                              // break spoiler discipline before the story even
+                              // starts.
+      "content": {
+        "era": "",                  // string — the period, consistent with the
+                                    // feed card's era.
+        "location": "",             // string — where the story takes place:
+                                    // "Vienna", "the North Atlantic", "a farm
+                                    // in Kansas".
+        "category": "",             // string — same category as the feed card.
+        "sources_reliability": 1,   // 1–3, where 3 = primary documents (court
+                                    // records, letters, contemporaneous
+                                    // reporting), 2 = solid secondary accounts,
+                                    // 1 = mostly oral or legendary. Honest about
+                                    // how well-documented the story is.
+        "post_reading_time_min": 0, // integer — same value as the feed card.
+        "post_difficulty": 1        // 1–3, same value as the feed card.
+        // No plot_summary, no outcome, no "what happened" field. This omission
+        // is deliberate and part of the format. Do not add one.
+      }
+    },
+
+    // ── PART 2 — THE STORY (the heart, ~5–12 min read) ───────────────
+    // The narrative itself, in scenic prose. This is the substance of the
+    // whole post. It runs Setting → Chapters → Turn → Aftermath. Spoiler
+    // discipline still holds through setting and the early chapters: the
+    // turn does not arrive until the_turn.
+
+    {
+      "type": "setting",  // REQUIRED — "Setting the Scene". Establishes time,
+      "order": 4,         // place, who matters, and what the world was like
+                          // BEFORE the action, so the stakes land when the
+                          // story moves. It builds the ground the turn will
+                          // later break. It must NOT reveal the turn.
+      "content": {
+        "body": "",            // string — one narrative block in third-person
+                               // past tense. Render the world the reader is
+                               // about to enter: the texture of the place and
+                               // moment, who the central figures are, what is at
+                               // stake. Prose, not bullet points. Length
+                               // guideline: 4–8 sentences. No em-dashes; no
+                               // foreshadowing phrases ("little did they know").
+        "image_url": "",       // string | omit — a period image of the place or
+                               // people. Omit if none genuinely fits; do not
+                               // force one.
+        "image_caption": "",   // string | omit — one sentence. Required when
+                               // image_url is set. Names what the image shows
+                               // and, where useful, the date.
+        "image_attribution": "" // string | omit — required when image_url is
+                               // set. Licence + source, e.g. "Public domain via
+                               // Wikimedia Commons".
+      }
+    },
+
+    {
+      "type": "chapters",  // REQUIRED — "The Story Itself". The narrative spine,
+      "order": 5,          // told as real prose across scenically titled
+                           // chapters. This is where most of the reading time
+                           // lives. Pacing is the craft here: chapters vary in
+                           // length to build tension toward the turn. Spoiler
+                           // discipline holds: the chapters carry the reader UP
+                           // TO the turn, they do not contain it.
+      // array[3–7] (HARD constraint). Each chapter is a substantial narrative
+      // block written like prose, not a summary and not bullet points. Titles
+      // are scenic ("The First Letter", "What the Maid Saw", "The Decision"),
+      // not summary labels ("Background", "The investigation"). Order the
+      // chapters to escalate: the last chapter should leave the reader on the
+      // edge of the turn without giving it away.
+      "content": [
+        {
+          "title": "",          // string — a scenic chapter title, 2–6 words.
+                                // Evokes a moment or image, does not summarise
+                                // the chapter's content or hint at the turn.
+          "body": "",           // string — 4–10 sentences of narrative prose.
+                                // Third person, past tense, scenic. Show
+                                // moments, render scenes, let events speak; do
+                                // not editorialise or moralise here (that is
+                                // Part 3). No "you"/"we" in the story voice. No
+                                // em-dashes. Length varies chapter to chapter
+                                // for pacing; guideline only.
+          "image_url": "",      // string | omit — an interspersed period image
+                                // (a photograph, a document, an artifact).
+                                // Distribute visuals across chapters rather than
+                                // stacking them; omit where none fits.
+          "image_caption": "",  // string | omit — one sentence. Required when
+                                // image_url is set.
+          "image_attribution": "" // string | omit — required when image_url is
+                                // set. Licence + source.
+        }
+        // Repeat object per chapter. 3–7 chapters (HARD constraint). Prefer
+        // 4–5 well-paced chapters over 7 thin ones. The final chapter sets up
+        // the turn but does not deliver it.
+      ]
+    },
+
+    {
+      "type": "the_turn",  // REQUIRED — "The Turn". THE STRUCTURAL HEART OF THE
+      "order": 6,          // POST. This is the narrative pivot: the revelation,
+                           // the twist, the disaster, the breakthrough, the
+                           // moment everything changes. Everything before built
+                           // toward it; everything after is consequence.
+                           // Treated as its own beat, deliberately short and
+                           // sharp, given visual emphasis by the renderer. This
+                           // is the ONLY place the pivotal moment may appear:
+                           // every earlier section was written to protect it.
+                           // For a story with no single sharp twist, this is the
+                           // pivotal PHASE rather than one instant, but it stays
+                           // tight and distinct from the aftermath.
+      "content": {
+        "body": "",            // string — short and sharp. Land the pivot in as
+                               // few sentences as it takes to hit. Do not
+                               // cushion it with explanation or jump ahead to
+                               // consequences (that is the_aftermath). Third
+                               // person, past tense. Length guideline: 2–5
+                               // sentences; brevity is the point. No em-dashes.
+        "image_url": "",       // string | omit — an image tied to the turn (the
+                               // artifact revealed, the headline, the
+                               // photograph of the moment). A strong image here
+                               // earns its place more than anywhere else.
+        "image_caption": "",   // string | omit — one sentence. Required when
+                               // image_url is set.
+        "image_attribution": "" // string | omit — required when image_url is
+                               // set. Licence + source.
+      }
+    },
+
+    {
+      "type": "the_aftermath",  // REQUIRED — "The Aftermath". The post-turn
+      "order": 7,               // close of the narrative, and the reader's first
+                                // breath after the pivot. It is more than a
+                                // recap of outcomes: it lets the turn's
+                                // consequences resonate and settle, tracing them
+                                // across days, years, sometimes decades to where
+                                // the story comes to rest. The tone is
+                                // reflective, but the MODE is still narrative.
+                                // It shows the consequences; it does not yet
+                                // explain their significance. That explicit
+                                // analysis is what_it_means, the next section.
+                                // The line to hold: aftermath = what the turn
+                                // did to the world and the people in it, felt;
+                                // what_it_means = why that matters, argued.
+      "content": {
+        "body": "",            // string — narrative prose, third person, past
+                               // tense, tracing the consequences of the turn to
+                               // where the story comes to rest. Give it the
+                               // texture of an ending, not a bullet list of
+                               // outcomes. Length guideline: 4–8 sentences;
+                               // longer when the consequences span decades. No
+                               // em-dashes.
+        "image_url": "",       // string | omit — a later image (the figure in
+                               // old age, the memorial, the site today).
+        "image_caption": "",   // string | omit — one sentence. Required when
+                               // image_url is set.
+        "image_attribution": "" // string | omit — required when image_url is
+                               // set. Licence + source.
+      }
+    },
+
+    // ── PART 3 — REFLECTION (~2 min read) ─────────────────────────────
+    // The story has been told. NOW the post is allowed to step back and
+    // think. This is where the "you"/"we" voice and analytical stance are
+    // appropriate, because the reader has earned the reflection by reading
+    // the story. Keep it observational, never preachy.
+
+    {
+      "type": "what_it_means",  // REQUIRED — "Why History Remembers This".
+      "order": 8,               // Analytical, not narrative. The first time the
+                                // post stops telling and starts interpreting:
+                                // what makes this story endure, what it reveals
+                                // about its time, about people, about
+                                // institutions. The reader is now ready to
+                                // think, so take a clear stance on its meaning.
+      "content": ""             // string — analysis, not retelling. Do not
+                                // summarise the plot again; say why it matters.
+                                // Take a position. "you"/"we" acceptable here.
+                                // Length guideline: 80–160 words. Guideline
+                                // only. No em-dashes; no buzzword vocabulary.
+    },
+
+    {
+      "type": "what_we_learn",  // OPTIONAL — "What It Teaches". The broader
+      "order": 9,               // lesson or pattern the story points to, the
+                                // closest Stories comes to a "what stays with
+                                // you" line. Include when the story genuinely
+                                // carries a transferable observation.
+                                // Skip when the story resists a clean lesson;
+                                // forcing a moral onto an ambiguous story
+                                // cheapens it. Better absent than heavy-handed.
+      "content": ""             // string — observation, not moralising. State
+                                // the pattern plainly and let the reader own the
+                                // judgement; do not instruct them how to feel.
+                                // Length guideline: 40–100 words. Guideline
+                                // only. No em-dashes.
+    },
+
+    {
+      "type": "unanswered",  // OPTIONAL — "What We Still Don't Know". Intellectual
+      "order": 10,           // honesty about the limits of the record: gaps,
+                             // contested details, what is documented versus what
+                             // is legend. Include for stories with genuine open
+                             // questions, especially historical mysteries and
+                             // true crime. This is also where the true-stories-
+                             // only principle is honoured in the open.
+                             // Skip when the record is settled and there is
+                             // nothing real left in doubt; do not manufacture
+                             // mystery for effect.
+      "content": ""          // string — name what remains unknown or disputed,
+                             // and distinguish it from what is established. Do
+                             // not present speculation as fact. Length
+                             // guideline: 40–120 words. Guideline only. No
+                             // em-dashes.
+    },
+
+    // ── PART 4 — TEST YOURSELF ────────────────────────────────────────
+
+    {
+      "type": "quiz",  // REQUIRED — affects Elo score. By now the reader has read
+      "order": 11,     // the turn, so quiz questions MAY reference it; spoiler
+                       // discipline no longer applies inside the quiz.
+      // array[5–10] (HARD constraint), exactly 4 options per question (HARD
+      // constraint). Test NARRATIVE UNDERSTANDING, not trivia. Good questions
+      // ask which decision actually mattered, who the key actor was, what
+      // condition made the turn possible, or the sequence of events that led to
+      // it. BAD questions ask for years, the names of secondary figures, or any
+      // detail a reader could miss while still fully understanding the story.
+      // Distractors should be plausible misreadings of the story, not random
+      // wrong facts.
+      "content": [
+        {
+          "question": "",
+          "options": ["", "", "", ""],  // exactly 4
+          "answer_index": 0,            // 0–3
+          "explanation": ""             // string — one sentence that explains why
+                                        // the answer is right, ideally sharpening
+                                        // the reader's grasp of the story's
+                                        // causation. Do not begin with "The
+                                        // correct answer is…".
+        }
+        // Repeat object per question. 5 minimum, 10 maximum.
+      ]
+    },
+
+    {
+      "type": "related_posts",  // OPTIONAL — "Stories That Echo This". Internal
+      "order": 12,              // links to posts with similar themes, the people
+                                // involved, or the same era. A reader who just
+                                // finished one story is primed for the next.
+                                // Include when 3 genuinely relevant posts exist;
+                                // skip rather than pad with loose links.
+      "content": [
+        {
+          "post_id": "",      // string — leave empty if not yet assigned.
+          "title": "",        // string
+          "format": "",       // "books"|"facts"|"people"|"concepts"|
+                              // "questions"|"stories"|"academy"
+          "mini_teaser": ""   // string — one sentence on why it echoes this
+                              // story (shared theme, a figure who appears in
+                              // both, the same period). Keep it spoiler-safe for
+                              // the linked post too.
+        }
+        // Exactly 3 items when included (HARD constraint).
+      ]
+    },
+
+    // ── PART 5 — CONTEXT (smaller typography, secondary) ─────────────
+    // These sit below the natural end-point. A reader who stopped at the quiz
+    // got the full experience; these reward those who want to know the players
+    // (cast), the wider period (historical_context), or the references
+    // (sources).
+
+    {
+      "type": "cast",  // OPTIONAL — "The Cast". Brief portraits of the key
+      "order": 13,     // figures, using the shared person-list base shape.
+                       // Include for complex stories with several players the
+                       // reader has to keep straight.
+                       // Skip for solo stories or two-hander sagas where the
+                       // narrative already made the players clear; a cast list
+                       // for a one-person story is padding.
+      // array[2–4] (HARD constraint). Use the shared person shape; do not
+      // invent new field names for the same concept.
+      "content": [
+        {
+          "name": "",        // string — full name as commonly known.
+          "role": "",        // string — their function in the story: "The
+                             // investigating magistrate", "The forger", "The
+                             // sole survivor". Concrete to this story, not a
+                             // generic title.
+          "one_line": "",    // string | omit — one sentence on who they were or
+                             // what they did.
+          "lifespan": "",    // string | omit — "1867–1934" or "1929–present".
+                             // En-dash allowed inside this range field only.
+          "image_url": ""    // string | omit — Wikimedia portrait. NOTE: the
+                             // shared person shape has no attribution or caption
+                             // field, so there is no place to credit a licence
+                             // here. Use only public-domain or CC0 portraits for
+                             // cast, or omit the image. Do not invent an
+                             // image_attribution field on this object (see the
+                             // shape note above). Flag to the implementer if the
+                             // renderer needs an attribution surface.
+        }
+        // Repeat object per figure. 2–4 (HARD constraint). Lead players only;
+        // do not list every name the story mentioned.
+      ]
+    },
+
+    {
+      "type": "historical_context",  // OPTIONAL — "The Era". The broader
+      "order": 14,                    // historical backdrop: what else was
+                                      // happening, what a reader should know
+                                      // about the period to feel the full weight
+                                      // of the stakes. Include when the story's
+                                      // significance depends on context the
+                                      // reader may not carry.
+                                      // Skip when the setting section already
+                                      // gave enough, or when the story is recent
+                                      // and needs no period briefing. Do not
+                                      // repeat the setting in different words.
+      "content": ""                   // string — the wider period, written for a
+                                      // reader who may not know it. Connects the
+                                      // story to its time without retelling the
+                                      // plot. Length guideline: 60–140 words.
+                                      // Guideline only. No em-dashes.
+    },
+
+    {
+      "type": "sources",  // REQUIRED — "Sources & Further Reading". The
+      "order": 15,         // true-stories-only principle made checkable: every
+                           // claim in the post traces to a real source. For a
+                           // format built on real events, this section is the
+                           // foundation of trust, not an afterthought.
+      // array[1–10]. Prefer primary documents and solid histories over generic
+      // web pages. Wikipedia is acceptable as one accessible entry but should
+      // not stand alone for a well-documented story. Every URL must resolve.
+      "content": [
+        {
+          "label": "",   // string — human-readable reference. Full citation or
+                         // site name: "Trial transcript, R v. Smith (1910),
+                         // Old Bailey Online" or "Erik Larson, The Devil in the
+                         // White City (2003)".
+          "url": "",     // string — full URL.
+          "type": ""     // "wikipedia"|"paper"|"book"|"article"|"database"
+        }
+        // Repeat object per source. At least 2 recommended; 1 is the minimum
+        // only when a single authoritative source genuinely dominates.
+      ]
+    }
+
+  ]
+}

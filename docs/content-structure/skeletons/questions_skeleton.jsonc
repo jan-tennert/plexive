@@ -1,0 +1,558 @@
+// questions_skeleton.jsonc
+// Deepscroll — Questions format skeleton.
+//
+// Every REQUIRED section must be present. OPTIONAL sections: include only
+// when they add genuine depth for this specific question, never as padding.
+//
+// Three principles distinguish the Questions format:
+//   1. The post does NOT deliver an answer. Its job is to make the reader
+//      think more clearly about a genuinely hard problem and leave knowing
+//      where they stand, not knowing "the solution". A Questions post that
+//      resolves the question is broken. The reader's own conclusion is the
+//      output; the post supplies the materials, not the verdict.
+//   2. THE STEELMAN DISCIPLINE IS THE WHOLE FORMAT. Each perspective is
+//      written as if its proponents are right, in the strongest version its
+//      best defenders would actually make. Every position gets equal space
+//      and equal respect. No "but of course this fails because…", no tonal
+//      tells (the position the author dislikes written flatter, hedged, or
+//      with a buried concession). If the reader can guess which view the
+//      AUTHOR personally holds, the post has failed. Two boundaries stop
+//      this from collapsing into mush:
+//        (a) Steelman only SERIOUS, live positions that a competent,
+//            informed person actually defends. Equal respect applies among
+//            the genuinely contested positions; it is NOT a mandate to
+//            invent a fake opposing camp, grant a fringe or empirically
+//            discredited view false parity, or manufacture a debate where
+//            the field has reached consensus. False balance is as much a
+//            failure as bias.
+//        (b) The post never declares which position is RIGHT. But it may
+//            report, WITH ATTRIBUTION, where the evidence or the field
+//            currently leans (inside where_they_clash, what_science_says,
+//            or where_the_debate_stands). Reporting the state of the debate
+//            is not the author picking a side. What is banned is the author
+//            signalling a personal verdict, and any suggestion that the
+//            question itself has been settled.
+//      When you catch yourself softening one camp to make another look
+//      better, that is the bug, not the style.
+//   3. Concrete before abstract. The spine runs question → setup (the vivid
+//      scenario) → why it's hard → the perspectives → where they clash →
+//      the reader's own turn. The reader meets the scenario and feels the
+//      difficulty before any named school of thought arrives.
+//
+// Section order follows the spec exactly:
+//   Part 1 (The Question): the_question → quiz_badge → setup → why_its_hard
+//   Part 2 (The Stakes):   at_a_glance → what_hangs_on_it?
+//   Part 3 (Perspectives): perspectives → where_they_clash → what_science_says?
+//   Part 4 (Your Turn):    your_turn
+//   Part 5 (Test):         quiz → related_posts?
+//   Part 6 (Context):      history_of_the_question? → where_the_debate_stands? → sources
+//
+// ━━━ LENGTH RULE (applies to every length range below) ━━━━━━━━━━━━━━━
+// All sentence counts, word counts, and perspective counts in this file
+// are GUIDELINES, not hard limits. A question with three serious live
+// positions gets three perspectives; one that genuinely splits five ways
+// gets five. Prefer clarity and balance over hitting a number. The only
+// HARD constraints are structural, fixed by the UI and the scoring system:
+// perspectives length 3–5, quiz length 5–10, quiz options length exactly 4
+// per question, your_turn prompts length 3–4, and related_posts length
+// exactly 3 (when included).
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
+// VISUALS: Questions is a visual-sparse format, by design. The general
+// style-guide expectation of several distinct visuals per post does NOT
+// apply here. Most Questions posts carry zero or one diagram. Add a visual
+// only where it genuinely clarifies, most often a single perspective-space
+// diagram on where_they_clash. Never insert a diagram to hit a visual
+// count, and never give one perspective a portrait or chart the others
+// lack (that is a tonal tell). Prose carries this format.
+//
+// See DEEPSCROLL_CONTENT_STRUCTURE.md (Questions section) for the full spec,
+// STYLE_GUIDE_LONGFORM.md for prose rules (em-dashes banned in user-facing
+// text; vocabulary blacklist applies; default voice is third-person
+// assertive, with "you" reserved for your_turn). SVG_STANDARD.md governs all
+// diagrams. Accent: emerald-400 #34d399.
+
+{
+  // ─── FEED CARD ──────────────────────────────────────────────────────
+  // What the user sees before tapping. A field label, the question itself
+  // as the anchor, a single framing line, and three teasers that promise
+  // the perspectives or stakes ahead. The card pulls because the question
+  // is genuinely hard, not because it promises a payoff. The reader should
+  // think "I want to figure out where I stand", never "I'll find out the
+  // answer". No clickbait, no rhetorical rephrasing, no false promise.
+  "feed_card": {
+    "field": "",                // string — small label above the question:
+                                // "Ethics", "Consciousness", "Free Will",
+                                // "Identity", "Justice". The domain the
+                                // question lives in, not an evaluative tag.
+    "the_question": "",         // string — THE ANCHOR. The question itself,
+                                // in quotation marks, rendered large. State
+                                // it cleanly with no preamble and no spin:
+                                // "Is it ever right to sacrifice one to save
+                                // five?" The question is the hook; do not
+                                // reword it into a teaser. No em-dashes; the
+                                // renderer does not transform feed-card text.
+    "framing_line": "",         // string — one sentence that sets the stakes
+                                // or paints the scenario. "A trolley is
+                                // heading for five workers. You can divert it
+                                // to a track with one." Frames; does not
+                                // hint at a "right" reaction.
+    "teasers": ["", "", ""],    // array[3], ~6 words each. The perspectives or
+                                // stakes the reader will meet, stated
+                                // even-handedly. "Utilitarian vs. Kantian
+                                // answers", "What neuroscience adds", "Why
+                                // most people freeze". Name the tension, never
+                                // tip which side wins. Vary structure across
+                                // the three.
+    "post_reading_time_min": 0, // integer — honest estimate; 5–17 min range
+                                // for Questions posts. Match the real read
+                                // length; do not undersell.
+    "post_difficulty": 1        // 1=accessible, 2=moderate, 3=demanding.
+                                // A vivid everyday dilemma lands at 1; a
+                                // dense metaphysical question with technical
+                                // positions sits at 3.
+  },
+
+  // ─── SECTIONS ───────────────────────────────────────────────────────
+  "sections": [
+
+    // ── PART 1 — THE QUESTION (~90 sec read) ─────────────────────────
+    // The question, isolated for impact, then the scenario that makes it
+    // vivid and the diagnosis of why it resists an easy answer. Each
+    // section here stands alone: a reader who stops after why_its_hard
+    // still leaves understanding what the problem is and why it bites.
+
+    {
+      "type": "the_question",  // REQUIRED — the question, isolated. This is
+      "order": 1,              // the first thing inside the post and it must
+                               // stand entirely on its own, with no commentary
+                               // wrapped around it.
+      "content": ""            // string — the question stated cleanly, large
+                               // typography, no preamble, no framing verb, no
+                               // "have you ever wondered". Just the question.
+                               // Match the_question in the feed card exactly,
+                               // or render it without the quotation marks the
+                               // card uses. No em-dashes.
+                               // Length guideline: one sentence.
+    },
+
+    {
+      "type": "quiz_badge",  // REQUIRED — signposts that a graded quiz waits
+      "order": 2,            // at the end. Pure retention signal, no teaching
+                             // content of its own: it gives the reader a
+                             // reason to scroll past the reflection to "earn
+                             // Elo". Keep it; posts without it lose the pull.
+      "content": ""          // string — format exactly: "🎯 N questions at
+                             // the end — earn Elo" where N matches the actual
+                             // quiz array length below. Keep N in sync if the
+                             // quiz grows or shrinks.
+    },
+
+    {
+      "type": "setup",  // REQUIRED — the concrete scenario or framing that
+      "order": 3,       // makes the question vivid. Concrete-before-abstract
+                        // in action: the reader should feel the dilemma before
+                        // any named position arrives. For thought experiments,
+                        // this is the scenario itself; for open questions, what
+                        // exactly is being asked and why it is not obvious.
+      "content": ""     // string — scenic writing. Lay out the situation so
+                        // the reader is standing inside it. Do not editorialise
+                        // about which response is right, and do not pre-load
+                        // the scenario toward one camp (the way you describe
+                        // the one person on the side track must not be warmer
+                        // than the five on the main track, or vice versa).
+                        // Do not use banned ta-da framings ("Picture this:",
+                        // "Imagine this:"); lead straight into the scene.
+                        // Length guideline: 3–5 sentences. Guideline only.
+    },
+
+    {
+      "type": "why_its_hard",  // REQUIRED — a diagnosis, not a teaser. What
+      "order": 4,              // makes this question genuinely difficult? Where
+                               // does intuition pull two ways, which values or
+                               // concepts collide, why does every clean answer
+                               // cost something. This section earns the reader's
+                               // attention by naming the real tension rather
+                               // than promising a reveal.
+      "content": ""            // string — the structural difficulty. Name the
+                               // competing intuitions or values precisely:
+                               // what we want to keep on each side, and why we
+                               // cannot keep both. Diagnose, do not hint at a
+                               // resolution. If the difficulty were resolvable
+                               // by one of the perspectives ahead, the question
+                               // would not deserve a post. Length guideline:
+                               // 60–140 words. Guideline only.
+    },
+
+    // ── PART 2 — THE STAKES (~1–2 min read) ──────────────────────────
+    // A compact metadata card, then an optional paragraph on why the
+    // question matters beyond a seminar room. A reader who stops here knows
+    // what the question is, why it is hard, and what rides on it.
+
+    {
+      "type": "at_a_glance",  // REQUIRED — compact metadata card. The frontend
+      "order": 5,             // renders the key-value pairs as a card. Fields
+                              // are Questions-specific; do not invent new keys
+                              // or rename these.
+      "content": {
+        "field": "",               // string — same domain label as the feed
+                                   // card: "Ethics", "Consciousness", etc.
+        "type": "",                // string — one of "thought experiment" |
+                                   // "open question" | "paradox". The kind of
+                                   // question this is.
+        "first_posed_by": "",      // string — who first framed it in this form:
+                                   // "Philippa Foot", "René Descartes". Use the
+                                   // best-attested origin; do not fabricate a
+                                   // single author for a question that emerged
+                                   // gradually (set to a school or era instead).
+        "year": "",                // string — when it was first posed in this
+                                   // form: "1967", "c. 1641", "Antiquity".
+                                   // Approximate honestly rather than invent
+                                   // false precision.
+        "still_debated": true,     // boolean — is the question live in current
+                                   // academic philosophy / science? Almost
+                                   // always true for a question worth a post;
+                                   // set false only if genuinely settled.
+        "post_reading_time_min": 0,// integer — must match the feed card value.
+        "post_difficulty": 1       // 1–3 — must match the feed card value.
+      }
+    },
+
+    {
+      "type": "what_hangs_on_it",  // OPTIONAL — "What Hangs On It"
+      "order": 6,
+      // Include when the question has real downstream consequences: how we
+      // punish, who we treat, what a machine is allowed to decide, whether a
+      // patient is "still there". A paragraph grounding the abstract question
+      // in stakes the reader can feel.
+      // Skip only when the question is purely abstract with no practical
+      // effect. Do not manufacture fake real-world stakes to fill the slot.
+      "content": ""               // string — the real-world implications, in
+                                  // prose. Name concrete domains where the
+                                  // answer changes something: law, medicine,
+                                  // AI policy, how we treat each other. Stay
+                                  // neutral on which answer those domains
+                                  // should adopt. Length guideline: 3–5
+                                  // sentences. Guideline only.
+    },
+
+    // ── PART 3 — THE PERSPECTIVES (~3–6 min read, the core) ──────────
+    // The structural heart of the format. Each serious position gets its
+    // own section, steelmanned: written as if its proponents are right,
+    // in the strongest form they would recognise as their own. Then
+    // where_they_clash analyses why the positions cannot be reconciled.
+
+    {
+      "type": "perspectives",  // REQUIRED — the core of the post.
+      "order": 7,
+      // array[3–5] (HARD constraint). Each item is one serious live position
+      // on the question. THE STEELMAN DISCIPLINE (header principle 2) is
+      // enforced item by item:
+      //   - Each perspective is written AS IF IT IS CORRECT. No hedging, no
+      //     "proponents claim", no "this view holds that" distancing. State
+      //     the position in its own confident voice.
+      //   - Equal space and equal respect across all items. If one body runs
+      //     120 words and rich with example while another gets 40 flat words,
+      //     the post is signalling a winner. Balance them.
+      //   - NO refutation inside a perspective. A perspective never argues
+      //     against another perspective; it makes its own strongest case.
+      //     The disagreement is collected separately, in where_they_clash.
+      //   - No tonal tells: do not write the view you find weaker with
+      //     flatter prose, a buried concession, or a faint sneer. The reader
+      //     must not be able to infer the author's own stance from tone.
+      //   - SERIOUS POSITIONS ONLY (header principle 2a). Each item must be
+      //     a position a competent, informed defender actually holds. Do not
+      //     reach the minimum of 3 by inventing a strawman "other side", and
+      //     do not elevate a fringe or discredited view to equal standing
+      //     just to create symmetry. If you cannot find three genuinely
+      //     live positions, the question is a poor fit for this format;
+      //     padding with a fake camp is worse than not writing the post.
+      //     (A "dissolve the question" or "it depends on distinction X"
+      //     position is often a legitimate third where two camps dominate.)
+      // Order the perspectives by something neutral (chronological, or the
+      // order they enter the debate), never best-to-worst.
+      "content": [
+        {
+          "position_name": "",      // string — the position named as its
+                                    // holders would name it: "Save the five",
+                                    // "Never use a person as a means",
+                                    // "It depends on the act/omission line".
+                                    // Not "The utilitarian objection".
+          "school_or_thinker": "",  // string | omit — the school and key
+                                    // figures behind it: "Utilitarianism /
+                                    // Bentham, Mill", "Kantian deontology /
+                                    // Kant". Omit only for positions with no
+                                    // clear lineage.
+          "body": "",               // string — the position explained in its
+                                    // own voice, as if correct. Concrete
+                                    // before abstract: show the position
+                                    // handling the setup's scenario, then the
+                                    // principle underneath. Do not reference
+                                    // the other perspectives; do not concede.
+                                    // This is the steelman in full. Length
+                                    // guideline: 80–160 words, and keep the
+                                    // lengths close across perspectives.
+          "strongest_argument": "", // string — the one-sentence distilled
+                                    // steelman: the single hardest point this
+                                    // position makes, the thing an opponent
+                                    // most has to answer. Stated as a claim,
+                                    // not "they would argue that". Do not just
+                                    // recycle body's last sentence; compress
+                                    // the whole case into its hardest punch.
+          "concrete_example": "",   // string | omit — a real or vivid case
+                                    // where this position gives the compelling
+                                    // answer. Optional but strong; include
+                                    // one for each perspective if you can, to
+                                    // keep the items balanced.
+          "image_url": "",          // string | omit — Wikimedia portrait of
+                                    // the key thinker. If you add a portrait
+                                    // to one perspective, prefer adding one to
+                                    // each, so no single position gets a face
+                                    // and the others do not.
+          "image_attribution": "",  // string | omit — required when image_url
+                                    // is set. Licence + source (Wikimedia).
+          "visual_svg": ""          // string | omit — rare here; most
+                                    // perspectives are prose. Add only if this
+                                    // one position has a genuinely diagrammable
+                                    // structure. Per SVG_STANDARD.md,
+                                    // emerald-400 #34d399 accent, viewBox
+                                    // "0 0 400 300". See the VISUALS note in
+                                    // the header before adding one.
+        }
+        // Repeat object per position. 3 minimum, 5 maximum (HARD constraint).
+        // Three sharp, balanced positions beat five where two are padding.
+      ]
+    },
+
+    {
+      "type": "where_they_clash",  // REQUIRED — the intellectual heart.
+      "order": 8,
+      // Visuals are sparser in Questions than in other formats. Where a
+      // visual earns its place, it is usually HERE: a 2x2 matrix or an axes
+      // diagram mapping the perspectives against the values they trade off
+      // (e.g. "outcomes vs. rules" on one axis) can show the shape of the
+      // disagreement at a glance. Optional, never required. If used, it goes
+      // on this section, follows SVG_STANDARD.md (emerald-400 #34d399), and
+      // must place each perspective even-handedly, not toward a "correct"
+      // quadrant.
+      "content": ""               // string — analysis, not summary. Pull out
+                                  // the deepest disagreements and explain WHY
+                                  // they cannot be reconciled: what each side
+                                  // would have to give up to agree, and why
+                                  // neither can. This is where the post is
+                                  // allowed to be its sharpest, because
+                                  // describing an irreconcilable clash does
+                                  // not require picking a winner. Stay neutral
+                                  // on resolution; be precise on the fault
+                                  // line. Length guideline: 100–200 words.
+    },
+
+    {
+      "type": "what_science_says",  // OPTIONAL — "What Science Adds"
+      "order": 9,
+      // Include for questions where empirical research genuinely constrains
+      // the debate: free will (Libet and successors), consciousness (neural
+      // correlates), moral psychology (trolley-problem fMRI work). Science
+      // here CONSTRAINS the question; it does not RESOLVE it. Say so plainly:
+      // present what is measured, then mark where the measurement stops and
+      // the philosophy resumes. Do not let an empirical finding masquerade
+      // as the answer.
+      // Skip for purely conceptual questions where no experiment bears on
+      // the dispute (the classic trolley problem in its armchair form).
+      "content": {
+        "body": "",              // string — what neuroscience / psychology /
+                                 // physics has contributed, in prose, and the
+                                 // explicit limit: what it settles and what it
+                                 // leaves open. Length guideline: 80–160 words.
+        "key_findings": [        // array | omit — specific findings, each one
+                                 // line, attributed where possible ("Libet
+                                 // (1983): readiness potential precedes
+                                 // reported intention by ~350ms"). Include when
+                                 // the research reduces cleanly to a few
+                                 // landmark results; omit if the body carries
+                                 // it. Each item is a finding, not a verdict on
+                                 // the question.
+          ""
+        ],
+        "visual_svg": "",        // string | omit — a chart or diagram of a
+                                 // finding, if one clarifies. Per
+                                 // SVG_STANDARD.md, emerald-400 #34d399 accent.
+        "image_url": "",         // string | omit — Wikimedia or royalty-free
+                                 // image (an experimental setup, a brain-scan
+                                 // figure). Omit if none genuinely fits.
+        "image_attribution": ""  // string | omit — required when image_url is
+                                 // set. Licence + source.
+      }
+    },
+
+    // ── PART 4 — WHERE YOU STAND ─────────────────────────────────────
+    // The climax. Not a debate-club "what do you think?", but specific
+    // provocations that force the reader to commit to a position. This is
+    // the one place the post turns toward the reader, and it must stay
+    // open-ended: it invites the reader's own thinking, it never nudges
+    // toward an answer.
+
+    {
+      "type": "your_turn",  // REQUIRED — the reflection, designed as a brief
+      "order": 10,          // private exercise. The whole post builds to this.
+                            // OPEN-ENDED IS THE RULE: every prompt below
+                            // invites the reader to find their own position;
+                            // none of them is a leading question with an
+                            // implied right answer. "Doesn't it seem obvious
+                            // that…" is a failure. A prompt that pushes one
+                            // perspective is the steelman discipline breaking
+                            // at the finish line.
+      "content": {
+        "intro": "",         // string — one or two sentences handing the
+                             // question back to the reader. Sets up the
+                             // prompts without summarising "the answer" (there
+                             // is none). "you" is appropriate from here on.
+        "prompts": [         // array[3–4] (HARD constraint). Each prompt is a
+                             // specific provocation that pushes on a DIFFERENT
+                             // intuition, forcing the reader to commit. Each
+                             // should be answerable in either direction with
+                             // dignity. Good: "Would you pull the lever if the
+                             // one person were your child? If not, what does
+                             // that reveal about your principle?" Bad:
+                             // "Don't you really think saving five is right?"
+          ""
+          // Repeat per prompt. 3 minimum, 4 maximum.
+        ],
+        "closing_thought": ""// string | omit — one sentence that leaves the
+                             // reader holding the question, not a resolution.
+                             // It may name the difficulty of choosing; it must
+                             // not reveal or imply where the author lands.
+                             // Omit rather than end on a nudge.
+      }
+    },
+
+    // ── PART 5 — TEST YOURSELF ───────────────────────────────────────
+
+    {
+      "type": "quiz",  // REQUIRED — affects Elo score
+      "order": 11,
+      // array[5–10] (HARD constraint), exactly 4 options per question (HARD
+      // constraint). The quiz tests PERSPECTIVE IDENTIFICATION and
+      // understanding, NEVER which position is correct. Good questions:
+      // "Which view would hold that diverting the trolley is required, not
+      // merely permitted?", "Which distinction does the act/omission
+      // objection turn on?", "Thomson's Loop variant was designed to put
+      // pressure on which principle?". Forbidden: any question whose answer
+      // is "the right thing to do", or that grades the reader's moral
+      // stance. Bare name-and-date recall ("In what year did Foot publish?")
+      // is also weak; if you test history, test the MOVE a thinker made, not
+      // the calendar. Distractors are the OTHER perspectives and their real
+      // claims, so a reader who skimmed could plausibly mix them up.
+      // Difficulty should spread: a couple easy (anyone who read can
+      // answer), a few medium (recall a specific argument), one or two hard
+      // (tell two adjacent positions apart at their closest).
+      "content": [
+        {
+          "question": "",
+          "options": ["", "", "", ""],  // exactly 4
+          "answer_index": 0,            // 0–3
+          "explanation": ""             // string — one or two sentences that
+                                        // TEACH the distinction, not just
+                                        // declare the answer. Do not begin with
+                                        // "The correct answer is…". Explain why
+                                        // the position identified holds what it
+                                        // holds. Never frame any position as
+                                        // the morally correct one.
+        }
+        // Repeat object per question. 5 minimum, 10 maximum.
+      ]
+    },
+
+    {
+      "type": "related_posts",  // OPTIONAL — "Questions That Connect"
+      "order": 12,
+      // Include when 3 genuinely related posts exist: a neighbouring
+      // question, a person who shaped the debate, or a concept the question
+      // turns on. The three slots ideally span the network: another question
+      // + a thinker + a concept. Skip rather than pad with loose links.
+      "content": [
+        {
+          "post_id": "",      // string — leave empty if not yet assigned.
+          "title": "",        // string
+          "format": "",       // "books"|"facts"|"people"|"concepts"|
+                              // "questions"|"stories"|"academy"
+          "mini_teaser": ""   // string — one sentence on why it connects.
+        }
+        // Exactly 3 items when included (HARD constraint).
+      ]
+    },
+
+    // ── PART 6 — CONTEXT (smaller typography, secondary) ─────────────
+    // These sit below the natural end-point. A reader who stopped at the
+    // quiz got the full experience; these reward those who want the
+    // history of the debate (history_of_the_question), its current state
+    // (where_the_debate_stands), or the references (sources).
+
+    {
+      "type": "history_of_the_question",  // OPTIONAL — "History of the Question"
+      "order": 13,
+      // Include for canonical questions with a real lineage: free will since
+      // Augustine, mind-body since Descartes, the trolley problem since Foot
+      // and Thomson. Trace how the question evolved, who reframed it, which
+      // moment shifted the conversation. Report the history even-handedly:
+      // describe how each camp gained or lost ground without ruling on who
+      // was right.
+      // Skip for newly minted or niche questions with no documented history.
+      "content": ""                      // string — the evolution of the
+                                         // question over time, in prose, with
+                                         // attributed turning points. Length
+                                         // guideline: 100–200 words. Guideline
+                                         // only.
+    },
+
+    {
+      "type": "where_the_debate_stands",  // OPTIONAL — "Where the Debate Stands Today"
+      "order": 14,
+      // Include when there is a reportable current state: which positions are
+      // gaining traction, which are fading, where the live disagreements sit
+      // now in academic philosophy / cognitive science / ethics. Be honest
+      // about the lack of consensus, which is the usual state for a question
+      // worth a post. Reporting that a position is currently ascendant is a
+      // claim about the field, not an endorsement; keep that line clear.
+      // Skip if the current state is indistinguishable from the history.
+      "content": ""                      // string — the current state of the
+                                         // discussion, attributed where
+                                         // possible, honest about open
+                                         // disagreement. Do not let "currently
+                                         // popular" slide into "therefore
+                                         // correct". Length guideline: 80–160
+                                         // words. Guideline only.
+    },
+
+    {
+      "type": "sources",  // REQUIRED — "Sources & Further Reading". Exists so
+      "order": 15,         // every claim and every attribution in the post is
+                           // checkable. A post that puts words in a
+                           // philosopher's mouth without a source erodes the
+                           // trust the whole feed depends on; this section is
+                           // that trust made visible. For Questions, prioritise
+                           // a balanced reference set: a primary text for each
+                           // major perspective where possible, so no camp is
+                           // sourced and another merely asserted.
+      // array[1–10]. Prefer primary texts (the original papers and books that
+      // stated each position) plus an accessible overview. The Stanford
+      // Encyclopedia of Philosophy is an excellent entry. Wikipedia is
+      // acceptable for accessibility but should not be the only source. Every
+      // URL must resolve.
+      "content": [
+        {
+          "label": "",   // string — human-readable reference. Full citation or
+                         // site name: "Judith Jarvis Thomson, 'The Trolley
+                         // Problem', Yale Law Journal (1985)" or "Stanford
+                         // Encyclopedia of Philosophy: Doing vs. Allowing
+                         // Harm".
+          "url": "",     // string — full URL.
+          "type": ""     // "wikipedia"|"paper"|"book"|"article"|"database"
+        }
+        // Repeat object per source. At least 2 recommended; aim to cover the
+        // perspectives evenly.
+      ]
+    }
+
+  ]
+}
