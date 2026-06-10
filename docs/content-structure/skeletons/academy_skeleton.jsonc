@@ -1,0 +1,758 @@
+// academy_skeleton.jsonc
+// Deepscroll — Academy format skeleton.
+//
+// ━━━ HOW TO USE THIS SKELETON ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// This file is the canonical template for every Academy post. To generate a
+// post: fill each content field, DROP every OPTIONAL section object you do not
+// use (never leave one in with empty strings), and keep each remaining
+// section's `type` string and `order` integer EXACTLY as given here. The
+// renderer sorts by `order`, so the gaps left by dropped sections are expected
+// and fine; do NOT renumber to close them. Output valid JSON only: strip every
+// // comment and use no trailing commas. A minimal valid post is the 12
+// REQUIRED sections with key_findings holding at least 3 findings. Before
+// output, run the AI-tell check from STYLE_GUIDE_LONGFORM.md: zero em-dashes,
+// no contrast frames ("not just X, but Y"), no banned vocabulary, no hedging
+// preambles, headings that are claims rather than labels.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
+// Academy is the seventh format and the most technically idiosyncratic one.
+// It lives in its OWN feed tab, separate from the six format tabs (Books,
+// Facts, People, Ideas, Q&A, Stories) and the default For You tab. A reader
+// opens the Academy tab the way they would open a journal. The renderer treats
+// Academy as a distinct surface with its own accent and its own section
+// components.
+//
+// Every REQUIRED section must be present (12 required of 23 total). OPTIONAL
+// sections: include only when they add real value for THIS specific paper,
+// never as padding. A routine empirical paper skips historical_context and
+// formalism; a theoretical paper leans on formalism and may skip
+// data_or_sample.
+//
+// Three principles distinguish the Academy format:
+//   1. Accessibility comes through STRUCTURE, not simplification. Fachsprache,
+//      notation, p-values, effect sizes, and method names stay untranslated.
+//      The goal is that a neuroscientist can follow a Machine Learning paper
+//      and an advanced undergrad in the field can read it with effort. Do NOT
+//      dilute the math or the vocabulary to widen the audience. The structure
+//      (paper-at-a-glance first, method in the middle, critique and
+//      implications last) is what carries a non-specialist through, not
+//      dumbed-down prose.
+//   2. The equations are CONSTITUTIVE, not decorative. For a mathematical or
+//      theoretical paper the formalism is not an optional ornament sitting next
+//      to the "real" explanation, it IS the explanation. An equation in this
+//      format is load-bearing the way the mechanism diagram is load-bearing in
+//      Concepts: remove it and the argument loses its spine. Schema-wise the
+//      equations are a SEPARATE primitive, not part of the visual_svg/image_url
+//      visual system (see the spec's Visual Conventions), yet on the page they
+//      carry as much weight as a figure. The formalism SECTION is optional only
+//      because not every paper is mathematical; where a paper's contribution is
+//      a model or a derivation, the equations are mandatory and central. The
+//      headline_figure is the format's other load-bearing display element: the
+//      paper's central visual evidence, required for every post.
+//   3. Take a stance on quality. Academy does not summarise neutrally. It
+//      distinguishes what is strong from what is weak in the paper, keeps the
+//      authors' own admitted limitations strictly separate from the community's
+//      broader objections, and reports the result direction honestly. A null
+//      or negative result is not "weaker" than a positive one and must never be
+//      framed as a disappointment.
+//
+// Section order follows the spec exactly:
+//   Part 1 (The Paper at a Glance): paper_card -> quiz_badge -> tldr ->
+//           headline_figure -> at_a_glance
+//   Part 2 (The Research Question): the_question -> the_big_idea? ->
+//           field_context?
+//   Part 3 (The Method): approach -> formalism? -> data_or_sample?
+//   Part 4 (The Findings): key_findings -> figures? -> robustness?
+//   Part 5 (Critical Reading): limitations -> objections?
+//   Part 6 (Why It Matters): implications -> connections_to_other_fields?
+//   Part 7 (Test Yourself): quiz -> related_posts?
+//   Part 8 (Context): authors_context? -> historical_context? -> sources
+//
+// ━━━ KaTeX / LaTeX CONVENTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// The spec defines equations only as an array of {latex, label?, description}
+// and does NOT state a delimiter convention. The rules below are the adopted
+// convention; confirm the renderer wiring in Claude Code before bulk
+// generation, since whether delimiters are needed depends on how the KaTeX
+// component is mounted.
+//
+// Math lives in two kinds of places, delimited differently:
+//   1. STRUCTURED math fields rendered by a dedicated KaTeX component
+//      (formalism.equations[].latex and formalism.notation_legend[].symbol):
+//      store BARE LaTeX with NO delimiters. equations[].latex is meant to
+//      render as a display block, symbol as inline. Write "\\nabla F = 0",
+//      not "$$\\nabla F = 0$$". (JSON needs a doubled backslash for each LaTeX
+//      backslash: "\\mathcal{L}".)
+//   2. Math EMBEDDED IN PROSE strings (tldr, the_question, approach.body, a
+//      finding's `finding`, a quiz `question` or `explanation`, etc.): wrap
+//      inline math in single dollars, "$\\mathcal{L}$", and a display equation
+//      in double dollars, "$$\\nabla F = 0$$". Prefer inline $...$ in prose; a
+//      standalone display equation usually belongs in formalism.equations
+//      rather than mid-paragraph.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
+// ━━━ LENGTH RULE (applies to every length range below) ━━━━━━━━━━━━━━━
+// All sentence counts, word counts, and item counts in this file are
+// GUIDELINES, not hard limits. A paper with five genuine findings gets five;
+// one with three gets three. Prefer depth and accuracy over hitting a number.
+// The only HARD constraints are structural, fixed by the UI and the scoring
+// system: key_findings length 3–7, figures length 1–4 (when included), quiz
+// length 5–10 with exactly 4 options per question, and related_posts length
+// exactly 3 (when included).
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
+// NAMING NOTE: the build brief listed an `arxiv_url` field. The canonical spec
+// (DEEPSCROLL_CONTENT_STRUCTURE.md, paper_card shape) names it `arxiv_id`
+// (e.g. "2410.01234"). This skeleton follows the spec so the Pydantic schema
+// and renderer agree. If a full arXiv URL is wanted instead, change it in the
+// spec first, then here. Until then: arxiv_id holds the bare ID.
+//
+// See DEEPSCROLL_CONTENT_STRUCTURE.md (Academy section) for the full spec,
+// STYLE_GUIDE_LONGFORM.md for prose rules (em-dashes banned everywhere in
+// user-facing text; vocabulary blacklist applies; Academy voice is DIRECT:
+// "you", "we", active verbs, no "it has been shown that"). SVG_STANDARD.md
+// governs all diagrams. Accent: indigo-400 #818cf8 (Academy's own colour,
+// distinct from the other six formats).
+
+{
+  // ─── FEED CARD ──────────────────────────────────────────────────────
+  // What the reader sees in the Academy tab before tapping. The ANCHOR is the
+  // finding, not a teaser: a field label, the paper title, the authors, and one
+  // technical sentence stating the result. The reader should think "Have I read
+  // this? Should I?" the way they would scanning a conference programme. Do not
+  // dumb the one-liner down and do not use provocation framing ("the shocking
+  // result that…"); state the finding as a colleague would.
+  "feed_card": {
+    "field": "",                  // string — small label above the title:
+                                  // "Cognitive Neuroscience", "Machine
+                                  // Learning", "Quantum Optics". This is also
+                                  // the value the Academy tab FILTERS on, so use
+                                  // the canonical field name, not a clever gloss.
+    "title": "",                  // string — the paper title, primary
+                                  // typography. May be truncated for display by
+                                  // the renderer; store the full title here.
+    "authors_compact": "",        // string — short citation form, "Smith et
+                                  // al., 2024". One or two names plus "et al."
+                                  // and the year. Full author list lives in
+                                  // paper_card below.
+    "key_finding_one_line": "",   // string — the core finding in ONE technical
+                                  // sentence, the kind heard in a conference
+                                  // summary. Not dumbed down. Report the result,
+                                  // including null or negative results plainly:
+                                  // "Pre-registered replication of the Florida
+                                  // effect finds no priming (d = 0.01)." This is
+                                  // the promise the card makes.
+    "teasers": ["", "", ""],      // array[3], ~6 words each. Methodological
+                                  // highlights or key claims, not the finding
+                                  // reworded: "Pre-registered, n = 1,200",
+                                  // "Bayesian model beats baseline", "Kahneman
+                                  // 2011 fails to replicate". Vary structure
+                                  // across the three; each is a distinct hook.
+    "post_reading_time_min": 0,   // integer — honest estimate, 7–18 min range
+                                  // for Academy. Match the real read length; do
+                                  // not undersell a dense paper summary.
+    "post_difficulty": 3,         // 1 | 2 | 3 on the ACADEMY-specific scale
+                                  // (1 = accessible to advanced undergrads or
+                                  // adjacent fields; 2 = domain expertise
+                                  // required; 3 = specialist-level, deep subfield
+                                  // knowledge). Academy posts are USUALLY 3.
+                                  // Drop to 2 or 1 only for genuinely broad or
+                                  // introductory papers.
+    "published_year": 0,          // integer — the paper's publication year. Used
+                                  // in the card meta line and for sorting.
+    "venue": ""                   // string — journal or conference acronym:
+                                  // "Nature", "NeurIPS", "PRL", "PNAS". Where a
+                                  // paper is a preprint with no venue yet, use
+                                  // "arXiv" or "preprint".
+  },
+
+  // ─── SECTIONS ───────────────────────────────────────────────────────
+  "sections": [
+
+    // ── PART 1 — THE PAPER AT A GLANCE (~60 sec read) ────────────────
+    // Citation, a one-line quiz promise, the expert TL;DR, the central figure,
+    // and the methodological summary card. A reader who stops after this part
+    // still walks away able to cite the paper and state its result.
+
+    {
+      "type": "paper_card",  // REQUIRED — the full citation block. This is the
+      "order": 1,            // bibliographic record: everything needed to find,
+                             // cite, and verify the paper. At least one of `doi`
+                             // and `arxiv_id` MUST be present (both when both
+                             // exist) so every Academy post is independently
+                             // locatable.
+      "content": {
+        "title": "",            // string — full paper title (not truncated).
+        "authors": [            // array — every author with affiliation, in the
+                                // paper's own author order. This is the complete
+                                // list; authors_compact in the feed card is the
+                                // short form, and authors_context (Part 8) is the
+                                // optional prose portrait. Do not invent
+                                // affiliations; omit one if genuinely unknown.
+          {
+            "name": "",         // string — author name as printed on the paper.
+            "affiliation": ""   // string — institution, "MIT", "DeepMind",
+                                // "Max Planck Institute for Brain Research".
+          }
+          // Repeat per author, in published order.
+        ],
+        "venue": "",            // string — full journal or conference name, or
+                                // acronym if that is how it is cited.
+        "year": 0,              // integer — publication year.
+        "doi": "",              // string | omit — the DOI, "10.1038/s41586-...".
+                                // Present when published. At least one of doi /
+                                // arxiv_id is required.
+        "arxiv_id": "",         // string | omit — bare arXiv ID, "2410.01234"
+                                // (NOT a full URL; see NAMING NOTE in the header).
+                                // Present for anything with a preprint.
+        "code_url": "",         // string | omit — repository link if the paper
+                                // releases code. Powers the open_code flag in
+                                // at_a_glance; keep them consistent.
+        "data_url": "",         // string | omit — dataset link if data is
+                                // released. Mirrors open_data in at_a_glance.
+        "funding_source": "",   // string | omit — funders, where disclosed.
+                                // Include when relevant to reading the result
+                                // (e.g. industry-funded clinical trials).
+        "conflicts_of_interest": "" // string | omit — declared conflicts. Include
+                                // verbatim from the paper when present; this is
+                                // part of reading the work critically, not an
+                                // accusation.
+      }
+    },
+
+    {
+      "type": "quiz_badge",  // REQUIRED — signposts the graded quiz at the end.
+      "order": 2,            // Pure retention signal, no teaching content: it
+                             // gives the reader a reason to scroll past
+                             // implications to "earn Elo". Academy readers are
+                             // competitive about their own field, so the badge
+                             // pulls harder here than elsewhere.
+      "content": ""          // string — format exactly: "🎯 N questions at the
+                             // end — earn Elo" where N matches the actual quiz
+                             // array length below. Keep N in sync if the quiz
+                             // grows or shrinks. (Fixed UI template string; the
+                             // em-dash here is part of the template, not prose.)
+    },
+
+    {
+      "type": "tldr",  // REQUIRED — the summary an expert would give a colleague
+      "order": 3,      // in the hallway. Technical, not simplified. States the
+                       // core finding and why it matters to the field in two or
+                       // three sentences. A reader who stops here can repeat the
+                       // result accurately to a peer.
+      "content": ""    // string — 2–3 technical sentences. Lead with the result,
+                       // not the setup. Notation and inline math allowed; wrap
+                       // inline math in $...$. No hedging preamble ("it is worth
+                       // noting that…"), no buzzwords. Length guideline: 2–3
+                       // sentences, ~40–80 words. Guideline only.
+    },
+
+    {
+      "type": "headline_figure",  // REQUIRED — the paper's central visual
+      "order": 4,                  // evidence, and the format's load-bearing
+                                   // visual (the formalism equations are the
+                                   // other constitutive element, a separate
+                                   // primitive). This is the single image that,
+                                   // on its own, conveys the result: the key
+                                   // plot, the architecture diagram, the effect.
+                                   // Treat it as load-bearing, not as a banner.
+      // At least one of `visual_svg` or `image_url` MUST be present. Use
+      // image_url for the paper's own most important figure WITH attribution
+      // (respect the licence; many journal figures are not freely reusable, so
+      // prefer arXiv/open-access versions or a rebuilt SVG). Use visual_svg to
+      // rebuild the figure when the original cannot be reproduced.
+      "content": {
+        "visual_svg": "",          // string | omit — rebuilt figure per
+                                   // SVG_STANDARD.md: viewBox "0 0 400 300", no
+                                   // width/height, transparent background,
+                                   // currentColor for neutral/structural
+                                   // elements, indigo-400 #818cf8 for the one
+                                   // highlighted element. Stroke-based, flat, no
+                                   // gradients or shadows. Prefer rebuilding over
+                                   // a non-free journal image.
+        "image_url": "",           // string | omit — the paper's own figure,
+                                   // only if its licence permits reuse. Must
+                                   // pair with image_attribution.
+        "image_caption": "",       // string | omit — technical AND conceptually
+                                   // accessible. Names the axes/quantities and
+                                   // says what the figure shows. Required when
+                                   // image_url is set; recommended for an SVG too.
+        "image_attribution": ""    // string | omit — licence + source. REQUIRED
+                                   // when image_url is set (Wikimedia / arXiv /
+                                   // CC compliance). Omit for a self-built SVG.
+      }
+    },
+
+    {
+      "type": "at_a_glance",  // REQUIRED — the methodological summary card. A
+      "order": 5,             // generic key-value container the renderer prints
+                              // as a card; for Academy it surfaces the metadata a
+                              // reader uses to judge a paper at a glance. Fill
+                              // every applicable key honestly. result_direction
+                              // and replication_status are the two most
+                              // consequential fields, so never fudge them.
+      "content": {
+        "study_type": "",            // string — "RCT" | "observational" |
+                                     // "theoretical" | "computational" |
+                                     // "meta-analysis" | "review" | other. Use
+                                     // the term the field uses.
+        "sample_size": "",           // string | omit — "n = 1,200", "12 datasets",
+                                     // "3 model scales". Omit for purely
+                                     // theoretical papers with no sample.
+        "pre_registered": false,     // boolean — was the study pre-registered?
+        "open_data": false,          // boolean — is the data released? Keep
+                                     // consistent with data_url in paper_card.
+        "open_code": false,          // boolean — is the code released? Keep
+                                     // consistent with code_url in paper_card.
+        "replication_status": "",    // string — "none" | "partial" | "full" |
+                                     // "failed". "failed" is a legitimate and
+                                     // important value, not a stain to hide.
+        "peer_review_status": "",    // string — "preprint" | "under_review" |
+                                     // "published".
+        "result_direction": "",      // string — "positive" | "negative" | "null"
+                                     // | "mixed". Report honestly. A null result
+                                     // is often more informative than a positive
+                                     // one; never soften it.
+        "post_reading_time_min": 0,  // integer — same value as the feed card.
+        "post_difficulty": 3         // 1–3 on the Academy scale; same value as
+                                     // the feed card.
+      }
+    },
+
+    // ── PART 2 — THE RESEARCH QUESTION ───────────────────────────────
+    // What the paper is actually asking, and the debate it joins. the_question
+    // is required; the_big_idea and field_context are optional layers for
+    // papers that warrant cross-field translation or a literature setup.
+
+    {
+      "type": "the_question",  // REQUIRED — the question the paper sets out to
+      "order": 6,              // answer, stated precisely and connected to a live
+                               // debate in the field. Not "the authors study X"
+                               // but the actual open problem: what was unknown,
+                               // contested, or assumed that this paper tests.
+      "content": ""            // string — the precise research question and the
+                               // debate it enters. Assume domain knowledge; name
+                               // the prior positions if the question is a
+                               // referendum on them. Inline math in $...$.
+                               // Length guideline: 2–4 sentences. Guideline only.
+    },
+
+    {
+      "type": "the_big_idea",  // OPTIONAL — "The Big Idea". The paper's central
+      "order": 7,              // idea translated FOR EXPERTS IN ADJACENT FIELDS.
+                               // This is NOT simplification for laypeople: keep
+                               // the scientific level intact, only drop the
+                               // domain-specific notation. A physicist should
+                               // grasp an ML paper's contribution from this
+                               // paragraph without knowing the field's notation.
+      // Skip when the paper is so narrowly technical that no honest
+      // adjacent-field translation exists. Do not manufacture a folksy gloss.
+      "content": ""            // string — one paragraph, no domain-specific
+                               // notation, scientific level preserved. Length
+                               // guideline: 60–120 words. Guideline only.
+    },
+
+    {
+      "type": "field_context",  // OPTIONAL — "Where the Field Stood". The prior
+      "order": 8,                // work, the key disagreements, and why this
+                                 // question is being asked now. Assumes domain
+                                 // knowledge; this is the literature-review
+                                 // compression an expert reader expects.
+      // Include when the paper's contribution only makes sense against a
+      // specific prior state of the field. Skip for self-contained results.
+      "content": {
+        "body": "",            // string — the state of the field before this
+                               // paper: what was established, what was contested,
+                               // what gap this addresses. Length guideline:
+                               // 80–160 words. Guideline only.
+        "key_priors": [        // array | omit — the specific prior results this
+                               // paper builds on or argues against. Include when
+                               // naming them sharpens the contribution.
+          {
+            "citation": "",    // string — "Tononi 2004", "Vaswani et al. 2017".
+            "claim": ""        // string — the one claim from that prior work that
+                               // matters here, stated in a sentence.
+          }
+          // Repeat per prior. Typically 2–4; only the load-bearing ones.
+        ]
+      }
+    },
+
+    // ── PART 3 — THE METHOD (~2–4 min read) ──────────────────────────
+    // How the paper does what it does, at a technical level. approach is
+    // required. formalism carries the equations (constitutive when present) and
+    // data_or_sample documents the empirical material.
+
+    {
+      "type": "approach",  // REQUIRED — "The Approach". The methodology at a
+      "order": 9,          // technical level: the design, the choices behind it,
+                           // and what it controls for. Say WHY this design and
+                           // not an alternative. A reader should be able to judge
+                           // whether the method can actually answer the question.
+      "content": {
+        "body": "",        // string — the methodology, technically. Design,
+                           // rationale, controls, confounds addressed. Direct
+                           // voice ("we", "the authors") and active verbs.
+                           // Inline math in $...$. Length guideline: 120–250
+                           // words. Guideline only; a complex pipeline warrants
+                           // more.
+        "visual_svg": "",  // string | omit — a method/architecture diagram per
+                           // SVG_STANDARD.md, indigo-400 #818cf8 accent. A `flow`
+                           // diagram suits most pipelines. Distribute visuals:
+                           // this is a natural second visual after the headline
+                           // figure.
+        "image_url": ""    // string | omit — only if a real figure teaches the
+                           // method better than a diagram. Pair with attribution
+                           // (add image_caption/image_attribution alongside if
+                           // used).
+      }
+    },
+
+    {
+      "type": "formalism",  // OPTIONAL — "The Formalism". The equations, model,
+      "order": 10,          // and mathematical setup. Where a paper's
+                            // contribution IS a model or a derivation, the
+                            // equations here are CONSTITUTIVE: they carry the
+                            // argument the prose only gestures at. Render with
+                            // KaTeX. Always include a notation legend so a reader
+                            // from an adjacent field can follow the symbols.
+      // Include for theoretical, mathematical, or model-based papers. Skip for
+      // purely empirical papers with no formal model: do NOT invent equations to
+      // fill the slot, a fabricated formalism is worse than none. When you do
+      // include it, the equations are mandatory and central, not ornamental.
+      "content": {
+        "body": "",            // string — the mathematical setup in prose: what
+                               // the model represents, how the pieces fit, and a
+                               // sentence tying the formalism back to the
+                               // intuition so it does not float free. Inline math
+                               // in $...$. Length guideline: 80–200 words.
+        "equations": [         // array — the actual equations, each rendered as a
+                               // display block. This is the heart of the section;
+                               // when formalism is included it MUST hold at least
+                               // one equation. Order them as the derivation flows.
+          {
+            "latex": "",       // string — BARE LaTeX, NO delimiters (rendered as
+                               // a display block). JSON needs doubled
+                               // backslashes: "F = \\mathbb{E}_q[\\ln q(s) - \\ln p(o, s)]".
+            "label": "",       // string | omit — an equation number or short
+                               // name shown beside it, "(1)", "Free energy".
+            "description": ""  // string — one sentence on what the equation says
+                               // and why it matters. This is what makes the math
+                               // legible to an adjacent-field reader; do not skip
+                               // it. Inline math in $...$.
+          }
+          // Repeat per equation. Include every equation the argument needs;
+          // omit textbook identities the target reader already knows.
+        ],
+        "notation_legend": [   // array | omit — gloss each symbol. Include
+                               // WHENEVER equations are present: it is the bridge
+                               // that lets a reader from a neighbouring field
+                               // follow without dumbing the math down.
+          {
+            "symbol": "",      // string — BARE LaTeX, no delimiters (rendered
+                               // inline by KaTeX), e.g. "\\mathcal{L}".
+            "meaning": ""      // string — plain-language meaning, "the training
+                               // loss". Precise, not simplified.
+          }
+          // Repeat per symbol used above.
+        ]
+      }
+    },
+
+    {
+      "type": "data_or_sample",  // OPTIONAL — "Data & Sample". What data, what
+      "order": 11,               // subjects, what conditions. Inclusion and
+                                 // exclusion criteria. Power analysis where
+                                 // relevant. The grounding that lets a reader
+                                 // judge whether the sample supports the claim.
+      // Include for empirical and computational papers. Skip for purely
+      // theoretical work with no data.
+      "content": ""              // string — datasets, subjects, conditions,
+                                 // inclusion/exclusion criteria, power analysis
+                                 // if reported. Report numbers exactly; flag a
+                                 // detail clearly if uncertain rather than
+                                 // guessing. Length guideline: 60–160 words.
+                                 // Guideline only.
+    },
+
+    // ── PART 4 — THE FINDINGS (the core) ─────────────────────────────
+    // Where the paper earns its place. key_findings is the required heart;
+    // figures and robustness are optional reinforcement.
+
+    {
+      "type": "key_findings",  // REQUIRED — the substantive results, each as its
+      "order": 12,             // own block. This is the centre of the post. Each
+                               // finding states the result technically, reports
+                               // the effect size or significance, and where
+                               // possible points to the exact table or figure in
+                               // the paper. Take a stance: which findings are
+                               // strong, which are suggestive.
+      // array[3–7] (HARD constraint). Prefer 4 solid findings over 7 thin ones.
+      // Distribute a visual or two across the findings rather than front-loading.
+      "content": [
+        {
+          "title": "",             // string — 3–7 words naming the finding as a
+                                   // claim, not a label: "Scaling improves
+                                   // calibration", not "Result 1".
+          "finding": "",           // string — the result stated technically.
+                                   // What was found, in the field's own terms.
+                                   // Inline math in $...$. Length guideline:
+                                   // 1–3 sentences. Guideline only.
+          "effect_size": "",       // string | omit — the magnitude, "d = 0.42",
+                                   // "AUC = 0.91", "OR = 1.8". Include whenever
+                                   // the paper reports one; magnitude matters as
+                                   // much as significance.
+          "statistical_detail": "",// string | omit — p-values, confidence
+                                   // intervals, Bayes factors, "p < .001, 95% CI
+                                   // [0.31, 0.53]". Report as the paper does; do
+                                   // not translate into lay terms.
+          "source_in_paper": "",   // string | omit — the exact locus, "Table 2",
+                                   // "Fig. 4b". Lets a reader verify the claim
+                                   // against the paper directly.
+          "visual_svg": "",        // string | omit — a small rebuilt result
+                                   // figure for THIS finding, per SVG_STANDARD.md,
+                                   // indigo-400 #818cf8 accent. Use for the one
+                                   // or two findings a diagram clarifies.
+          "image_url": "",         // string | omit — the paper's own result
+                                   // figure, licence permitting; pair with
+                                   // image_caption and attribution.
+          "image_caption": ""      // string | omit — technical caption for the
+                                   // finding's visual. Required when image_url is
+                                   // set.
+        }
+        // Repeat per finding. 3–7 items (HARD constraint). Order by importance,
+        // not by the paper's section order; lead with the headline result.
+      ]
+    },
+
+    {
+      "type": "figures",  // OPTIONAL — "Headline Figures". Additional data
+      "order": 13,         // figures from the paper, beyond the single headline
+                           // figure in Part 1. Use for papers whose evidence is
+                           // genuinely multi-panel and where each figure adds
+                           // something the prose cannot.
+      // array[1–4] (HARD constraint). Only the paper's OWN figures here, each
+      // with attribution; rebuilt SVGs belong inside the finding they support.
+      "content": [
+        {
+          "figure_label": "",     // string — "Fig. 3", "Panel B".
+          "image_url": "",        // string — the figure, licence permitting.
+          "image_caption": "",    // string — technical caption naming what is
+                                  // plotted and what it shows.
+          "image_attribution": "" // string — licence + source. REQUIRED.
+        }
+        // Repeat per figure. 1–4 items (HARD constraint).
+      ]
+    },
+
+    {
+      "type": "robustness",  // OPTIONAL — "Robustness". The sensitivity analyses,
+      "order": 14,           // alternative specifications, ablations, and
+                             // internal replications. What survives scrutiny and
+                             // what the result hinges on. This is where a strong
+                             // paper separates from a fragile one.
+      // Include when the paper reports robustness checks worth surfacing. Skip
+      // when there is nothing beyond the headline analysis.
+      "content": ""          // string — what was varied and what held. Name the
+                             // checks ("ablating the attention heads", "leave-one-
+                             // dataset-out", "alternative priors") and the
+                             // outcome. Length guideline: 60–160 words. Guideline
+                             // only.
+    },
+
+    // ── PART 5 — CRITICAL READING ────────────────────────────────────
+    // The honesty layer. limitations and objections are kept STRICTLY separate:
+    // limitations is what the authors themselves concede; objections is the
+    // wider community's critique. Conflating them misrepresents both.
+
+    {
+      "type": "limitations",  // REQUIRED — "Limitations". ONLY what the AUTHORS
+      "order": 15,            // THEMSELVES admit cannot be concluded:
+                              // methodological caveats, sample constraints,
+                              // generalizability limits stated in their own
+                              // discussion section. Stay close to the paper.
+      "content": ""           // string — the authors' own admitted limits, in
+                              // their framing. Do NOT add the community's
+                              // critique here (that is `objections`). Do not
+                              // invent limitations the authors did not raise.
+                              // Length guideline: 60–140 words. Guideline only.
+    },
+
+    {
+      "type": "objections",  // OPTIONAL — "Objections & Open Questions". The
+      "order": 16,           // COMMUNITY'S broader critique, beyond the authors'
+                             // own admissions: peer-review responses, rebuttals,
+                             // follow-up papers, methodological counterarguments.
+      // Include when there is real community response. Skip if the paper is too
+      // new to have drawn one (and say so implicitly by omitting, not by padding
+      // with hypotheticals). Name the source of each objection; do not
+      // ventriloquise an anonymous "some researchers".
+      "content": ""          // string — the external critique, attributed.
+                             // "A 2025 rebuttal by Lee et al. argues the effect
+                             // is an artefact of…". Keep separate from
+                             // limitations. Length guideline: 60–160 words.
+                             // Guideline only.
+    },
+
+    // ── PART 6 — WHY IT MATTERS ──────────────────────────────────────
+    // The consequences. implications stays inside the field;
+    // connections_to_other_fields handles the cross-disciplinary bridges.
+
+    {
+      "type": "implications",  // REQUIRED — "Implications". What this changes
+      "order": 17,             // WITHIN the field: for theory, for practice, for
+                               // the next experiments. Concrete, not grand. What
+                               // would a researcher in this field do differently
+                               // after reading this?
+      "content": ""            // string — the in-field consequences. Name what is
+                               // now settled, reopened, or worth testing next.
+                               // No buzzwords ("game-changing"); say what
+                               // changes. Length guideline: 80–180 words.
+                               // Guideline only.
+    },
+
+    {
+      "type": "connections_to_other_fields",  // OPTIONAL — "Connections to Other
+      "order": 18,                            // Fields". The interdisciplinary
+                                              // bridges: where this paper opens to
+                                              // or constrains other disciplines
+                                              // (e.g. the Free Energy Principle
+                                              // across neuroscience, ML, and
+                                              // physics).
+      // Include when a genuine cross-field bridge exists. Skip for purely
+      // intra-field results; do not strain for a connection that is not there.
+      "content": ""                           // string — the cross-disciplinary
+                                              // links, named concretely. Length
+                                              // guideline: 60–140 words. Guideline
+                                              // only.
+    },
+
+    // ── PART 7 — TEST YOURSELF ───────────────────────────────────────
+
+    {
+      "type": "quiz",  // REQUIRED — affects Elo score. Academy quizzes are the
+      "order": 19,      // HARDEST of any format: technical terminology is
+                        // expected, and questions test real comprehension of the
+                        // method, the finding, and the limitations. Good Academy
+                        // questions ask the reader to APPLY an equation, identify
+                        // the methodology that would be needed, read an effect
+                        // size correctly, or judge what the result does and does
+                        // not license. Not trivia (no "what year", no "which
+                        // university").
+      // array[5–10] (HARD constraint), exactly 4 options per question (HARD
+      // constraint). Spread difficulty: 1–2 readable-after-skim, 2–3 requiring
+      // specific recall, 1–2 requiring synthesis across sections (e.g. combining
+      // a limitation with a finding). Distractors must be plausible: misreadings
+      // a careful reader would genuinely weigh, the classic over-claim of the
+      // result, a confusable method.
+      "content": [
+        {
+          "question": "",                  // string — short and technical.
+                                           // Inline math in $...$ where it
+                                           // belongs ("Given $p < .05$, which
+                                           // conclusion is licensed?").
+          "options": ["", "", "", ""],     // exactly 4. No "all/none of the
+                                           // above". Every wrong option a real
+                                           // misconception.
+          "answer_index": 0,               // 0–3 — index of the correct option.
+                                           // Vary it across questions; do not
+                                           // leave the answer always at 0
+                                           // (position bias is guessable and
+                                           // corrupts the Elo signal).
+          "explanation": ""                // string — one or two sentences that
+                                           // TEACH the reasoning, not just
+                                           // declare the answer. Do not start
+                                           // with "The correct answer is".
+                                           // Explain why the tempting distractor
+                                           // misreads the result.
+        }
+        // Repeat per question. 5 minimum, 10 maximum (HARD constraint).
+      ]
+    },
+
+    {
+      "type": "related_posts",  // OPTIONAL — "Papers That Connect". Three related
+      "order": 20,              // papers, key concepts, or central figures the
+                                // reader is primed to follow next. The three
+                                // slots ideally span: another paper + a Concepts
+                                // post for a method used + a People post for a
+                                // central figure in the field.
+      "content": [
+        {
+          "post_id": "",      // string — leave empty if not yet assigned.
+          "title": "",        // string.
+          "format": "",       // "books"|"facts"|"people"|"concepts"|
+                              // "questions"|"stories"|"academy".
+          "mini_teaser": ""   // string — one sentence on why it connects.
+        }
+        // Exactly 3 items when included (HARD constraint). Skip rather than pad
+        // with loose links.
+      ]
+    },
+
+    // ── PART 8 — CONTEXT (smaller typography, secondary) ─────────────
+    // Below the natural end-point. A reader who stopped at the quiz had the full
+    // experience; these reward those who want the people, the backstory, or the
+    // references.
+
+    {
+      "type": "authors_context",  // OPTIONAL — "The Authors". Brief portraits of
+      "order": 21,                 // the lead and senior/corresponding authors:
+                                   // who they are, where they work, and the
+                                   // prior work that situates this paper. For
+                                   // multi-author papers, lead + senior author is
+                                   // usually enough.
+      // Uses the shared person-list base shape; the `role` field describes their
+      // FUNCTION ON THE PAPER (lead / corresponding / senior author). Skip for
+      // routine papers where the authors' background adds nothing.
+      "content": [
+        {
+          "name": "",         // string — author name.
+          "role": "",         // string — function on the paper: "Lead author",
+                              // "Corresponding author", "Senior author".
+          "one_line": "",     // string | omit — brief note on relevant prior
+                              // work: "Introduced the transformer in 2017".
+          "affiliation": "",  // string | omit — institution.
+          "image_url": ""     // string | omit — Wikimedia portrait if one exists
+                              // freely; omit otherwise (do not hotlink a personal
+                              // or institutional headshot).
+        }
+        // Repeat per author surfaced. Typically the lead + senior author.
+      ]
+    },
+
+    {
+      "type": "historical_context",  // OPTIONAL — "The Backstory". For LANDMARK
+      "order": 22,                    // papers only: how it came to be written,
+                                      // the intellectual or institutional context
+                                      // that produced it. For routine papers,
+                                      // skip entirely.
+      "content": ""                   // string — the backstory of a landmark
+                                      // result. Length guideline: 80–180 words.
+                                      // Guideline only. Omit the whole section
+                                      // for ordinary papers.
+    },
+
+    {
+      "type": "sources",  // REQUIRED — "Sources & Further Reading". Every claim
+      "order": 23,         // in the post must be checkable; this section is that
+                           // trust made visible. The paper itself is the first
+                           // entry (paper or database type), plus the key prior
+                           // works cited and any accessible explainer.
+      // array[1–10]. The primary paper MUST appear. Prefer the original sources
+      // over secondary summaries; Wikipedia is acceptable as one accessibility
+      // entry but never the only source. Every URL must resolve.
+      "content": [
+        {
+          "label": "",   // string — full citation or site name: "Vaswani et al.,
+                         // Attention Is All You Need (2017), NeurIPS".
+          "url": "",     // string — full URL (the DOI link or arXiv abstract page
+                         // for the paper itself).
+          "type": ""     // "wikipedia"|"paper"|"book"|"article"|"database".
+        }
+        // Repeat per source. The primary paper is required; 2+ entries
+        // recommended.
+      ]
+    }
+
+  ]
+}
