@@ -17,9 +17,22 @@ def create_events(
     db: Session = Depends(get_db),
     optional_user: Optional[User] = Depends(get_optional_user),
 ):
+    # The frontend queue flushes at 5 events; anything near this cap is abuse.
+    if len(events) > 50:
+        raise HTTPException(status_code=422, detail="Too many events in one batch.")
+
+    # Drop events that reference nonexistent posts instead of storing garbage.
+    requested_ids = {e.post_id for e in events}
+    valid_ids = {
+        row[0]
+        for row in db.query(Post.id).filter(Post.id.in_(requested_ids)).all()
+    } if requested_ids else set()
+
     new_events = []
     batch_liked_post_ids: set[int] = set()
     for e in events:
+        if e.post_id not in valid_ids:
+            continue
         if e.event_type == "like" and optional_user:
             # Dedup within this batch as well as against stored events
             if e.post_id in batch_liked_post_ids:
@@ -55,6 +68,9 @@ def get_likes(
 ):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found.")
+    # Pending posts are author-only everywhere else; like info follows the same rule.
+    if post.status != "published" and (optional_user is None or post.author_id != optional_user.id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found.")
 
     count = (
