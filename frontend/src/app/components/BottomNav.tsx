@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/app/lib/auth"
 
-type ActiveTab = "feed" | "search" | "create" | "stats" | "profile"
+// "search" stays in the union for the search page, which now lives behind the
+// top-right button on the feed and highlights nothing down here.
+type ActiveTab = "feed" | "search" | "chat" | "create" | "stats" | "profile"
 
 export default function BottomNav({ activeTab }: { activeTab: ActiveTab }) {
   const router = useRouter()
@@ -19,15 +21,14 @@ export default function BottomNav({ activeTab }: { activeTab: ActiveTab }) {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="h-14 flex">
-        {/* Search */}
+        {/* Chat */}
         <button
-          onClick={() => router.push("/search")}
-          className={`flex-1 flex items-center justify-center h-full ${icon("search")}`}
-          aria-label="Search"
+          onClick={() => router.push("/chat")}
+          className={`flex-1 flex items-center justify-center h-full ${icon("chat")}`}
+          aria-label="Chat"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
           </svg>
         </button>
 

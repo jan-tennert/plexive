@@ -268,8 +268,19 @@ export default function Home() {
         <div className="relative bg-zinc-950/90 backdrop-blur-md">
           {/* Left edge fade */}
           <div className="absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-zinc-950 to-transparent pointer-events-none z-10" />
-          {/* Right edge fade */}
-          <div className="absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-zinc-950 to-transparent pointer-events-none z-10" />
+          {/* Right edge fade — wider so tab labels tuck under the search button */}
+          <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-l from-zinc-950 via-zinc-950/90 to-transparent pointer-events-none z-10" />
+          {/* Search — top-right, TikTok style */}
+          <button
+            onClick={() => router.push("/search")}
+            className="absolute right-1 top-0 h-[44px] w-10 flex items-center justify-center text-zinc-300 z-20"
+            aria-label="Search"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+          </button>
           {/* Scrollable tab strip */}
           <div
             ref={tabStripRef}
