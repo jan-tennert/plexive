@@ -34,7 +34,7 @@ export default function SavedPostsPage() {
   }, [])
 
   return (
-    <div className="h-[100dvh] bg-zinc-950 flex justify-center">
+    <div className="h-[100dvh] bg-surface-0 flex justify-center">
       <div className="w-full max-w-[430px] h-[100dvh] relative overflow-hidden">
 
         {/* Loading */}
@@ -54,16 +54,16 @@ export default function SavedPostsPage() {
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-10 h-10 text-zinc-700"
+              className="w-10 h-10 text-ink-faint"
             >
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
             </svg>
-            <p className="text-zinc-400 text-sm">
+            <p className="text-ink-dim text-sm">
               No saved posts yet. Tap the bookmark icon on any post to save it.
             </p>
             <button
               onClick={() => router.back()}
-              className="text-zinc-500 text-sm underline"
+              className="text-ink-muted text-sm underline cursor-pointer"
             >
               Go back
             </button>
@@ -76,7 +76,7 @@ export default function SavedPostsPage() {
             {/* Floating back button overlaid on the snap feed */}
             <button
               onClick={() => router.back()}
-              className="absolute top-4 left-4 z-40 w-11 h-11 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+              className="absolute top-4 left-4 z-40 w-11 h-11 flex items-center justify-center text-ink-dim hover:text-ink transition-colors cursor-pointer"
               aria-label="Go back"
             >
               <svg

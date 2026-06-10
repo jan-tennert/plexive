@@ -31,7 +31,7 @@ export default function MyPostsPage() {
   if (loading || !user) return null
 
   return (
-    <div className="h-[100dvh] bg-zinc-950 flex justify-center">
+    <div className="h-[100dvh] bg-surface-0 flex justify-center">
       <div className="w-full max-w-[430px] h-[100dvh] relative">
         <div className="h-full overflow-y-auto pb-20 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
 
@@ -39,18 +39,18 @@ export default function MyPostsPage() {
           <div className="flex items-center gap-3 px-4 pt-4 pb-3">
             <button
               onClick={() => router.back()}
-              className="w-9 h-9 flex items-center justify-center text-zinc-400"
+              className="w-9 h-9 flex items-center justify-center text-ink-dim hover:text-ink transition-colors duration-150 cursor-pointer"
               aria-label="Go back"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </button>
-            <h1 className="text-white font-semibold text-lg">My Posts</h1>
+            <h1 className="font-serif text-ink font-medium text-xl">My Posts</h1>
           </div>
 
           {fetchError && (
-            <p className="text-red-400 text-sm px-4">{fetchError}</p>
+            <p className="text-bad text-sm px-4">{fetchError}</p>
           )}
 
           {/* Loading */}
@@ -63,10 +63,10 @@ export default function MyPostsPage() {
           {/* Empty state */}
           {posts !== null && posts.length === 0 && (
             <div className="flex flex-col items-center pt-24 px-8 gap-4 text-center">
-              <p className="text-zinc-400 text-sm">You haven&apos;t created any posts yet.</p>
+              <p className="text-ink-dim text-sm">You haven&apos;t created any posts yet.</p>
               <button
                 onClick={() => router.push("/create")}
-                className="bg-white text-zinc-950 rounded-full px-6 py-2.5 text-sm font-semibold"
+                className="btn btn-primary rounded-full px-6 py-2.5"
               >
                 Create your first post
               </button>
@@ -82,10 +82,10 @@ export default function MyPostsPage() {
                   <button
                     key={post.id}
                     onClick={() => router.push(`/post/${post.id}`)}
-                    className="w-full text-left bg-surface-1 rounded-card px-4 py-3 flex items-start gap-3"
+                    className="w-full text-left card px-4 py-3 flex items-start gap-3 cursor-pointer hover:bg-surface-2 transition-colors duration-150"
                   >
                     {/* Cover thumbnail */}
-                    <div className="shrink-0 w-10 h-14 rounded-lg overflow-hidden bg-zinc-800">
+                    <div className="shrink-0 w-10 h-14 rounded-md overflow-hidden bg-surface-2 border border-edge">
                       {fcStr(post.feed_card, "cover_url") ? (
                         <img
                           src={fcStr(post.feed_card, "cover_url")}
@@ -94,32 +94,32 @@ export default function MyPostsPage() {
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
                         />
                       ) : (
-                        <span className={`w-full h-full flex items-center justify-center text-lg ${style?.dot ?? "bg-zinc-700"}`} />
+                        <span className={`w-full h-full flex items-center justify-center text-lg ${style?.dot ?? "bg-fmt-neutral"}`} />
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         {style && (
-                          <span className={`text-xs font-medium ${style.text}`}>{style.badge}</span>
+                          <span className={`label-caps ${style.text}`}>{style.badge}</span>
                         )}
                         {post.status === "pending" && (
-                          <span className="bg-amber-500/20 text-amber-300 rounded-full px-2 py-0.5 text-xs">
+                          <span className="bg-lamp/15 text-lamp rounded-full px-2 py-0.5 text-xs">
                             Pending review
                           </span>
                         )}
                         {post.status === "published" && (
-                          <span className="bg-emerald-500/20 text-emerald-300 rounded-full px-2 py-0.5 text-xs">
+                          <span className="bg-good/15 text-good rounded-full px-2 py-0.5 text-xs">
                             Published
                           </span>
                         )}
                       </div>
-                      <p className="text-white font-semibold text-sm mt-0.5 line-clamp-2">{post.title}</p>
+                      <p className="text-ink font-serif font-medium text-[15px] mt-0.5 line-clamp-2">{post.title}</p>
                       {fcStr(post.feed_card, "author") && (
-                        <p className="text-zinc-500 text-xs mt-0.5 truncate">{fcStr(post.feed_card, "author")}</p>
+                        <p className="text-ink-muted text-xs mt-0.5 truncate">{fcStr(post.feed_card, "author")}</p>
                       )}
                       {post.created_at && (
-                        <p className="text-zinc-600 text-xs mt-1">{relativeTime(post.created_at)}</p>
+                        <p className="text-ink-faint text-xs font-mono mt-1">{relativeTime(post.created_at)}</p>
                       )}
                     </div>
                   </button>
