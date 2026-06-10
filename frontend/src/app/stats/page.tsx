@@ -2208,7 +2208,7 @@ export default function StatsPage() {
 
   return (
     <StatsErrorBoundary>
-    <div className="relative max-w-[430px] mx-auto bg-surface-0 min-h-[100dvh] flex flex-col">
+    <div className="relative max-w-[430px] mx-auto bg-surface-0 h-[100dvh] flex flex-col">
       {/* Tab bar */}
       <div className="sticky top-0 z-20 bg-surface-0 border-b border-edge px-4 pt-3 pb-0">
         <div className="flex gap-1 bg-surface-1 rounded-full p-1">
