@@ -18,6 +18,7 @@ class UserOut(BaseModel):
     is_verified: bool
     is_private: bool
     bio: str | None
+    avatar_url: str | None
 
 
 class EventIn(BaseModel):
@@ -406,6 +407,27 @@ class PostOut(BaseModel):
         if v and hasattr(v[0], "name"):
             return [interest.name for interest in v]
         return v
+
+    @field_validator("sections", mode="before")
+    @classmethod
+    def strip_quiz_answers(cls, v):
+        # Quiz correctness is validated server-side (POST /api/quiz/answer);
+        # answer_index and explanation must never be delivered with the post.
+        # Works on copies — mutating in place would write back to the ORM JSON.
+        if not isinstance(v, list):
+            return v
+        out = []
+        for section in v:
+            if isinstance(section, dict) and section.get("type") == "quiz":
+                items = section.get("content") or []
+                stripped = [
+                    {k: val for k, val in item.items() if k not in ("answer_index", "explanation")}
+                    if isinstance(item, dict) else item
+                    for item in items
+                ]
+                section = {**section, "content": stripped}
+            out.append(section)
+        return out
 
 
 class UploadResponse(BaseModel):

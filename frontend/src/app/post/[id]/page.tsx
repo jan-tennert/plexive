@@ -320,6 +320,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 <SectionRenderer
                   sections={post.sections}
                   isUserContent={post.is_user_content}
+                  postId={post.id}
                 />
 
                 {/* Comments list */}

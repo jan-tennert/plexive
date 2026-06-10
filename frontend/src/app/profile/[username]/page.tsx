@@ -11,16 +11,30 @@ import BottomNav from "@/app/components/BottomNav"
 import VerifiedBadge from "@/components/VerifiedBadge"
 import PostRow from "@/components/PostRow"
 import Spinner from "@/components/Spinner"
+import Avatar from "@/components/Avatar"
 
 interface ProfileData {
   username: string
   is_verified: boolean
   is_private: boolean
   bio: string | null
+  avatar_url: string | null
   follower_count: number
   following_count: number
   post_count: number
   follow_status: string | null
+}
+
+interface EloData {
+  global_rating: number | null
+  formats: Record<string, { rating: number; answered_count: number }>
+}
+
+interface ListUser {
+  username: string
+  is_verified: boolean
+  is_private: boolean
+  avatar_url: string | null
 }
 
 interface Post {
@@ -46,6 +60,9 @@ export default function PublicProfilePage() {
   const [activeTab, setActiveTab] = useState<Tab>("posts")
   const [followLoading, setFollowLoading] = useState(false)
   const [error, setError] = useState("")
+  const [elo, setElo] = useState<EloData | null>(null)
+  const [listOpen, setListOpen] = useState<"followers" | "following" | null>(null)
+  const [listUsers, setListUsers] = useState<ListUser[] | null>(null)
 
   const isOwnProfile = user?.username === username
 
@@ -58,6 +75,22 @@ export default function PublicProfilePage() {
       .then(setProfile)
       .catch(() => setError("Profile not found."))
   }, [username])
+
+  useEffect(() => {
+    apiFetch(`/api/users/${username}/elo`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setElo)
+      .catch(() => {})
+  }, [username])
+
+  function openList(kind: "followers" | "following") {
+    setListOpen(kind)
+    setListUsers(null)
+    apiFetch(`/api/users/${username}/${kind}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setListUsers)
+      .catch(() => setListUsers([]))
+  }
 
   useEffect(() => {
     apiFetch(`/api/feed/user/${username}`)
@@ -166,11 +199,7 @@ export default function PublicProfilePage() {
         {/* Profile section */}
         <div className="px-4 pt-4 pb-2">
           {/* Avatar */}
-          <div className="w-[72px] h-[72px] rounded-full bg-zinc-700 flex items-center justify-center mb-3">
-            <span className="text-white text-2xl font-bold uppercase">
-              {username.charAt(0)}
-            </span>
-          </div>
+          <Avatar username={username} avatarUrl={profile.avatar_url} size={72} className="mb-3" />
 
           {/* Username + verified */}
           <div className="flex items-center gap-1.5 mb-0.5">
@@ -194,13 +223,19 @@ export default function PublicProfilePage() {
               <p className="text-white font-bold text-base">{profile.post_count}</p>
               <p className="text-zinc-400 text-xs">Posts</p>
             </div>
-            <div className="text-center">
+            <button className="text-center" onClick={() => openList("followers")}>
               <p className="text-white font-bold text-base">{profile.follower_count}</p>
               <p className="text-zinc-400 text-xs">Followers</p>
-            </div>
-            <div className="text-center">
+            </button>
+            <button className="text-center" onClick={() => openList("following")}>
               <p className="text-white font-bold text-base">{profile.following_count}</p>
               <p className="text-zinc-400 text-xs">Following</p>
+            </button>
+            <div className="text-center">
+              <p className="text-amber-400 font-bold text-base">
+                {elo?.global_rating ?? "—"}
+              </p>
+              <p className="text-zinc-400 text-xs">Knowledge</p>
             </div>
           </div>
 
@@ -261,6 +296,52 @@ export default function PublicProfilePage() {
             <PrivateTabContent canSee={canSeePrivateContent} isOwnProfile={isOwnProfile} posts={likedPosts} lockedMessage="Follow to see liked posts" privateMessage="Liked posts are private" />
           )}
         </div>
+
+        {/* Followers / Following bottom sheet */}
+        {listOpen && (
+          <div className="fixed inset-0 z-40 flex justify-center" onClick={() => setListOpen(null)}>
+            <div className="absolute inset-0 bg-black/60" />
+            <div
+              className="absolute bottom-0 w-full max-w-[430px] max-h-[70dvh] bg-zinc-900 rounded-t-2xl flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-zinc-800">
+                <p className="text-white text-sm font-semibold capitalize">{listOpen}</p>
+                <button onClick={() => setListOpen(null)} className="text-zinc-400" aria-label="Close">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="overflow-y-auto px-3 py-3 flex flex-col gap-1 pb-[max(env(safe-area-inset-bottom),12px)]">
+                {listUsers === null ? (
+                  <div className="flex justify-center py-8"><Spinner /></div>
+                ) : listUsers.length === 0 ? (
+                  <p className="text-zinc-500 text-sm text-center py-8">
+                    {profile.is_private && profile.follow_status !== "accepted" && !isOwnProfile
+                      ? "This account is private."
+                      : "Nothing here yet."}
+                  </p>
+                ) : (
+                  listUsers.map((u) => (
+                    <Link
+                      key={u.username}
+                      href={`/profile/${u.username}`}
+                      onClick={() => setListOpen(null)}
+                      className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-zinc-800 transition-colors"
+                    >
+                      <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} />
+                      <span className="flex items-center gap-1.5 text-white text-sm font-medium">
+                        @{u.username}
+                        {u.is_verified && <VerifiedBadge size={14} />}
+                      </span>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <BottomNav activeTab="profile" />
       </div>

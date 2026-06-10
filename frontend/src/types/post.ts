@@ -51,11 +51,13 @@ export interface TakeawayContent {
   visual_svg?: string
 }
 
+// answer_index and explanation are stripped by the API before delivery;
+// correctness comes from POST /api/quiz/answer (validated server-side).
 export interface QuizItem {
   question: string
   options: [string, string, string, string]
-  answer_index: 0 | 1 | 2 | 3
-  explanation: string
+  answer_index?: 0 | 1 | 2 | 3
+  explanation?: string
 }
 
 export interface RelatedPostItem {

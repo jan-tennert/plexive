@@ -6,14 +6,17 @@
 backend/
   requirements.txt              fastapi, uvicorn, sqlalchemy, passlib[bcrypt], python-jose[cryptography], python-dotenv, email-validator
   .env.example                  JWT_SECRET template (copy to .env, never commit .env)
-  seed.py                       idempotent: get-or-create 145 interests from taxonomy; reads SEED_ADMIN_PASSWORD from backend/.env; get-or-create @Marlo (marlo07drews@gmail.com, is_verified=True); auto-discovers all *_example.json files in docs/content-structure/examples/ — upserts one post per file (format derived from filename, title from feed_card.title|concept_name|the_question|headline|name); upsert key is (author_id, format) so title changes do not create duplicates; FORMAT_INTEREST_SLUGS dict maps format → interest slugs (books/facts/concepts/questions/stories defined); legacy DB preserved as deepscroll.db.legacy_*
+  seed.py                       idempotent: get-or-create 145 interests from taxonomy; reads SEED_ADMIN_PASSWORD from backend/.env; get-or-create @Marlo (marlo07drews@gmail.com, is_verified=True); auto-discovers all *_example.json files in docs/content-structure/examples/ — upserts one post per file (format derived from filename, title from feed_card.title|concept_name|the_question|headline|name); upsert key is (author_id, format) so title changes do not create duplicates; FORMAT_INTEREST_SLUGS dict maps format → interest slugs (books/facts/people/concepts/questions/stories defined); legacy DB preserved as deepscroll.db.legacy_*
+  tests/smoke_test.py           end-to-end API smoke test (quiz/Elo, avatar, user search) against a throwaway DB in a temp dir; run with .venv\Scripts\python.exe tests\smoke_test.py (needs httpx)
+  tests/_db_inspect.py          idempotent helper: adds users.avatar_url to an existing deepscroll.db (create_all never adds columns); alternative to a full reset
   deepscroll.db                 SQLite database (gitignored)
   app/
     database.py                 engine, SessionLocal, Base, get_db dependency
     main.py                     FastAPI app, CORS for localhost:3000, router registration, create_all on startup
-    models.py                   ORM models: Interest, Post (feed_card JSON not null, sections JSON not null, is_user_content Boolean not null default False, author_id FK→users nullable; indexes on format/status/created_at; author_username and author_is_verified as properties), Event (user_id nullable FK), User (posts relationship, is_verified boolean default false, is_private boolean default false, bio string nullable), Follow (follower_id FK→users, following_id FK→users, status "pending"|"accepted", created_at; UniqueConstraint uq_follow), Comment, post_interests join table
+    models.py                   ORM models: Interest, Post (feed_card JSON not null, sections JSON not null, is_user_content Boolean not null default False, author_id FK→users nullable; indexes on format/status/created_at; author_username and author_is_verified as properties), Event (user_id nullable FK), User (posts relationship, is_verified boolean default false, is_private boolean default false, bio string nullable, avatar_url string nullable), Follow (follower_id FK→users, following_id FK→users, status "pending"|"accepted", created_at; UniqueConstraint uq_follow), UserElo (user_id+format unique, rating float, answered_count), QuizAnswer (user_id+post_id+question_index unique, chosen_index, is_correct, rating_delta), Comment, post_interests join table
+    elo.py                      Elo knowledge score: start 1000, floor 100, K=32 first 30 answers per format then 16, question rating 800/1000/1200 from post_difficulty, global = average of per-format ratings (None until first answer)
     auth.py                     hash_password, verify_password, create_access_token, decode_access_token, get_current_user, get_optional_user (returns User|None, used for optional auth)
-    schemas.py                  Pydantic v2 models: 15 section types with Literal discriminator → AnySection union; BooksFeedCard; PostCreate (Books required sections: essence/quiz_badge/voices/at_a_glance/heart/core_ideas/takeaway/quiz/sources; image_url recursive check for /uploads/ prefix); PostOut (feed_card dict, sections list[dict], is_user_content bool, like_count int, comment_count int); UserOut, InterestOut, EventIn, UploadResponse, SvgUploadResponse
+    schemas.py                  Pydantic v2 models: 15 section types with Literal discriminator → AnySection union; BooksFeedCard; PostCreate (Books required sections: essence/quiz_badge/voices/at_a_glance/heart/core_ideas/takeaway/quiz/sources; image_url recursive check for /uploads/ prefix); PostOut (feed_card dict, sections list[dict], is_user_content bool, like_count int, comment_count int; strips answer_index+explanation from quiz sections so answers never reach the client); UserOut (incl. avatar_url), InterestOut, EventIn, UploadResponse, SvgUploadResponse
     sanitize.py                 validate_image() — chunked read, magic-byte check, animated-GIF reject, Pillow re-encode; sanitize_svg() / sanitize_svg_text() — defusedxml XXE check, lxml element+attribute whitelist, dangerous-pattern rejection
     upload_config.py            UPLOAD_DIR (absolute path at repo root/user_uploads/), size limits (5 MB images, 512 KB SVGs)
     rate_limit.py               in-memory per-user rate limiter (dict of timestamps); check_rate_limit(user_id, key, max, window_secs)
@@ -24,14 +27,15 @@ backend/
       feed.py                   GET /api/feed — three-tier: direct matches → related co-tags → all remaining; GET /api/feed/following (auth, posts from followed users, limit 50); GET /api/feed/user/{username} (no auth, published posts by user, limit 50)
 
       events.py                 POST /api/events (captures user_id when auth token present; deduplicates "like" events per user+post for auth users, also within a batch); GET /api/posts/{id}/likes → {count, liked}
-      auth.py                   POST /api/auth/register, POST /api/auth/login, GET /api/auth/me, PATCH /api/auth/me (update username/password/is_private/bio), DELETE /api/auth/me (soft delete: sets is_active=False)
-      follows.py                POST /api/users/{username}/follow; DELETE /api/users/{username}/follow; POST /api/users/{username}/follow/accept; DELETE /api/users/{username}/follow/reject; GET /api/users/{username}/followers; GET /api/users/{username}/following; GET /api/users/{username}/follow-requests (auth, own only); GET /api/users/{username}/profile (no auth, returns counts + follow_status)
-      search.py                 GET /api/search — Python-side search across post.title, feed_card.essence, feed_card.author, heart section content, core_ideas title+body; ranked by title-match then recency; limit 50
+      auth.py                   POST /api/auth/register, POST /api/auth/login, GET /api/auth/me, PATCH /api/auth/me (update username/password/is_private/bio), POST /api/auth/me/avatar (multipart, validate_image pipeline, 10/hr), DELETE /api/auth/me (soft delete: sets is_active=False)
+      follows.py                POST /api/users/{username}/follow; DELETE /api/users/{username}/follow; POST /api/users/{username}/follow/accept; DELETE /api/users/{username}/follow/reject; GET /api/users/{username}/followers; GET /api/users/{username}/following; GET /api/users/{username}/follow-requests (auth, own only); GET /api/users/{username}/profile (no auth, returns counts + follow_status); all user payloads include avatar_url
+      search.py                 GET /api/search — Python-side search across post.title, feed_card.essence, feed_card.author, heart section content, core_ideas title+body; ranked by title-match then recency; limit 50; GET /api/search/users — username substring search, prefix matches first, limit 20, follow_status per row when authed
+      quiz.py                   POST /api/quiz/answer (optional auth; validates against stored answer_index; first authed answer per question updates Elo, own posts never scored, 60/min); GET /api/quiz/state/{post_id} (auth, answered questions with corrections); GET /api/users/{username}/elo (public, global + per-format ratings)
       comments.py               GET /api/posts/{id}/comments?count=true → {count} or full list; POST /api/posts/{id}/comments (auth); DELETE /api/comments/{id} (auth, own comment only)
       uploads.py                POST /api/upload/image (10/hr, validate_image, UUID filename); POST /api/upload/svg (10/hr, sanitize_svg, returns svg_content string not URL)
       admin.py                  PATCH /api/admin/users/{user_id}/verify — sets is_verified=True; caller must be authenticated and is_verified; 403 otherwise
       posts.py                  GET /api/posts/mine (auth, any status); POST /api/posts (auth, 20/day, status="published" if verified else "pending", sets is_user_content=True, sanitizes visual_svg fields); GET /api/posts/{id} (pending visible to author only); _attach_counts() helper adds like_count+comment_count as Python attributes before Pydantic serialization
-      stats.py                  GET /api/stats/global (no auth, all platform analytics); GET /api/stats/me (auth, personal stats — my_streak/my_milestones/my_engagement_score computed server-side); FORMATS includes all 7 formats incl. academy
+      stats.py                  GET /api/stats/global (no auth, all platform analytics); GET /api/stats/me (auth, personal stats — my_streak/my_milestones/my_engagement_score/my_elo/my_quiz/posts_liked/my_likes_given_by_format computed server-side; posts_saved stays -1, counted client-side from localStorage); FORMATS includes all 7 formats incl. academy
 
 user_uploads/                 gitignored; absolute path outside backend/ so files are never importable as Python modules; subdirs: images/, svgs/
 
@@ -41,7 +45,7 @@ frontend/
   src/app/
     layout.tsx                  root layout, Geist font, title "Deepscroll"
     globals.css                 Tailwind import, Geist font wiring, design tokens (@theme: surface-0/1/2/overlay, edge/edge-strong, ink levels, radius-card/field), dark-only body base, heart-pop + heart-boom keyframes
-    page.tsx                    home feed: 8-tab bar (For You + 7 formats derived from lib/formats.ts), horizontal snap between tabs, vertical snap within each, real-time indicator; BottomNav (feed active)
+    page.tsx                    home feed: 9-tab bar (For You + Following + 7 formats derived from lib/formats.ts), horizontal snap between tabs, vertical snap within each, real-time indicator; Following tab uses /api/feed/following with login/empty states; BottomNav (feed active)
     onboarding/
       page.tsx                  server component — renders InterestPicker (no props)
       InterestPicker.tsx        client — fetches /api/interests, groups 145 pills into 10 categories, sticky header/footer, saves slugs to localStorage
@@ -50,11 +54,11 @@ frontend/
     register/
       page.tsx                  register form: email + username + password, inline error messages, redirects to / on success or if already logged in
     profile/
-      page.tsx                  account page: avatar (initials), @username, email, "My posts →" link, bio textarea (160 chars, save button), private account toggle (PATCH /api/auth/me), follow requests panel (private accounts only, accept/decline each), inline forms for change username / change password / sign out / delete account; BottomNav (profile active)
+      page.tsx                  account page: Avatar with camera-button upload (POST /api/auth/me/avatar), @username, email, "View public profile" link, knowledge score card (global + per-format chips from /api/users/{me}/elo), My posts / Saved posts card rows, bio card (160 chars), private account toggle (PATCH /api/auth/me), follow requests panel with avatars (private accounts only, accept/decline each), inline forms for change username / change password / sign out / delete account; BottomNav (profile active)
       [username]/
-        page.tsx                public profile: header with back + settings/more-options, 72px avatar, verified badge, bio, stats row (posts/followers/following), follow/unfollow button, Posts|Saved|Liked tabs; fetches /api/users/{username}/profile and /api/feed/user/{username}; BottomNav (profile active)
+        page.tsx                public profile: header with back + settings/more-options, 72px Avatar (uploaded picture or initial), verified badge, bio, stats row (posts/followers/following/knowledge Elo); followers+following counts open a bottom-sheet user list; follow/unfollow button, Posts|Saved|Liked tabs; fetches /api/users/{username}/profile, /api/users/{username}/elo and /api/feed/user/{username}; BottomNav (profile active)
     search/
-      page.tsx                  search input + format chips + compact result cards; debounced 300ms; navigates to post detail; BottomNav (search active); attribution (@user or Deepscroll) below title in result cards
+      page.tsx                  search input + Posts|Accounts scope toggle; posts scope: format chips + compact result cards; accounts scope: /api/search/users rows with Avatar, verified badge, bio and follow/unfollow button; debounced 300ms; BottomNav (search active)
     create/
       page.tsx                  3-step Books creation wizard: step 1 — 7 format cards (only Books enabled, rest "coming soon"); step 2 — duplicate check; step 3 — Books form with Feed Card block, interest picker (1–5 required), 15 section accordions (9 required / 6 optional); submits {format, title, feed_card, sections, interests} to POST /api/posts; success screen links to /my-posts; BottomNav (create active)
     my-posts/
@@ -176,6 +180,7 @@ Join table linking posts ↔ interests (many-to-many).
 | is_verified   | Boolean  | default false; true = bypasses review queue (posts go to "published"), can verify other users via admin endpoint |
 | is_private    | Boolean  | default false; true = follow requests require approval |
 | bio           | String?  | up to 160 chars; shown on public profile  |
+| avatar_url    | String?  | /uploads/images/{uuid}.ext set by POST /api/auth/me/avatar |
 
 ### follows
 | column       | type              | description                                         |
@@ -186,6 +191,26 @@ Join table linking posts ↔ interests (many-to-many).
 | status       | String            | "pending" (awaiting approval) or "accepted" (active)|
 | created_at   | DateTime          | default now                                         |
 Unique constraint: (follower_id, following_id)
+
+### user_elo
+| column         | type     | description                                  |
+|----------------|----------|----------------------------------------------|
+| user_id        | FK→users |                                              |
+| format         | String   | one Elo rating per (user, format)            |
+| rating         | Float    | starts 1000, floor 100                       |
+| answered_count | Integer  | scored answers in this format (drives K)     |
+Unique constraint: (user_id, format)
+
+### quiz_answers
+| column         | type     | description                                  |
+|----------------|----------|----------------------------------------------|
+| user_id        | FK→users |                                              |
+| post_id        | FK→posts |                                              |
+| question_index | Integer  | index into the post's quiz section           |
+| chosen_index   | Integer  | option the user picked                       |
+| is_correct     | Boolean  | decided server-side against answer_index     |
+| rating_delta   | Float    | Elo change applied (0 for own posts)         |
+Unique constraint: (user_id, post_id, question_index) — each question scores once
 
 ## API ENDPOINTS
 
@@ -223,7 +248,23 @@ GET  /api/users/{username}/follow-requests  Authorization: Bearer <token>       
 GET  /api/users/{username}/profile                                                      → {username, is_verified, is_private, bio, follower_count, following_count, post_count, follow_status}
 GET  /api/feed/following  Authorization: Bearer <token>                                 → [PostOut]  limit 50  empty if following nobody
 GET  /api/feed/user/{username}                                                          → [PostOut]  published posts by user  limit 50  404 if user not found
+POST /api/auth/me/avatar  Authorization: Bearer <token>  multipart file field "file"    → UserOut with new avatar_url  10/hr  same validate_image pipeline as post images
+GET  /api/search/users  ?q=...   auth optional                                          → [{username, is_verified, is_private, bio, avatar_url, is_self, follow_status}]  limit 20  prefix matches first  follow_status only when authed
+POST /api/quiz/answer   auth optional  body: {post_id, question_index, chosen_index}    → {correct, correct_index, explanation, already_answered, scored, elo: {format, rating, delta, global_rating} | null}  Elo only for authed first-time answers on others' posts  60/min  400 bad index  404 missing post
+GET  /api/quiz/state/{post_id}  Authorization: Bearer <token>                           → {answers: [{question_index, chosen_index, correct, correct_index, explanation}]}  restores answered quiz UI
+GET  /api/users/{username}/elo                                                          → {global_rating: int|null, formats: {fmt: {rating, answered_count}}}  404 if user not found
 ```
+
+## ELO KNOWLEDGE SCORE
+
+Standard Elo: R' = R + K * (S - E), E = 1 / (1 + 10^((Q - R) / 400)). Each quiz question is an
+opponent rated by the post's difficulty (1→800, 2→1000, 3→1200; default 1000). Correct answers
+gain points, wrong answers always lose points so guessing has a cost. K=32 for the first 30
+answers in a format (fast convergence), K=16 after (stable). Ratings start at 1000, floored at
+100, one rating per format; the global score is the average of per-format ratings. A question
+can only ever be scored once per user (DB unique constraint) and answering your own post never
+moves your rating, so replays and self-quizzing cannot farm Elo. answer_index/explanation are
+stripped from API post payloads; correctness is decided only server-side.
 
 ## SECURITY
 
@@ -250,10 +291,10 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 
 | file                   | responsibility                                                              |
 |------------------------|-----------------------------------------------------------------------------|
-| page.tsx               | 8-tab feed (For You, Books, Facts, People, Ideas, Q&A, Stories, Academy — no Following tab); each tab is an independent lazy-fetched vertical snap feed; format tabs show EmptyState when empty; BottomNav (feed active) |
+| page.tsx               | 9-tab feed (For You, Following, Books, Facts, People, Ideas, Q&A, Stories, Academy); each tab is an independent lazy-fetched vertical snap feed; Following tab shows login prompt or find-people empty state; format tabs show EmptyState when empty; BottomNav (feed active) |
 | PostCard.tsx           | full-screen card; Books layout: cover thumbnail + title/author + essence + teasers (amber arrows) + metadata bar; Facts layout: field label + headline + teasers (cyan arrows) + read time + DotScale; People layout: circular portrait + role label (rose-400) + name + lifespan + essence + teasers (rose arrows) + read time + DotScale; fallback for other formats shows title only; re-exports Post type from @/types/post; format styles from lib/formats.ts |
 | types/post.ts          | TypeScript interfaces: Post (feed_card: Record<string,unknown>), BooksFeedCard, FactsFeedCard, PeopleFeedCard, Section, SectionType (34 types), VoiceItem, AtAGlanceBooksContent, AtAGlancePeopleContent, CoreIdeaItem, TakeawayContent, QuizItem, RelatedPostItem, SourceItem, AuthorContextContent, SeeItContent, KeyNumberItem, AngleItem, KeyFigure, StoryContent, MisconceptionItem; fcStr/fcNum typed feed_card accessors |
-| SectionRenderer.tsx    | dispatch component; sorts sections by order; switches on type to render named sub-component; passes isUserContent down to SVG-rendering sections; console.warn on unknown type; handles 34 section types (15 Books + 10 Facts + 9 People) |
+| SectionRenderer.tsx    | dispatch component; sorts sections by order; switches on type to render named sub-component; passes isUserContent down to SVG-rendering sections and postId to QuizSection; console.warn on unknown type; handles 34 section types (15 Books + 10 Facts + 9 People) |
 | sections/EssenceSection.tsx | large centered text, min-height 140px |
 | sections/QuizBadgeSection.tsx | amber pill badge |
 | sections/VoicesSection.tsx | blockquotes with serif font, attribution footer |
@@ -263,7 +304,8 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 | sections/StructureSection.tsx | numbered list with amber numbers |
 | sections/CoreIdeasSection.tsx | per-idea: amber title h2, body, SVG block (w-full max-w-[360px] wrapper so flex context doesn't collapse it; dangerouslySetInnerHTML if !isUserContent, base64 img if isUserContent; color #e4e4e7 for currentColor), image, pull-quote, amber callout for in_practice |
 | sections/TakeawaySection.tsx | framework framing: amber card; question framing: large centered amber text; optional SVG |
-| sections/QuizSectionPlaceholder.tsx | client component; "Reveal answer" expand; answer highlighted in amber; "Quiz scoring coming soon" note |
+| sections/QuizSection.tsx | client component; tappable options POST /api/quiz/answer; green/red correctness + explanation + Elo delta chip; restores answered state from GET /api/quiz/state; summary card with score when all answered; log-in hint for anonymous users |
+| Avatar.tsx (src/components) | shared avatar: uploaded image (resolves /uploads/ via API_URL) or initial-letter fallback; size prop |
 | sections/RelatedPostsSection.tsx | horizontal scroll row; post_id empty → non-clickable with "Coming soon" label |
 | sections/WorldContextSection.tsx | secondary text with heading |
 | sections/AuthorContextSection.tsx | portrait + text + Wikipedia external link |
@@ -313,7 +355,9 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 - Seed script: 145 interests + auto-discovers all *_example.json files (currently Books + Facts + People); FORMAT_INTEREST_SLUGS maps format → interests; _post_title falls back to feed_card.name for People
 - Legacy DB preserved as backend/deepscroll.db.legacy_*
 - Onboarding: interest picker → slugs saved to localStorage → gates feed
-- Feed: 8-tab horizontal swipe (For You + 7 formats, no Following tab) + vertical snap scroll per tab
+- Feed: 9-tab horizontal swipe (For You + Following + 7 formats) + vertical snap scroll per tab
+- Quiz + Elo: interactive quizzes, server-validated answers, per-format + global knowledge score (see ELO KNOWLEDGE SCORE)
+- Profiles: avatar upload, knowledge score, follower/following lists, account search, follow UI end-to-end
 - EmptyState component for format tabs with no posts yet
 - Books feed card: cover, title, author, essence, 3 teasers, difficulty DotScale, year/genre
 - Detail page: SectionRenderer renders 34 section types (15 Books + 10 Facts + 9 People) in order (SVG security: dangerouslySetInnerHTML for seed, base64 img for user)
@@ -323,8 +367,7 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 - Stats page, verification system, saved posts
 
 **Next**
-- Content for formats other than Books, Facts, and People (concepts, questions, stories, academy)
-- Quiz scoring implementation
+- Content for academy format
 - Recommendation algorithm improvements
 - Pagination / infinite scroll
 - PostgreSQL migration

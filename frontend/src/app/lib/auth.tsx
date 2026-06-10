@@ -12,6 +12,7 @@ export interface AuthUser {
   is_verified: boolean
   is_private: boolean
   bio: string | null
+  avatar_url: string | null
 }
 
 interface AuthContextType {
