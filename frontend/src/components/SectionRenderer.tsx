@@ -8,7 +8,7 @@ import HeartSection from "./sections/HeartSection"
 import StructureSection from "./sections/StructureSection"
 import CoreIdeasSection from "./sections/CoreIdeasSection"
 import TakeawaySection from "./sections/TakeawaySection"
-import QuizSectionPlaceholder from "./sections/QuizSectionPlaceholder"
+import QuizSection from "./sections/QuizSection"
 import RelatedPostsSection from "./sections/RelatedPostsSection"
 import WorldContextSection from "./sections/WorldContextSection"
 import AuthorContextSection from "./sections/AuthorContextSection"
@@ -68,9 +68,10 @@ import NearbyConceptsSection from "./sections/NearbyConceptsSection"
 interface Props {
   sections: Section[]
   isUserContent: boolean
+  postId: number
 }
 
-export default function SectionRenderer({ sections, isUserContent }: Props) {
+export default function SectionRenderer({ sections, isUserContent, postId }: Props) {
   const sorted = [...sections].sort((a, b) => a.order - b.order)
 
   return (
@@ -97,7 +98,7 @@ export default function SectionRenderer({ sections, isUserContent }: Props) {
           case "takeaway":
             return <TakeawaySection key={i} content={c as any} isUserContent={isUserContent} />
           case "quiz":
-            return <QuizSectionPlaceholder key={i} content={c as any} />
+            return <QuizSection key={i} content={c as any} postId={postId} />
           case "related_posts":
             return <RelatedPostsSection key={i} content={c as any} />
           case "world_context":
