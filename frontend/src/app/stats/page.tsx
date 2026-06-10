@@ -36,7 +36,7 @@ class StatsErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-6 text-red-400 text-sm">
+        <div className="p-6 text-bad text-sm">
           <p className="font-bold mb-2">Stats page error:</p>
           <p>{this.state.error}</p>
         </div>
@@ -52,24 +52,24 @@ const FORMAT_COLORS: Record<string, string> = Object.fromEntries(
   FORMAT_IDS.map((id) => [id, FORMAT_STYLES[id].accent]),
 )
 const FORMATS: string[] = [...FORMAT_IDS]
-const DEFAULT_COLOR = "#a1a1aa"
-const RANK_COLORS = ["#a78bfa", "#7c3aed", "#4c1d95", "#2e1065", "#1e1b4b"]
+const DEFAULT_COLOR = "#a39b8b"
+const RANK_COLORS = ["#d2a45a", "#b8893f", "#6e5226", "#4f3b1c", "#332815"]
 
 const TT = {
   contentStyle: {
-    background: "#18181b",
-    border: "1px solid #3f3f46",
+    background: "#1b1815",
+    border: "1px solid #4a4339",
     borderRadius: 8,
-    color: "#fff",
+    color: "#efe9de",
     fontSize: 12,
   },
-  labelStyle: { color: "#a1a1aa" },
+  labelStyle: { color: "#a39b8b" },
   cursor: { fill: "rgba(255,255,255,0.05)" },
   wrapperStyle: { zIndex: 50 },
 }
 
-const AXIS = { fill: "#a1a1aa", fontSize: 11 }
-const GRID = { stroke: "#27272a", strokeDasharray: "3 3" }
+const AXIS = { fill: "#a39b8b", fontSize: 11 }
+const GRID = { stroke: "#2b2721", strokeDasharray: "3 3" }
 
 // --- Type definitions ---
 
@@ -147,7 +147,7 @@ function WaffleChart({ data }: { data: { label: string; value: number; color: st
     const n = Math.round((d.value / total) * 100)
     for (let i = 0; i < n; i++) squares.push(d.color)
   }
-  while (squares.length < 100) squares.push(squares[squares.length - 1] ?? "#27272a")
+  while (squares.length < 100) squares.push(squares[squares.length - 1] ?? "#2b2721")
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-10 gap-0.5">
@@ -159,7 +159,7 @@ function WaffleChart({ data }: { data: { label: string; value: number; color: st
         {data.map(d => (
           <div key={d.label} className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: d.color }} />
-            <span className="text-zinc-400 text-xs">{d.label} ({d.value})</span>
+            <span className="text-ink-dim text-xs">{d.label} ({d.value})</span>
           </div>
         ))}
       </div>
@@ -169,7 +169,7 @@ function WaffleChart({ data }: { data: { label: string; value: number; color: st
 
 function CalendarHeatmap({ data }: { data: { period: string; count: number }[] }) {
   if (!data || data.length === 0) {
-    return <div className="text-zinc-600 text-sm p-4">No data</div>
+    return <div className="text-ink-faint text-sm p-4">No data</div>
   }
   const lookup = new Map(data.map(d => [d.period, d.count]))
   const maxCount = Math.max(...data.map(d => d.count), 1)
@@ -190,11 +190,11 @@ function CalendarHeatmap({ data }: { data: { period: string; count: number }[] }
               className="w-full h-8 rounded-lg"
               style={{
                 backgroundColor:
-                  count === 0 ? "#18181b" : `rgba(34,211,238,${0.2 + intensity * 0.8})`,
+                  count === 0 ? "#1b1815" : `rgba(34,211,238,${0.2 + intensity * 0.8})`,
               }}
               title={`${m.label} ${m.year}: ${count}`}
             />
-            <span className="text-zinc-500 text-[10px]">{m.label}</span>
+            <span className="text-ink-muted text-[10px]">{m.label}</span>
           </div>
         )
       })}
@@ -210,7 +210,7 @@ function ActivityHeatmap({
   color?: string
 }) {
   if (!data || data.length === 0) {
-    return <div className="text-zinc-600 text-sm p-4">No data</div>
+    return <div className="text-ink-faint text-sm p-4">No data</div>
   }
   const lookup = new Map(data.map(d => [`${d.weekday}:${d.hour}`, d.count]))
   const maxCount = Math.max(...data.map(d => d.count), 1)
@@ -220,12 +220,12 @@ function ActivityHeatmap({
       <div className="flex gap-0.5 min-w-max">
         <div className="flex flex-col gap-0.5 mr-1 mt-4">
           {days.map(d => (
-            <div key={d} className="h-3 text-zinc-500 text-[9px] leading-3 w-7">{d}</div>
+            <div key={d} className="h-3 text-ink-muted text-[9px] leading-3 w-7">{d}</div>
           ))}
         </div>
         {Array.from({ length: 24 }, (_, hr) => (
           <div key={hr} className="flex flex-col gap-0.5">
-            <div className="h-3 text-zinc-500 text-[9px] leading-3 text-center w-3">
+            <div className="h-3 text-ink-muted text-[9px] leading-3 text-center w-3">
               {hr % 6 === 0 ? hr : ""}
             </div>
             {Array.from({ length: 7 }, (_, wd) => {
@@ -237,7 +237,7 @@ function ActivityHeatmap({
                   className="w-3 h-3 rounded-sm"
                   style={{
                     backgroundColor:
-                      count === 0 ? "#18181b" : `rgba(${color},${0.15 + intensity * 0.85})`,
+                      count === 0 ? "#1b1815" : `rgba(${color},${0.15 + intensity * 0.85})`,
                   }}
                   title={`${days[wd]} ${hr}:00 — ${count}`}
                 />
@@ -254,7 +254,7 @@ function GaugeChart({
   value,
   max,
   label,
-  color = "#22d3ee",
+  color = "#76ada0",
   size = 160,
 }: {
   value: number
@@ -288,7 +288,7 @@ function GaugeChart({
         <path
           d={`M ${sx} ${sy} A ${r} ${r} 0 0 0 ${ex} ${ey}`}
           fill="none"
-          stroke="#3f3f46"
+          stroke="#4a4339"
           strokeWidth={size * 0.065}
           strokeLinecap="round"
         />
@@ -301,20 +301,20 @@ function GaugeChart({
             strokeLinecap="round"
           />
         )}
-        <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="white" strokeWidth="2" strokeLinecap="round" />
-        <circle cx={cx} cy={cy} r={size * 0.025} fill="white" />
+        <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#efe9de" strokeWidth="2" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r={size * 0.025} fill="#efe9de" />
         <text
           x={cx}
           y={cy + size * 0.1}
           textAnchor="middle"
-          fill="white"
+          fill="#efe9de"
           fontSize={size * 0.1}
           fontWeight="bold"
         >
           {displayValue}
         </text>
         {label && (
-          <text x={cx} y={cy + size * 0.2} textAnchor="middle" fill="#a1a1aa" fontSize={size * 0.065}>
+          <text x={cx} y={cy + size * 0.2} textAnchor="middle" fill="#a39b8b" fontSize={size * 0.065}>
             {label}
           </text>
         )}
@@ -327,7 +327,7 @@ function GaugeChart({
 
 function NoData() {
   return (
-    <div className="flex items-center justify-center h-16 text-zinc-600 text-sm">No data yet</div>
+    <div className="flex items-center justify-center h-16 text-ink-faint text-sm">No data yet</div>
   )
 }
 
@@ -344,9 +344,9 @@ function FormatChip({ format }: { format: string }) {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-zinc-900 rounded-xl p-4">
-      <div className="text-white text-2xl font-bold">{value}</div>
-      <div className="text-zinc-400 text-xs mt-1">{label}</div>
+    <div className="card p-4">
+      <div className="text-ink text-2xl font-bold font-mono">{value}</div>
+      <div className="text-ink-dim text-xs mt-1">{label}</div>
     </div>
   )
 }
@@ -361,8 +361,8 @@ interface ChartOption {
 function CategorySection({ title, charts }: { title: string; charts: ChartOption[] }) {
   const [selected, setSelected] = useState(0)
   return (
-    <div className="px-4 py-4 border-b border-zinc-900">
-      <div className="text-zinc-300 text-xs font-semibold uppercase tracking-widest mb-3">
+    <div className="px-4 py-4 border-b border-edge">
+      <div className="label-caps text-ink-dim mb-3">
         {title}
       </div>
       {charts.length > 1 && (
@@ -373,8 +373,8 @@ function CategorySection({ title, charts }: { title: string; charts: ChartOption
               onClick={() => setSelected(i)}
               className={`flex-shrink-0 text-xs px-3 py-1 rounded-full transition-colors ${
                 selected === i
-                  ? "bg-zinc-700 text-white"
-                  : "bg-zinc-900 text-zinc-400 hover:text-zinc-300"
+                  ? "bg-surface-3 text-ink"
+                  : "bg-surface-1 text-ink-dim hover:text-ink-body"
               }`}
             >
               {c.label}
@@ -413,14 +413,14 @@ function TreemapCell(props: {
   if (width <= 0 || height <= 0) return null
   return (
     <g>
-      <rect x={x} y={y} width={width} height={height} fill={fill ?? "#3f3f46"} rx={2} />
+      <rect x={x} y={y} width={width} height={height} fill={fill ?? "#4a4339"} rx={2} />
       {width > 40 && height > 18 && (
         <text
           x={x + width / 2}
           y={y + height / 2}
           textAnchor="middle"
           dominantBaseline="middle"
-          fill="white"
+          fill="#efe9de"
           fontSize={11}
         >
           {name}
@@ -455,7 +455,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis type="number" tick={AXIS} />
         <YAxis dataKey="username" type="category" tick={AXIS} width={56} />
         <Tooltip {...TT} />
-        <Bar dataKey="post_count" fill="#a78bfa" radius={[0, 3, 3, 0]} />
+        <Bar dataKey="post_count" fill="#d2a45a" radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -466,7 +466,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="username" tick={{ ...AXIS, angle: -35, textAnchor: "end" }} interval={0} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Bar dataKey="post_count" fill="#a78bfa" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="post_count" fill="#d2a45a" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -474,7 +474,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-zinc-500 border-b border-zinc-800">
+          <tr className="text-ink-muted border-b border-edge">
             <th className="text-left pb-2 pr-3">#</th>
             <th className="text-left pb-2 pr-3">Username</th>
             <th className="text-right pb-2">Posts</th>
@@ -482,13 +482,13 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         </thead>
         <tbody>
           {topByPosts.map((r, i) => (
-            <tr key={r.username} className="border-b border-zinc-900">
-              <td className="py-2 pr-3 text-zinc-500">{i + 1}</td>
-              <td className="py-2 pr-3 text-white">
-                <Link href={`/profile/${r.username}`} className="hover:text-zinc-300 transition-colors">{r.username}</Link>
-                {r.is_verified && <span className="ml-1 text-blue-400 text-[10px]">✓</span>}
+            <tr key={r.username} className="border-b border-edge">
+              <td className="py-2 pr-3 text-ink-muted">{i + 1}</td>
+              <td className="py-2 pr-3 text-ink">
+                <Link href={`/profile/${r.username}`} className="hover:text-ink-body transition-colors">{r.username}</Link>
+                {r.is_verified && <span className="ml-1 text-lamp text-[10px]">✓</span>}
               </td>
-              <td className="py-2 text-right text-zinc-300">{r.post_count}</td>
+              <td className="py-2 text-right text-ink-body">{r.post_count}</td>
             </tr>
           ))}
         </tbody>
@@ -501,7 +501,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         data={topByPosts.map((r, i) => ({
           name: r.username,
           size: r.post_count,
-          fill: RANK_COLORS[i] ?? "#3f3f46",
+          fill: RANK_COLORS[i] ?? "#4a4339",
         }))}
         dataKey="size"
         nameKey="name"
@@ -518,7 +518,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <Tooltip {...TT} cursor={false} />
         <Scatter
           data={topByPosts.map((r, i) => ({ ...r, index: i + 1 }))}
-          fill="#a78bfa"
+          fill="#d2a45a"
         />
       </ScatterChart>
     </ResponsiveContainer>
@@ -533,7 +533,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis type="number" tick={AXIS} />
         <YAxis dataKey="username" type="category" tick={AXIS} width={56} />
         <Tooltip {...TT} />
-        <Bar dataKey="like_count" fill="#fb7185" radius={[0, 3, 3, 0]} />
+        <Bar dataKey="like_count" fill="#c5848f" radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -541,7 +541,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-zinc-500 border-b border-zinc-800">
+          <tr className="text-ink-muted border-b border-edge">
             <th className="text-left pb-2 pr-3">#</th>
             <th className="text-left pb-2 pr-3">Username</th>
             <th className="text-right pb-2">Likes</th>
@@ -549,13 +549,13 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         </thead>
         <tbody>
           {topByLikes.map((r, i) => (
-            <tr key={r.username} className="border-b border-zinc-900">
-              <td className="py-2 pr-3 text-zinc-500">{i + 1}</td>
-              <td className="py-2 pr-3 text-white">
-                <Link href={`/profile/${r.username}`} className="hover:text-zinc-300 transition-colors">{r.username}</Link>
-                {r.is_verified && <span className="ml-1 text-blue-400 text-[10px]">✓</span>}
+            <tr key={r.username} className="border-b border-edge">
+              <td className="py-2 pr-3 text-ink-muted">{i + 1}</td>
+              <td className="py-2 pr-3 text-ink">
+                <Link href={`/profile/${r.username}`} className="hover:text-ink-body transition-colors">{r.username}</Link>
+                {r.is_verified && <span className="ml-1 text-lamp text-[10px]">✓</span>}
               </td>
-              <td className="py-2 text-right text-zinc-300">{r.like_count}</td>
+              <td className="py-2 text-right text-ink-body">{r.like_count}</td>
             </tr>
           ))}
         </tbody>
@@ -569,7 +569,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="index" type="number" tick={AXIS} name="Rank" />
         <YAxis dataKey="like_count" tick={AXIS} />
         <Tooltip {...TT} cursor={false} />
-        <Scatter data={topByLikes.map((r, i) => ({ ...r, index: i + 1 }))} fill="#fb7185" />
+        <Scatter data={topByLikes.map((r, i) => ({ ...r, index: i + 1 }))} fill="#c5848f" />
       </ScatterChart>
     </ResponsiveContainer>
   )
@@ -582,7 +582,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <Tooltip {...TT} cursor={false} />
         <Scatter
           data={topByLikes.map((r, i) => ({ ...r, rank: i + 1 }))}
-          fill="#fb7185"
+          fill="#c5848f"
         />
       </ScatterChart>
     </ResponsiveContainer>
@@ -597,7 +597,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis type="number" tick={AXIS} />
         <YAxis dataKey="username" type="category" tick={AXIS} width={56} />
         <Tooltip {...TT} />
-        <Bar dataKey="comment_count" fill="#34d399" radius={[0, 3, 3, 0]} />
+        <Bar dataKey="comment_count" fill="#93af7c" radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -605,7 +605,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-zinc-500 border-b border-zinc-800">
+          <tr className="text-ink-muted border-b border-edge">
             <th className="text-left pb-2 pr-3">#</th>
             <th className="text-left pb-2 pr-3">Username</th>
             <th className="text-right pb-2">Comments</th>
@@ -613,10 +613,10 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         </thead>
         <tbody>
           {topByComments.map((r, i) => (
-            <tr key={r.username} className="border-b border-zinc-900">
-              <td className="py-2 pr-3 text-zinc-500">{i + 1}</td>
-              <td className="py-2 pr-3 text-white"><Link href={`/profile/${r.username}`} className="hover:text-zinc-300 transition-colors">{r.username}</Link></td>
-              <td className="py-2 text-right text-zinc-300">{r.comment_count}</td>
+            <tr key={r.username} className="border-b border-edge">
+              <td className="py-2 pr-3 text-ink-muted">{i + 1}</td>
+              <td className="py-2 pr-3 text-ink"><Link href={`/profile/${r.username}`} className="hover:text-ink-body transition-colors">{r.username}</Link></td>
+              <td className="py-2 text-right text-ink-body">{r.comment_count}</td>
             </tr>
           ))}
         </tbody>
@@ -632,7 +632,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <Tooltip {...TT} cursor={false} />
         <Scatter
           data={topByComments.map((r, i) => ({ ...r, index: i + 1 }))}
-          fill="#34d399"
+          fill="#93af7c"
         />
       </ScatterChart>
     </ResponsiveContainer>
@@ -650,7 +650,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis type="number" tick={AXIS} unit="s" />
         <YAxis dataKey="username" type="category" tick={AXIS} width={56} />
         <Tooltip {...TT} formatter={(v: unknown) => [`${v}s`, "Avg read time"]} />
-        <Bar dataKey="avg_sec" fill="#22d3ee" radius={[0, 3, 3, 0]} />
+        <Bar dataKey="avg_sec" fill="#76ada0" radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -658,7 +658,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-zinc-500 border-b border-zinc-800">
+          <tr className="text-ink-muted border-b border-edge">
             <th className="text-left pb-2 pr-3">#</th>
             <th className="text-left pb-2 pr-3">Username</th>
             <th className="text-right pb-2">Avg Read</th>
@@ -666,10 +666,10 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         </thead>
         <tbody>
           {topByReadTime.map((r, i) => (
-            <tr key={r.username} className="border-b border-zinc-900">
-              <td className="py-2 pr-3 text-zinc-500">{i + 1}</td>
-              <td className="py-2 pr-3 text-white"><Link href={`/profile/${r.username}`} className="hover:text-zinc-300 transition-colors">{r.username}</Link></td>
-              <td className="py-2 text-right text-zinc-300">{r.avg_sec}s</td>
+            <tr key={r.username} className="border-b border-edge">
+              <td className="py-2 pr-3 text-ink-muted">{i + 1}</td>
+              <td className="py-2 pr-3 text-ink"><Link href={`/profile/${r.username}`} className="hover:text-ink-body transition-colors">{r.username}</Link></td>
+              <td className="py-2 text-right text-ink-body">{r.avg_sec}s</td>
             </tr>
           ))}
         </tbody>
@@ -685,7 +685,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <Tooltip {...TT} formatter={(v: unknown) => [`${v}s`, "Avg read time"]} />
         <Scatter
           data={topByReadTime.map((r, i) => ({ ...r, rank: i + 1 }))}
-          fill="#22d3ee"
+          fill="#76ada0"
         />
       </ScatterChart>
     </ResponsiveContainer>
@@ -705,10 +705,10 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="format" tick={{ ...AXIS, angle: -30, textAnchor: "end" }} interval={0} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Legend wrapperStyle={{ fontSize: 11, color: "#a1a1aa" }} />
-        <Bar dataKey="first" name="1st" fill="#a78bfa" radius={[2, 2, 0, 0]} />
-        <Bar dataKey="second" name="2nd" fill="#7c3aed" radius={[2, 2, 0, 0]} />
-        <Bar dataKey="third" name="3rd" fill="#4c1d95" radius={[2, 2, 0, 0]} />
+        <Legend wrapperStyle={{ fontSize: 11, color: "#a39b8b" }} />
+        <Bar dataKey="first" name="1st" fill="#d2a45a" radius={[2, 2, 0, 0]} />
+        <Bar dataKey="second" name="2nd" fill="#b8893f" radius={[2, 2, 0, 0]} />
+        <Bar dataKey="third" name="3rd" fill="#6e5226" radius={[2, 2, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -737,12 +737,12 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           <div className="flex gap-0.5 mb-1">
             <div className="w-16" />
             {FORMATS.map(f => (
-              <div key={f} className="w-12 text-zinc-500 text-[9px] text-center">{f}</div>
+              <div key={f} className="w-12 text-ink-muted text-[9px] text-center">{f}</div>
             ))}
           </div>
           {allUsers.slice(0, 10).map(u => (
             <div key={u} className="flex gap-0.5 mb-0.5 items-center">
-              <div className="w-16 text-zinc-400 text-[10px] truncate pr-1">{u}</div>
+              <div className="w-16 text-ink-dim text-[10px] truncate pr-1">{u}</div>
               {FORMATS.map(fmt => {
                 const cnt = data.top_creators_per_format[fmt]?.find(r => r.username === u)?.post_count ?? 0
                 return (
@@ -752,12 +752,12 @@ function GlobalTab({ data }: { data: GlobalStats }) {
                     style={{
                       backgroundColor:
                         cnt === 0
-                          ? "#18181b"
+                          ? "#1b1815"
                           : `${FORMAT_COLORS[fmt]}${Math.round(40 + (cnt / maxVal) * 175).toString(16).padStart(2, "0")}`,
                     }}
                     title={`${u} / ${fmt}: ${cnt}`}
                   >
-                    {cnt > 0 && <span className="text-white text-[9px]">{cnt}</span>}
+                    {cnt > 0 && <span className="text-ink text-[9px]">{cnt}</span>}
                   </div>
                 )
               })}
@@ -772,12 +772,12 @@ function GlobalTab({ data }: { data: GlobalStats }) {
       {FORMATS.map(fmt => {
         const fmtData = data.top_creators_per_format[fmt] ?? []
         return (
-          <div key={fmt} className="bg-zinc-900 rounded-lg p-2">
+          <div key={fmt} className="bg-surface-1 rounded-lg p-2">
             <div className="text-[10px] font-semibold mb-1" style={{ color: FORMAT_COLORS[fmt] }}>
               {fmt}
             </div>
             {fmtData.length === 0 ? (
-              <div className="text-zinc-600 text-[10px]">No data</div>
+              <div className="text-ink-faint text-[10px]">No data</div>
             ) : (
               fmtData.map((r, i) => (
                 <div key={r.username} className="flex items-center gap-1 mb-0.5">
@@ -789,8 +789,8 @@ function GlobalTab({ data }: { data: GlobalStats }) {
                       opacity: 1 - i * 0.25,
                     }}
                   />
-                  <span className="text-zinc-400 text-[9px] truncate">{r.username}</span>
-                  <span className="text-zinc-500 text-[9px] ml-auto">{r.post_count}</span>
+                  <span className="text-ink-dim text-[9px] truncate">{r.username}</span>
+                  <span className="text-ink-muted text-[9px] ml-auto">{r.post_count}</span>
                 </div>
               ))
             )}
@@ -815,7 +815,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           tickFormatter={(v: string) => (v.length > 14 ? v.slice(0, 14) + "…" : v)}
         />
         <Tooltip {...TT} />
-        <Bar dataKey="like_count" fill="#fb7185" radius={[0, 3, 3, 0]} />
+        <Bar dataKey="like_count" fill="#c5848f" radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -823,7 +823,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-zinc-500 border-b border-zinc-800">
+          <tr className="text-ink-muted border-b border-edge">
             <th className="text-left pb-2 pr-2">#</th>
             <th className="text-left pb-2 pr-2">Title</th>
             <th className="text-left pb-2 pr-2">Format</th>
@@ -833,14 +833,14 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         </thead>
         <tbody>
           {topPosts.map((r, i) => (
-            <tr key={r.post_id} className="border-b border-zinc-900">
-              <td className="py-2 pr-2 text-zinc-500">{i + 1}</td>
-              <td className="py-2 pr-2 text-white">
+            <tr key={r.post_id} className="border-b border-edge">
+              <td className="py-2 pr-2 text-ink-muted">{i + 1}</td>
+              <td className="py-2 pr-2 text-ink">
                 {r.title.length > 30 ? r.title.slice(0, 30) + "…" : r.title}
               </td>
               <td className="py-2 pr-2"><FormatChip format={r.format} /></td>
-              <td className="py-2 pr-2 text-zinc-400">{r.author}</td>
-              <td className="py-2 text-right text-zinc-300">{r.like_count}</td>
+              <td className="py-2 pr-2 text-ink-dim">{r.author}</td>
+              <td className="py-2 text-right text-ink-body">{r.like_count}</td>
             </tr>
           ))}
         </tbody>
@@ -944,7 +944,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           <YAxis yAxisId="left" tick={AXIS} />
           <YAxis yAxisId="right" orientation="right" tick={AXIS} />
           <Tooltip {...TT} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#a1a1aa" }} />
+          <Legend wrapperStyle={{ fontSize: 11, color: "#a39b8b" }} />
           <Line yAxisId="left" type="monotone" dataKey={label1} stroke={color1} dot={false} strokeWidth={2} />
           <Line yAxisId="right" type="monotone" dataKey={label2} stroke={color2} dot={false} strokeWidth={2} />
         </LineChart>
@@ -964,7 +964,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           </Pie>
           <Tooltip {...TT} />
           <Legend
-            formatter={(v: string) => <span style={{ color: "#a1a1aa", fontSize: 11 }}>{v}</span>}
+            formatter={(v: string) => <span style={{ color: "#a39b8b", fontSize: 11 }}>{v}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -982,7 +982,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           </Pie>
           <Tooltip {...TT} />
           <Legend
-            formatter={(v: string) => <span style={{ color: "#a1a1aa", fontSize: 11 }}>{v}</span>}
+            formatter={(v: string) => <span style={{ color: "#a39b8b", fontSize: 11 }}>{v}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -1020,10 +1020,10 @@ function GlobalTab({ data }: { data: GlobalStats }) {
   const makeRadar = (byFormat: Record<string, number>) => (
     <ResponsiveContainer width="100%" height={200}>
       <RadarChart data={formatRadarData(byFormat)}>
-        <PolarGrid stroke="#27272a" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#a1a1aa", fontSize: 9 }} />
-        <Radar dataKey="count" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.3} />
+        <PolarGrid stroke="#2b2721" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a39b8b", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#a39b8b", fontSize: 9 }} />
+        <Radar dataKey="count" stroke="#d2a45a" fill="#d2a45a" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
     </ResponsiveContainer>
@@ -1062,17 +1062,17 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="weekday" tick={AXIS} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Bar dataKey="count" fill="#a78bfa" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="count" fill="#d2a45a" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
   const wdRadar = (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={data.activity_by_weekday.map(d => ({ subject: d.weekday, count: d.count }))}>
-        <PolarGrid stroke="#27272a" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#a1a1aa", fontSize: 9 }} />
-        <Radar dataKey="count" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.3} />
+        <PolarGrid stroke="#2b2721" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a39b8b", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#a39b8b", fontSize: 9 }} />
+        <Radar dataKey="count" stroke="#d2a45a" fill="#d2a45a" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
     </ResponsiveContainer>
@@ -1085,7 +1085,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="weekday" tick={AXIS} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Line type="monotone" dataKey="count" stroke="#a78bfa" dot={false} strokeWidth={2} />
+        <Line type="monotone" dataKey="count" stroke="#d2a45a" dot={false} strokeWidth={2} />
       </LineChart>
     </ResponsiveContainer>
   )
@@ -1098,7 +1098,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="hour" tick={AXIS} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Bar dataKey="count" fill="#22d3ee" radius={[2, 2, 0, 0]} />
+        <Bar dataKey="count" fill="#76ada0" radius={[2, 2, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -1109,7 +1109,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="hour" tick={AXIS} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Area type="monotone" dataKey="count" stroke="#22d3ee" fill="#22d3ee" fillOpacity={0.2} dot={false} strokeWidth={2} />
+        <Area type="monotone" dataKey="count" stroke="#76ada0" fill="#76ada0" fillOpacity={0.2} dot={false} strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
   )
@@ -1121,9 +1121,9 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           count: data.activity_by_hour[h]?.count ?? 0,
         }))}
       >
-        <PolarGrid stroke="#27272a" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-        <Radar dataKey="count" stroke="#22d3ee" fill="#22d3ee" fillOpacity={0.3} />
+        <PolarGrid stroke="#2b2721" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a39b8b", fontSize: 11 }} />
+        <Radar dataKey="count" stroke="#76ada0" fill="#76ada0" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
     </ResponsiveContainer>
@@ -1138,7 +1138,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="period" tick={AXIS} tickFormatter={(v: string) => v.slice(5)} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Line type="monotone" dataKey="avg_likes_per_post" stroke="#fbbf24" dot={false} strokeWidth={2} />
+        <Line type="monotone" dataKey="avg_likes_per_post" stroke="#d2a45a" dot={false} strokeWidth={2} />
       </LineChart>
     </ResponsiveContainer>
   )
@@ -1149,7 +1149,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="period" tick={AXIS} tickFormatter={(v: string) => v.slice(5)} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Bar dataKey="avg_likes_per_post" fill="#fbbf24" radius={[2, 2, 0, 0]} />
+        <Bar dataKey="avg_likes_per_post" fill="#d2a45a" radius={[2, 2, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -1160,7 +1160,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="period" tick={AXIS} tickFormatter={(v: string) => v.slice(5)} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Area type="monotone" dataKey="avg_likes_per_post" stroke="#fbbf24" fill="#fbbf24" fillOpacity={0.2} dot={false} strokeWidth={2} />
+        <Area type="monotone" dataKey="avg_likes_per_post" stroke="#d2a45a" fill="#d2a45a" fillOpacity={0.2} dot={false} strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
   )
@@ -1170,8 +1170,8 @@ function GlobalTab({ data }: { data: GlobalStats }) {
   const statusDonut = makeDonut({ published, pending } as unknown as Record<string, number>)
   const statusDonutReal = (() => {
     const statusData = [
-      { name: "Published", value: published, fill: "#34d399" },
-      { name: "Pending", value: pending, fill: "#fbbf24" },
+      { name: "Published", value: published, fill: "#93af7c" },
+      { name: "Pending", value: pending, fill: "#d2a45a" },
     ]
     return (
       <ResponsiveContainer width="100%" height={220}>
@@ -1181,7 +1181,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           </Pie>
           <Tooltip {...TT} />
           <Legend
-            formatter={(v: string) => <span style={{ color: "#a1a1aa", fontSize: 11 }}>{v}</span>}
+            formatter={(v: string) => <span style={{ color: "#a39b8b", fontSize: 11 }}>{v}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -1193,10 +1193,10 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         value={published}
         max={published + pending}
         label="Published ratio"
-        color="#34d399"
+        color="#93af7c"
         size={200}
       />
-      <div className="text-zinc-400 text-xs">
+      <div className="text-ink-dim text-xs">
         {published} published / {pending} pending
       </div>
     </div>
@@ -1211,7 +1211,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis type="number" tick={AXIS} />
         <YAxis dataKey="username" type="category" tick={AXIS} width={56} />
         <Tooltip {...TT} />
-        <Bar dataKey="comment_count" fill="#fb923c" radius={[0, 3, 3, 0]} />
+        <Bar dataKey="comment_count" fill="#c98a62" radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -1219,7 +1219,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-zinc-500 border-b border-zinc-800">
+          <tr className="text-ink-muted border-b border-edge">
             <th className="text-left pb-2 pr-3">#</th>
             <th className="text-left pb-2 pr-3">Username</th>
             <th className="text-right pb-2">Comments</th>
@@ -1227,10 +1227,10 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         </thead>
         <tbody>
           {commenters.map((r, i) => (
-            <tr key={r.username} className="border-b border-zinc-900">
-              <td className="py-2 pr-3 text-zinc-500">{i + 1}</td>
-              <td className="py-2 pr-3 text-white">{r.username}</td>
-              <td className="py-2 text-right text-zinc-300">{r.comment_count}</td>
+            <tr key={r.username} className="border-b border-edge">
+              <td className="py-2 pr-3 text-ink-muted">{i + 1}</td>
+              <td className="py-2 pr-3 text-ink">{r.username}</td>
+              <td className="py-2 text-right text-ink-body">{r.comment_count}</td>
             </tr>
           ))}
         </tbody>
@@ -1241,8 +1241,8 @@ function GlobalTab({ data }: { data: GlobalStats }) {
   return (
     <div>
       {/* 1. Overview */}
-      <div className="px-4 py-4 border-b border-zinc-900">
-        <div className="text-zinc-300 text-xs font-semibold uppercase tracking-widest mb-3">
+      <div className="px-4 py-4 border-b border-edge">
+        <div className="label-caps text-ink-dim mb-3">
           Overview
         </div>
         {overviewCards}
@@ -1314,10 +1314,10 @@ function GlobalTab({ data }: { data: GlobalStats }) {
       <CategorySection
         title="Posts over Time"
         charts={[
-          { label: "Line", component: makeLineChart(data.posts_over_time, "#a78bfa") },
-          { label: "Area", component: makeAreaChart(data.posts_over_time, "#a78bfa") },
-          { label: "Bar", component: makeBarChart(data.posts_over_time, "#a78bfa") },
-          { label: "Cumulative", component: makeCumulativeArea(data.posts_over_time, "#a78bfa") },
+          { label: "Line", component: makeLineChart(data.posts_over_time, "#d2a45a") },
+          { label: "Area", component: makeAreaChart(data.posts_over_time, "#d2a45a") },
+          { label: "Bar", component: makeBarChart(data.posts_over_time, "#d2a45a") },
+          { label: "Cumulative", component: makeCumulativeArea(data.posts_over_time, "#d2a45a") },
           { label: "Calendar", component: <CalendarHeatmap data={data.posts_over_time} /> },
         ]}
       />
@@ -1326,10 +1326,10 @@ function GlobalTab({ data }: { data: GlobalStats }) {
       <CategorySection
         title="Users over Time"
         charts={[
-          { label: "Line", component: makeLineChart(data.users_over_time, "#34d399") },
-          { label: "Area", component: makeAreaChart(data.users_over_time, "#34d399") },
-          { label: "Bar", component: makeBarChart(data.users_over_time, "#34d399") },
-          { label: "Cumulative", component: makeCumulativeArea(data.users_over_time, "#34d399") },
+          { label: "Line", component: makeLineChart(data.users_over_time, "#93af7c") },
+          { label: "Area", component: makeAreaChart(data.users_over_time, "#93af7c") },
+          { label: "Bar", component: makeBarChart(data.users_over_time, "#93af7c") },
+          { label: "Cumulative", component: makeCumulativeArea(data.users_over_time, "#93af7c") },
         ]}
       />
 
@@ -1337,14 +1337,14 @@ function GlobalTab({ data }: { data: GlobalStats }) {
       <CategorySection
         title="Comments over Time"
         charts={[
-          { label: "Line", component: makeLineChart(data.comments_over_time, "#fb7185") },
-          { label: "Area", component: makeAreaChart(data.comments_over_time, "#fb7185") },
-          { label: "Bar", component: makeBarChart(data.comments_over_time, "#fb7185") },
+          { label: "Line", component: makeLineChart(data.comments_over_time, "#c5848f") },
+          { label: "Area", component: makeAreaChart(data.comments_over_time, "#c5848f") },
+          { label: "Bar", component: makeBarChart(data.comments_over_time, "#c5848f") },
           {
             label: "Overlay",
             component: makeOverlayLine(
-              data.comments_over_time, "comments", "#fb7185",
-              data.posts_over_time, "posts", "#a78bfa",
+              data.comments_over_time, "comments", "#c5848f",
+              data.posts_over_time, "posts", "#d2a45a",
             ),
           },
         ]}
@@ -1354,14 +1354,14 @@ function GlobalTab({ data }: { data: GlobalStats }) {
       <CategorySection
         title="Likes over Time"
         charts={[
-          { label: "Line", component: makeLineChart(data.likes_over_time, "#fbbf24") },
-          { label: "Area", component: makeAreaChart(data.likes_over_time, "#fbbf24") },
-          { label: "Bar", component: makeBarChart(data.likes_over_time, "#fbbf24") },
+          { label: "Line", component: makeLineChart(data.likes_over_time, "#d2a45a") },
+          { label: "Area", component: makeAreaChart(data.likes_over_time, "#d2a45a") },
+          { label: "Bar", component: makeBarChart(data.likes_over_time, "#d2a45a") },
           {
             label: "Overlay",
             component: makeOverlayLine(
-              data.likes_over_time, "likes", "#fbbf24",
-              data.posts_over_time, "posts", "#a78bfa",
+              data.likes_over_time, "likes", "#d2a45a",
+              data.posts_over_time, "posts", "#d2a45a",
             ),
           },
         ]}
@@ -1494,15 +1494,15 @@ function MyStatsTab({
         <StatCard label="Accuracy" value={`${data.my_quiz.accuracy}%`} />
       </div>
       {eloFormats.length === 0 ? (
-        <p className="text-zinc-500 text-xs">
+        <p className="text-ink-muted text-xs">
           Answer post quizzes to build your score. Correct answers raise it, wrong answers lower it.
         </p>
       ) : (
         <div className="flex flex-col gap-2">
           {eloFormats.map(([fmt, d]) => (
             <div key={fmt} className="flex items-center gap-3">
-              <span className="w-20 shrink-0 text-xs text-zinc-400 capitalize">{fmt}</span>
-              <div className="flex-1 h-2 bg-zinc-900 rounded-full overflow-hidden">
+              <span className="w-20 shrink-0 text-xs text-ink-dim capitalize">{fmt}</span>
+              <div className="flex-1 h-2 bg-surface-1 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full"
                   style={{
@@ -1511,7 +1511,7 @@ function MyStatsTab({
                   }}
                 />
               </div>
-              <span className="w-12 shrink-0 text-right text-xs text-zinc-300 font-semibold">
+              <span className="w-12 shrink-0 text-right text-xs text-ink-body font-semibold">
                 {Math.round(d.rating)}
               </span>
             </div>
@@ -1584,7 +1584,7 @@ function MyStatsTab({
             {data2.map(d => <Cell key={d.format} fill={FORMAT_COLORS[d.format] ?? DEFAULT_COLOR} />)}
           </Pie>
           <Tooltip {...TT} />
-          <Legend formatter={(v: string) => <span style={{ color: "#a1a1aa", fontSize: 11 }}>{v}</span>} />
+          <Legend formatter={(v: string) => <span style={{ color: "#a39b8b", fontSize: 11 }}>{v}</span>} />
         </PieChart>
       </ResponsiveContainer>
     )
@@ -1607,10 +1607,10 @@ function MyStatsTab({
   const makeFormatRadar = (arr: { format: string; count: number }[]) => (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={arr.map(d => ({ subject: d.format, count: d.count }))}>
-        <PolarGrid stroke="#27272a" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#a1a1aa", fontSize: 9 }} />
-        <Radar dataKey="count" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.3} />
+        <PolarGrid stroke="#2b2721" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a39b8b", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#a39b8b", fontSize: 9 }} />
+        <Radar dataKey="count" stroke="#d2a45a" fill="#d2a45a" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
     </ResponsiveContainer>
@@ -1661,9 +1661,9 @@ function MyStatsTab({
           <YAxis yAxisId="left" tick={AXIS} />
           <YAxis yAxisId="right" orientation="right" tick={AXIS} />
           <Tooltip {...TT} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#a1a1aa" }} />
-          <Line yAxisId="left" type="monotone" dataKey="posts" stroke="#a78bfa" dot={false} strokeWidth={2} />
-          <Line yAxisId="right" type="monotone" dataKey="likes" stroke="#fb7185" dot={false} strokeWidth={2} />
+          <Legend wrapperStyle={{ fontSize: 11, color: "#a39b8b" }} />
+          <Line yAxisId="left" type="monotone" dataKey="posts" stroke="#d2a45a" dot={false} strokeWidth={2} />
+          <Line yAxisId="right" type="monotone" dataKey="likes" stroke="#c5848f" dot={false} strokeWidth={2} />
         </LineChart>
       </ResponsiveContainer>
     )
@@ -1677,7 +1677,7 @@ function MyStatsTab({
         <XAxis dataKey="weekday" tick={AXIS} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Bar dataKey="count" fill="#a78bfa" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="count" fill="#d2a45a" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -1688,17 +1688,17 @@ function MyStatsTab({
         <XAxis dataKey="hour" tick={AXIS} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Bar dataKey="count" fill="#22d3ee" radius={[2, 2, 0, 0]} />
+        <Bar dataKey="count" fill="#76ada0" radius={[2, 2, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
   const myPolar = (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={data.my_activity_by_weekday.map(d => ({ subject: d.weekday, count: d.count }))}>
-        <PolarGrid stroke="#27272a" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#a1a1aa", fontSize: 9 }} />
-        <Radar dataKey="count" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.3} />
+        <PolarGrid stroke="#2b2721" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a39b8b", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#a39b8b", fontSize: 9 }} />
+        <Radar dataKey="count" stroke="#d2a45a" fill="#d2a45a" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
     </ResponsiveContainer>
@@ -1725,10 +1725,10 @@ function MyStatsTab({
   const readTimeRadar = (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={readTimeArr.map(d => ({ subject: d.format, avg_sec: d.avg_sec }))}>
-        <PolarGrid stroke="#27272a" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#a1a1aa", fontSize: 9 }} />
-        <Radar dataKey="avg_sec" stroke="#22d3ee" fill="#22d3ee" fillOpacity={0.3} />
+        <PolarGrid stroke="#2b2721" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#a39b8b", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#a39b8b", fontSize: 9 }} />
+        <Radar dataKey="avg_sec" stroke="#76ada0" fill="#76ada0" fillOpacity={0.3} />
         <Tooltip {...TT} formatter={(v: unknown) => [`${v}s`, "Avg read time"]} />
       </RadarChart>
     </ResponsiveContainer>
@@ -1742,7 +1742,7 @@ function MyStatsTab({
         <Tooltip {...TT} formatter={(v: unknown) => [`${v}s`, "Avg read"]} />
         <Scatter
           data={readTimeArr.map((d, i) => ({ ...d, rank: i + 1 }))}
-          fill="#22d3ee"
+          fill="#76ada0"
         />
       </ScatterChart>
     </ResponsiveContainer>
@@ -1769,7 +1769,7 @@ function MyStatsTab({
           tickFormatter={(v: string) => (v.length > 14 ? v.slice(0, 14) + "…" : v)}
         />
         <Tooltip {...TT} />
-        <Bar dataKey="like_count" fill="#fb7185" radius={[0, 3, 3, 0]} />
+        <Bar dataKey="like_count" fill="#c5848f" radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -1777,7 +1777,7 @@ function MyStatsTab({
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-zinc-500 border-b border-zinc-800">
+          <tr className="text-ink-muted border-b border-edge">
             <th className="text-left pb-2 pr-2">Title</th>
             <th className="text-left pb-2 pr-2">Format</th>
             <th className="text-right pb-2">Likes</th>
@@ -1785,12 +1785,12 @@ function MyStatsTab({
         </thead>
         <tbody>
           {myTopByLikes.map(r => (
-            <tr key={r.post_id} className="border-b border-zinc-900">
-              <td className="py-2 pr-2 text-white">
+            <tr key={r.post_id} className="border-b border-edge">
+              <td className="py-2 pr-2 text-ink">
                 {r.title.length > 28 ? r.title.slice(0, 28) + "…" : r.title}
               </td>
               <td className="py-2 pr-2"><FormatChip format={r.format} /></td>
-              <td className="py-2 text-right text-zinc-300">{r.like_count}</td>
+              <td className="py-2 text-right text-ink-body">{r.like_count}</td>
             </tr>
           ))}
         </tbody>
@@ -1813,7 +1813,7 @@ function MyStatsTab({
           tickFormatter={(v: string) => (v.length > 14 ? v.slice(0, 14) + "…" : v)}
         />
         <Tooltip {...TT} />
-        <Bar dataKey="comment_count" fill="#34d399" radius={[0, 3, 3, 0]} />
+        <Bar dataKey="comment_count" fill="#93af7c" radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -1821,7 +1821,7 @@ function MyStatsTab({
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-zinc-500 border-b border-zinc-800">
+          <tr className="text-ink-muted border-b border-edge">
             <th className="text-left pb-2 pr-2">Title</th>
             <th className="text-left pb-2 pr-2">Format</th>
             <th className="text-right pb-2">Comments</th>
@@ -1829,12 +1829,12 @@ function MyStatsTab({
         </thead>
         <tbody>
           {myTopByComments.map(r => (
-            <tr key={r.post_id} className="border-b border-zinc-900">
-              <td className="py-2 pr-2 text-white">
+            <tr key={r.post_id} className="border-b border-edge">
+              <td className="py-2 pr-2 text-ink">
                 {r.title.length > 28 ? r.title.slice(0, 28) + "…" : r.title}
               </td>
               <td className="py-2 pr-2"><FormatChip format={r.format} /></td>
-              <td className="py-2 text-right text-zinc-300">{r.comment_count}</td>
+              <td className="py-2 text-right text-ink-body">{r.comment_count}</td>
             </tr>
           ))}
         </tbody>
@@ -1853,14 +1853,14 @@ function MyStatsTab({
   const rankingGauges = (
     <div className="flex justify-around">
       <div className="flex flex-col items-center gap-1">
-        <GaugeChart value={total_users - by_posts + 1} max={total_users} label="Posts rank" color="#a78bfa" size={140} />
-        <div className="text-zinc-400 text-xs text-center">
+        <GaugeChart value={total_users - by_posts + 1} max={total_users} label="Posts rank" color="#d2a45a" size={140} />
+        <div className="text-ink-dim text-xs text-center">
           #{by_posts} of {total_users}
         </div>
       </div>
       <div className="flex flex-col items-center gap-1">
-        <GaugeChart value={total_users - by_likes + 1} max={total_users} label="Likes rank" color="#fb7185" size={140} />
-        <div className="text-zinc-400 text-xs text-center">
+        <GaugeChart value={total_users - by_likes + 1} max={total_users} label="Likes rank" color="#c5848f" size={140} />
+        <div className="text-ink-dim text-xs text-center">
           #{by_likes} of {total_users}
         </div>
       </div>
@@ -1871,9 +1871,9 @@ function MyStatsTab({
   const score = data.my_engagement_score
   const engagementGauge = (
     <div className="flex flex-col items-center gap-2">
-      <div className="text-white text-4xl font-bold">{score.toFixed(1)}</div>
-      <div className="text-zinc-500 text-xs">out of 100</div>
-      <GaugeChart value={score} max={100} label="Engagement" color="#fbbf24" size={180} />
+      <div className="text-ink text-4xl font-bold">{score.toFixed(1)}</div>
+      <div className="text-ink-muted text-xs">out of 100</div>
+      <GaugeChart value={score} max={100} label="Engagement" color="#d2a45a" size={180} />
     </div>
   )
   const engagementLine = (() => {
@@ -1888,7 +1888,7 @@ function MyStatsTab({
           <XAxis dataKey="period" tick={AXIS} tickFormatter={(v: string) => v.slice(5)} />
           <YAxis tick={AXIS} domain={[0, 100]} />
           <Tooltip {...TT} />
-          <Line type="monotone" dataKey="score" stroke="#fbbf24" dot={false} strokeWidth={2} />
+          <Line type="monotone" dataKey="score" stroke="#d2a45a" dot={false} strokeWidth={2} />
         </LineChart>
       </ResponsiveContainer>
     )
@@ -1898,14 +1898,14 @@ function MyStatsTab({
   const { current_days, best_days } = data.my_streak
   const streakCards = (
     <div className="grid grid-cols-2 gap-4">
-      <div className="bg-zinc-900 rounded-xl p-5 text-center">
-        <div className="text-4xl font-bold text-white">{current_days}</div>
-        <div className="text-zinc-400 text-xs mt-1">Current streak</div>
+      <div className="bg-surface-1 rounded-xl p-5 text-center">
+        <div className="text-4xl font-bold text-ink">{current_days}</div>
+        <div className="text-ink-dim text-xs mt-1">Current streak</div>
         <div className="text-2xl mt-1">🔥</div>
       </div>
-      <div className="bg-zinc-900 rounded-xl p-5 text-center">
-        <div className="text-4xl font-bold text-white">{best_days}</div>
-        <div className="text-zinc-400 text-xs mt-1">Best streak</div>
+      <div className="bg-surface-1 rounded-xl p-5 text-center">
+        <div className="text-4xl font-bold text-ink">{best_days}</div>
+        <div className="text-ink-dim text-xs mt-1">Best streak</div>
         <div className="text-2xl mt-1">🔥</div>
       </div>
     </div>
@@ -1920,21 +1920,21 @@ function MyStatsTab({
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 transition-all ${
                 m.achieved
-                  ? "border-violet-500 bg-violet-500/20 shadow-[0_0_8px_rgba(167,139,250,0.4)]"
-                  : "border-zinc-700 bg-zinc-900"
+                  ? "border-lamp bg-lamp/20 shadow-[0_0_8px_rgba(167,139,250,0.4)]"
+                  : "border-edge-strong bg-surface-1"
               }`}
             >
               {m.achieved ? (
-                <span className="text-violet-400">✓</span>
+                <span className="text-lamp">✓</span>
               ) : (
-                <span className="text-zinc-600">○</span>
+                <span className="text-ink-faint">○</span>
               )}
             </div>
-            <div className={`text-[10px] text-center leading-tight ${m.achieved ? "text-zinc-300" : "text-zinc-600"}`}>
+            <div className={`text-[10px] text-center leading-tight ${m.achieved ? "text-ink-body" : "text-ink-faint"}`}>
               {m.label}
             </div>
             {m.achieved_at && (
-              <div className="text-zinc-600 text-[9px] text-center">{m.achieved_at}</div>
+              <div className="text-ink-faint text-[9px] text-center">{m.achieved_at}</div>
             )}
           </div>
         ))}
@@ -1952,16 +1952,16 @@ function MyStatsTab({
   return (
     <div>
       {/* 1. Overview */}
-      <div className="px-4 py-4 border-b border-zinc-900">
-        <div className="text-zinc-300 text-xs font-semibold uppercase tracking-widest mb-3">
+      <div className="px-4 py-4 border-b border-edge">
+        <div className="label-caps text-ink-dim mb-3">
           Overview
         </div>
         {overviewCards}
       </div>
 
       {/* 1b. My Knowledge Score */}
-      <div className="px-4 py-4 border-b border-zinc-900">
-        <div className="text-zinc-300 text-xs font-semibold uppercase tracking-widest mb-3">
+      <div className="px-4 py-4 border-b border-edge">
+        <div className="label-caps text-ink-dim mb-3">
           My Knowledge Score
         </div>
         {knowledgeBlock}
@@ -1971,10 +1971,10 @@ function MyStatsTab({
       <CategorySection
         title="My Posts over Time"
         charts={[
-          { label: "Line", component: makeLineChart(data.my_posts_over_time, "#a78bfa") },
-          { label: "Area", component: makeAreaChart(data.my_posts_over_time, "#a78bfa") },
-          { label: "Bar", component: makeBarChart(data.my_posts_over_time, "#a78bfa") },
-          { label: "Cumulative", component: makeCumulative(data.my_posts_over_time, "#a78bfa") },
+          { label: "Line", component: makeLineChart(data.my_posts_over_time, "#d2a45a") },
+          { label: "Area", component: makeAreaChart(data.my_posts_over_time, "#d2a45a") },
+          { label: "Bar", component: makeBarChart(data.my_posts_over_time, "#d2a45a") },
+          { label: "Cumulative", component: makeCumulative(data.my_posts_over_time, "#d2a45a") },
           { label: "Calendar", component: <CalendarHeatmap data={data.my_posts_over_time} /> },
         ]}
       />
@@ -1983,9 +1983,9 @@ function MyStatsTab({
       <CategorySection
         title="My Likes Received over Time"
         charts={[
-          { label: "Line", component: makeLineChart(data.my_likes_received_over_time, "#fb7185") },
-          { label: "Area", component: makeAreaChart(data.my_likes_received_over_time, "#fb7185") },
-          { label: "Bar", component: makeBarChart(data.my_likes_received_over_time, "#fb7185") },
+          { label: "Line", component: makeLineChart(data.my_likes_received_over_time, "#c5848f") },
+          { label: "Area", component: makeAreaChart(data.my_likes_received_over_time, "#c5848f") },
+          { label: "Bar", component: makeBarChart(data.my_likes_received_over_time, "#c5848f") },
           { label: "Overlay", component: postsOverlayWithLikes },
         ]}
       />
@@ -1994,9 +1994,9 @@ function MyStatsTab({
       <CategorySection
         title="My Comments Received over Time"
         charts={[
-          { label: "Line", component: makeLineChart(data.my_comments_received_over_time, "#34d399") },
-          { label: "Area", component: makeAreaChart(data.my_comments_received_over_time, "#34d399") },
-          { label: "Bar", component: makeBarChart(data.my_comments_received_over_time, "#34d399") },
+          { label: "Line", component: makeLineChart(data.my_comments_received_over_time, "#93af7c") },
+          { label: "Area", component: makeAreaChart(data.my_comments_received_over_time, "#93af7c") },
+          { label: "Bar", component: makeBarChart(data.my_comments_received_over_time, "#93af7c") },
         ]}
       />
 
@@ -2046,7 +2046,7 @@ function MyStatsTab({
                   <XAxis dataKey="period" tick={AXIS} tickFormatter={(v: string) => v.slice(5)} />
                   <YAxis tick={AXIS} unit="s" />
                   <Tooltip {...TT} formatter={(v: unknown) => [`${v}s`, "Avg read"]} />
-                  <Line type="monotone" dataKey="avg_sec" stroke="#22d3ee" dot={false} strokeWidth={2} />
+                  <Line type="monotone" dataKey="avg_sec" stroke="#76ada0" dot={false} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             ),
@@ -2060,7 +2060,7 @@ function MyStatsTab({
                   <XAxis dataKey="period" tick={AXIS} tickFormatter={(v: string) => v.slice(5)} />
                   <YAxis tick={AXIS} unit="s" />
                   <Tooltip {...TT} formatter={(v: unknown) => [`${v}s`, "Avg read"]} />
-                  <Area type="monotone" dataKey="avg_sec" stroke="#22d3ee" fill="#22d3ee" fillOpacity={0.15} dot={false} strokeWidth={2} />
+                  <Area type="monotone" dataKey="avg_sec" stroke="#76ada0" fill="#76ada0" fillOpacity={0.15} dot={false} strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             ),
@@ -2074,7 +2074,7 @@ function MyStatsTab({
                   <XAxis dataKey="period" tick={AXIS} tickFormatter={(v: string) => v.slice(5)} />
                   <YAxis tick={AXIS} unit="s" />
                   <Tooltip {...TT} formatter={(v: unknown) => [`${v}s`, "Avg read"]} />
-                  <Bar dataKey="avg_sec" fill="#22d3ee" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="avg_sec" fill="#76ada0" radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ),
@@ -2128,16 +2128,16 @@ function MyStatsTab({
       />
 
       {/* 14. My Streak */}
-      <div className="px-4 py-4 border-b border-zinc-900">
-        <div className="text-zinc-300 text-xs font-semibold uppercase tracking-widest mb-3">
+      <div className="px-4 py-4 border-b border-edge">
+        <div className="label-caps text-ink-dim mb-3">
           My Streak
         </div>
         {streakCards}
       </div>
 
       {/* 15. My Milestones */}
-      <div className="px-4 py-4 border-b border-zinc-900">
-        <div className="text-zinc-300 text-xs font-semibold uppercase tracking-widest mb-3">
+      <div className="px-4 py-4 border-b border-edge">
+        <div className="label-caps text-ink-dim mb-3">
           My Milestones
         </div>
         {milestonesTimeline}
@@ -2224,18 +2224,18 @@ export default function StatsPage() {
 
   return (
     <StatsErrorBoundary>
-    <div className="relative max-w-[430px] mx-auto bg-zinc-950 min-h-[100dvh] flex flex-col">
+    <div className="relative max-w-[430px] mx-auto bg-surface-0 min-h-[100dvh] flex flex-col">
       {/* Tab bar */}
-      <div className="sticky top-0 z-20 bg-zinc-950 border-b border-zinc-900 px-4 pt-3 pb-0">
-        <div className="flex gap-1 bg-zinc-900 rounded-full p-1">
+      <div className="sticky top-0 z-20 bg-surface-0 border-b border-edge px-4 pt-3 pb-0">
+        <div className="flex gap-1 bg-surface-1 rounded-full p-1">
           {tabs.map(t => (
             <button
               key={t.key}
               onClick={() => setActiveTab(t.key)}
               className={`flex-1 py-1.5 text-sm font-medium rounded-full transition-colors ${
                 activeTab === t.key
-                  ? "bg-zinc-700 text-white"
-                  : "text-zinc-400 hover:text-zinc-300"
+                  ? "bg-surface-3 text-ink"
+                  : "text-ink-dim hover:text-ink-body"
               }`}
             >
               {t.label}
@@ -2248,13 +2248,13 @@ export default function StatsPage() {
       <div className="flex-1 overflow-y-auto pb-20 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         {activeTab === "global" && (
           globalLoading ? (
-            <div className="flex items-center justify-center h-40 text-zinc-400 text-sm">
+            <div className="flex items-center justify-center h-40 text-ink-dim text-sm">
               Loading stats...
             </div>
           ) : globalData ? (
             <GlobalTab data={globalData} />
           ) : (
-            <div className="flex items-center justify-center h-40 text-zinc-500 text-sm">
+            <div className="flex items-center justify-center h-40 text-ink-muted text-sm">
               Could not load stats.
             </div>
           )
@@ -2262,10 +2262,10 @@ export default function StatsPage() {
 
         {activeTab === "my" && !user && (
           <div className="flex flex-col items-center justify-center h-60 gap-4 px-8 text-center">
-            <div className="text-zinc-400 text-sm">Log in to see your personal stats</div>
+            <div className="text-ink-dim text-sm">Log in to see your personal stats</div>
             <a
               href="/login"
-              className="text-xs bg-zinc-800 text-white px-4 py-2 rounded-full hover:bg-zinc-700 transition-colors"
+              className="text-xs bg-surface-2 text-ink px-4 py-2 rounded-full hover:bg-surface-3 transition-colors"
             >
               Log in
             </a>
@@ -2274,13 +2274,13 @@ export default function StatsPage() {
 
         {activeTab === "my" && user && (
           myLoading ? (
-            <div className="flex items-center justify-center h-40 text-zinc-400 text-sm">
+            <div className="flex items-center justify-center h-40 text-ink-dim text-sm">
               Loading stats...
             </div>
           ) : myData ? (
             <MyStatsTab data={myData} savedCount={savedCount} likedByFormat={likedByFormat} />
           ) : (
-            <div className="flex items-center justify-center h-40 text-zinc-500 text-sm">
+            <div className="flex items-center justify-center h-40 text-ink-muted text-sm">
               Could not load personal stats.
             </div>
           )

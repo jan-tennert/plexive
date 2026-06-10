@@ -236,19 +236,19 @@ export default function ProfilePage() {
   }
 
   const inputClass =
-    "w-full bg-surface-2 border border-edge-strong rounded-field text-white placeholder-zinc-500 px-4 py-3 text-sm focus:outline-none focus:border-zinc-500 transition-colors"
+    "field text-sm py-3"
   const submitClass =
-    "w-full bg-white text-zinc-950 font-semibold py-3 rounded-xl text-sm disabled:opacity-50 transition-opacity"
+    "btn btn-primary w-full py-3"
 
   return (
-    <div className="h-[100dvh] bg-zinc-950 flex justify-center">
+    <div className="h-[100dvh] bg-surface-0 flex justify-center">
       <div className="w-full max-w-[430px] h-[100dvh] relative">
         <div className="h-full overflow-y-auto pb-14 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
 
         {/* Back button */}
         <button
           onClick={() => router.back()}
-          className="absolute top-4 left-4 z-10 w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+          className="absolute top-4 left-4 z-10 w-10 h-10 flex items-center justify-center text-ink-dim hover:text-ink transition-colors cursor-pointer"
           aria-label="Go back"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
@@ -263,7 +263,7 @@ export default function ProfilePage() {
             <button
               onClick={() => avatarInputRef.current?.click()}
               disabled={avatarLoading}
-              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-zinc-800 border-2 border-zinc-950 flex items-center justify-center text-zinc-300 hover:text-white transition-colors"
+              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-surface-3 border-2 border-surface-0 flex items-center justify-center text-ink-dim hover:text-ink cursor-pointer transition-colors"
               aria-label="Change profile picture"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
@@ -279,25 +279,25 @@ export default function ProfilePage() {
               className="hidden"
             />
           </div>
-          {avatarError && <p className="text-red-400 text-xs mb-2">{avatarError}</p>}
-          <p className="flex items-center gap-1.5 text-white text-xl font-semibold">
+          {avatarError && <p className="text-bad text-xs mb-2">{avatarError}</p>}
+          <p className="flex items-center gap-1.5 font-serif text-ink text-2xl font-medium">
             @{user.username}
             {user.is_verified && <VerifiedBadge size={20} />}
           </p>
-          <p className="text-zinc-500 text-sm mt-1">{user.email}</p>
-          <Link href={`/profile/${user.username}`} className="text-zinc-400 text-sm mt-2 border border-zinc-700 rounded-lg px-3 py-1.5 hover:text-white transition-colors">
+          <p className="text-ink-muted text-sm mt-1">{user.email}</p>
+          <Link href={`/profile/${user.username}`} className="btn btn-ghost text-sm mt-2 px-3 py-1.5">
             View public profile
           </Link>
         </div>
 
         {/* Knowledge score */}
-        <div className="mx-6 mb-4 bg-surface-1 rounded-card px-5 py-4">
+        <div className="mx-6 mb-4 card px-5 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white text-sm">Knowledge score</p>
-              <p className="text-zinc-500 text-xs mt-0.5">Answer quizzes to raise it</p>
+              <p className="text-ink text-sm font-medium">Knowledge score</p>
+              <p className="text-ink-muted text-xs mt-0.5">Answer quizzes to raise it</p>
             </div>
-            <p className="text-amber-400 text-2xl font-bold">
+            <p className="text-lamp text-2xl font-bold font-mono">
               {elo?.global_rating ?? "—"}
             </p>
           </div>
@@ -306,7 +306,7 @@ export default function ProfilePage() {
               {Object.entries(elo.formats).map(([fmt, data]) => {
                 const style = formatStyle(fmt)
                 return (
-                  <span key={fmt} className={`text-xs rounded-full px-2.5 py-1 bg-zinc-800 ${style.text}`}>
+                  <span key={fmt} className={`text-xs rounded-full px-2.5 py-1 bg-surface-2 border border-edge ${style.text}`}>
                     {style.label} {Math.round(data.rating)}
                   </span>
                 )
@@ -316,18 +316,18 @@ export default function ProfilePage() {
         </div>
 
         {/* My content */}
-        <div className="mx-6 mb-4 bg-surface-1 rounded-card overflow-hidden">
+        <div className="mx-6 mb-4 card overflow-hidden">
           <button
             onClick={() => router.push("/my-posts")}
             className="w-full px-5 py-4 flex items-center justify-between text-left border-b border-edge"
           >
-            <span className="flex items-center gap-3 text-white text-sm">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-zinc-400">
+            <span className="flex items-center gap-3 text-ink text-sm font-medium">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-ink-dim">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
               </svg>
               My posts
             </span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-zinc-500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-ink-muted">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </button>
@@ -335,86 +335,86 @@ export default function ProfilePage() {
             onClick={() => router.push("/saved-posts")}
             className="w-full px-5 py-4 flex items-center justify-between text-left"
           >
-            <span className="flex items-center gap-3 text-white text-sm">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-zinc-400">
+            <span className="flex items-center gap-3 text-ink text-sm font-medium">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-ink-dim">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
               </svg>
               Saved posts
             </span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-zinc-500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-ink-muted">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </button>
         </div>
 
         {/* Bio */}
-        <div className="mx-6 mb-4 bg-surface-1 rounded-card px-5 py-4">
-          <label className="block text-zinc-400 text-xs mb-1.5">Bio</label>
+        <div className="mx-6 mb-4 card px-5 py-4">
+          <label className="block label-caps mb-1.5">Bio</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             maxLength={160}
             rows={3}
             placeholder="Tell people about yourself..."
-            className="w-full bg-surface-2 border border-edge-strong rounded-field text-white placeholder-zinc-500 px-4 py-3 text-sm focus:outline-none focus:border-zinc-500 transition-colors resize-none"
+            className="field text-sm py-3 resize-none"
           />
           <div className="flex items-center justify-between mt-1">
-            <span className="text-zinc-600 text-xs">{bio.length}/160</span>
+            <span className="text-ink-faint text-xs font-mono">{bio.length}/160</span>
             <button
               onClick={handleSaveBio}
               disabled={bioLoading}
-              className="text-xs text-zinc-400 disabled:opacity-50"
+              className="text-xs text-lamp font-semibold disabled:opacity-50 cursor-pointer"
             >
               {bioLoading ? "Saving..." : "Save bio"}
             </button>
           </div>
-          {bioError && <p className="text-red-400 text-xs mt-1">{bioError}</p>}
+          {bioError && <p className="text-bad text-xs mt-1">{bioError}</p>}
         </div>
 
         {/* Follow Requests (private accounts only) */}
         {user.is_private && (
-          <div className="mx-6 mb-4 bg-surface-1 rounded-card overflow-hidden">
+          <div className="mx-6 mb-4 card overflow-hidden">
             <button
               onClick={() => setShowRequests((v) => !v)}
               className="w-full px-5 py-4 flex items-center justify-between text-left"
             >
-              <span className="text-white text-sm flex items-center gap-2">
+              <span className="text-ink text-sm font-medium flex items-center gap-2">
                 Follow Requests
                 {pendingRequests.length > 0 && (
-                  <span className="bg-sky-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="bg-lamp text-surface-0 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {pendingRequests.length}
                   </span>
                 )}
               </span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-                className={`w-4 h-4 text-zinc-500 transition-transform ${showRequests ? "rotate-90" : ""}`}>
+                className={`w-4 h-4 text-ink-muted transition-transform ${showRequests ? "rotate-90" : ""}`}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
             </button>
             {showRequests && (
               <div className="px-5 pb-5 flex flex-col gap-3">
                 {pendingRequests.length === 0 ? (
-                  <p className="text-zinc-500 text-sm">No pending requests.</p>
+                  <p className="text-ink-muted text-sm">No pending requests.</p>
                 ) : (
                   pendingRequests.map((req) => (
                     <div key={req.username} className="flex items-center justify-between gap-3">
                       <Link href={`/profile/${req.username}`} className="flex items-center gap-2 min-w-0">
                         <Avatar username={req.username} avatarUrl={req.avatar_url} size={32} />
-                        <span className="text-white text-sm font-medium truncate">@{req.username}</span>
+                        <span className="text-ink text-sm font-medium truncate">@{req.username}</span>
                         {req.is_verified && <VerifiedBadge size={14} />}
                       </Link>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAcceptRequest(req.username)}
                           disabled={requestActionLoading === req.username}
-                          className="bg-white text-zinc-950 rounded-lg px-3 py-1 text-xs font-semibold disabled:opacity-50"
+                          className="btn btn-primary px-3 py-1 text-xs"
                         >
                           Accept
                         </button>
                         <button
                           onClick={() => handleDeclineRequest(req.username)}
                           disabled={requestActionLoading === req.username}
-                          className="border border-zinc-600 text-zinc-400 rounded-lg px-3 py-1 text-xs disabled:opacity-50"
+                          className="btn btn-ghost px-3 py-1 text-xs"
                         >
                           Decline
                         </button>
@@ -428,24 +428,24 @@ export default function ProfilePage() {
         )}
 
         {/* Settings card */}
-        <div className="mx-6 mb-8 bg-surface-1 rounded-card overflow-hidden">
+        <div className="mx-6 mb-8 card overflow-hidden">
 
           {/* Private Account toggle */}
           <div className="border-b border-edge">
             <div className="px-5 py-4 flex items-center justify-between">
               <div>
-                <p className="text-white text-sm">Private account</p>
-                <p className="text-zinc-500 text-xs mt-0.5">New followers must be approved</p>
+                <p className="text-ink text-sm font-medium">Private account</p>
+                <p className="text-ink-muted text-xs mt-0.5">New followers must be approved</p>
               </div>
               <button
                 onClick={handleTogglePrivacy}
                 disabled={privacyLoading}
                 className={`relative w-11 h-6 rounded-full transition-colors duration-200 disabled:opacity-50 ${
-                  user.is_private ? "bg-sky-500" : "bg-zinc-700"
+                  user.is_private ? "bg-lamp" : "bg-surface-3"
                 }`}
                 aria-label="Toggle private account"
               >
-                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-ink rounded-full transition-transform duration-200 ${
                   user.is_private ? "translate-x-5" : "translate-x-0"
                 }`} />
               </button>
@@ -458,9 +458,9 @@ export default function ProfilePage() {
               onClick={() => togglePanel("username")}
               className="w-full px-5 py-4 flex items-center justify-between text-left"
             >
-              <span className="text-white text-sm">Change username</span>
+              <span className="text-ink text-sm font-medium">Change username</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-                className={`w-4 h-4 text-zinc-500 transition-transform ${open === "username" ? "rotate-90" : ""}`}>
+                className={`w-4 h-4 text-ink-muted transition-transform ${open === "username" ? "rotate-90" : ""}`}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
             </button>
@@ -475,7 +475,7 @@ export default function ProfilePage() {
                   required
                   className={inputClass}
                 />
-                {usernameError && <p className="text-red-400 text-sm">{usernameError}</p>}
+                {usernameError && <p className="text-bad text-sm">{usernameError}</p>}
                 <button type="submit" disabled={usernameLoading} className={submitClass}>
                   {usernameLoading ? "Saving..." : "Save username"}
                 </button>
@@ -489,9 +489,9 @@ export default function ProfilePage() {
               onClick={() => togglePanel("password")}
               className="w-full px-5 py-4 flex items-center justify-between text-left"
             >
-              <span className="text-white text-sm">Change password</span>
+              <span className="text-ink text-sm font-medium">Change password</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-                className={`w-4 h-4 text-zinc-500 transition-transform ${open === "password" ? "rotate-90" : ""}`}>
+                className={`w-4 h-4 text-ink-muted transition-transform ${open === "password" ? "rotate-90" : ""}`}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
             </button>
@@ -515,7 +515,7 @@ export default function ProfilePage() {
                   required
                   className={inputClass}
                 />
-                {passwordError && <p className="text-red-400 text-sm">{passwordError}</p>}
+                {passwordError && <p className="text-bad text-sm">{passwordError}</p>}
                 <button type="submit" disabled={passwordLoading} className={submitClass}>
                   {passwordLoading ? "Saving..." : "Save password"}
                 </button>
@@ -527,7 +527,7 @@ export default function ProfilePage() {
           <div className="border-b border-edge">
             <button
               onClick={() => { logout(); router.replace("/") }}
-              className="w-full px-5 py-4 text-left text-red-400 text-sm"
+              className="w-full px-5 py-4 text-left text-bad text-sm"
             >
               Sign out
             </button>
@@ -539,15 +539,15 @@ export default function ProfilePage() {
               onClick={() => togglePanel("delete")}
               className="w-full px-5 py-4 flex items-center justify-between text-left"
             >
-              <span className="text-red-400 text-sm">Delete account</span>
+              <span className="text-bad text-sm">Delete account</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-                className={`w-4 h-4 text-zinc-500 transition-transform ${open === "delete" ? "rotate-90" : ""}`}>
+                className={`w-4 h-4 text-ink-muted transition-transform ${open === "delete" ? "rotate-90" : ""}`}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
             </button>
             {open === "delete" && (
               <form onSubmit={handleDeleteAccount} className="px-5 pb-5 flex flex-col gap-3">
-                <p className="text-zinc-400 text-sm">This will permanently delete your account and all your data.</p>
+                <p className="text-ink-dim text-sm">This will permanently delete your account and all your data.</p>
                 <input
                   type="password"
                   placeholder="Enter password to confirm"
@@ -557,11 +557,11 @@ export default function ProfilePage() {
                   required
                   className={inputClass}
                 />
-                {deleteError && <p className="text-red-400 text-sm">{deleteError}</p>}
+                {deleteError && <p className="text-bad text-sm">{deleteError}</p>}
                 <button
                   type="submit"
                   disabled={deleteLoading}
-                  className="w-full bg-red-500 text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50 transition-opacity"
+                  className="btn w-full py-3 bg-bad text-ink hover:opacity-90"
                 >
                   {deleteLoading ? "Deleting..." : "Confirm delete"}
                 </button>

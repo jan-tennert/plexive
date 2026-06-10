@@ -4,6 +4,7 @@ import type {
   AtAGlancePeopleContent,
   AtAGlanceQuestionsContent,
   AtAGlanceStoriesContent,
+  AtAGlanceAcademyContent,
 } from "../../types/post"
 
 type AnyAtAGlance =
@@ -11,6 +12,7 @@ type AnyAtAGlance =
   | AtAGlancePeopleContent
   | AtAGlanceQuestionsContent
   | AtAGlanceStoriesContent
+  | AtAGlanceAcademyContent
 
 interface Props {
   content: AnyAtAGlance
@@ -22,11 +24,15 @@ function DotScale({ value, max = 3 }: { value: number; max?: number }) {
       {Array.from({ length: max }, (_, i) => (
         <span
           key={i}
-          className={`inline-block w-2 h-2 rounded-full ${i < value ? "bg-amber-400" : "bg-zinc-600"}`}
+          className={`inline-block w-2 h-2 rounded-full ${i < value ? "bg-(--accent)" : "bg-surface-3"}`}
         />
       ))}
     </span>
   )
+}
+
+function isAcademy(c: AnyAtAGlance): c is AtAGlanceAcademyContent {
+  return "study_type" in c
 }
 
 function isPeople(c: AnyAtAGlance): c is AtAGlancePeopleContent {
@@ -42,6 +48,32 @@ function isStories(c: AnyAtAGlance): c is AtAGlanceStoriesContent {
 }
 
 export default function AtAGlanceSection({ content }: Props) {
+  if (isAcademy(content)) {
+    const rows: { label: string; value: ReactNode }[] = [
+      { label: "Study type", value: content.study_type },
+      { label: "Peer review", value: content.peer_review_status },
+      { label: "Result direction", value: content.result_direction },
+      { label: "Replication", value: content.replication_status },
+      { label: "Pre-registered", value: content.pre_registered ? "Yes" : "No" },
+      { label: "Open data", value: content.open_data ? "Yes" : "No" },
+      { label: "Open code", value: content.open_code ? "Yes" : "No" },
+      { label: "Read time", value: `${content.post_reading_time_min} min` },
+      { label: "Difficulty", value: <DotScale value={content.post_difficulty} /> },
+    ]
+    return (
+      <div className="px-5 py-6">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          {rows.map(({ label, value }) => (
+            <div key={label} className="flex flex-col gap-0.5">
+              <span className="text-xs text-ink-muted uppercase tracking-wide">{label}</span>
+              <span className="text-sm text-ink">{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   if (isQuestions(content)) {
     const rows: { label: string; value: ReactNode }[] = [
       { label: "Field", value: content.field },
@@ -58,8 +90,8 @@ export default function AtAGlanceSection({ content }: Props) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-3">
           {rows.map(({ label, value }) => (
             <div key={label} className="flex flex-col gap-0.5">
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">{label}</span>
-              <span className="text-sm text-zinc-200">{value}</span>
+              <span className="text-xs text-ink-muted uppercase tracking-wide">{label}</span>
+              <span className="text-sm text-ink">{value}</span>
             </div>
           ))}
         </div>
@@ -82,8 +114,8 @@ export default function AtAGlanceSection({ content }: Props) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-3">
           {rows.map(({ label, value }) => (
             <div key={label} className="flex flex-col gap-0.5">
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">{label}</span>
-              <span className="text-sm text-zinc-200">{value}</span>
+              <span className="text-xs text-ink-muted uppercase tracking-wide">{label}</span>
+              <span className="text-sm text-ink">{value}</span>
             </div>
           ))}
         </div>
@@ -106,14 +138,14 @@ export default function AtAGlanceSection({ content }: Props) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-4">
           {rows.map(({ label, value }) => (
             <div key={label} className="flex flex-col gap-0.5">
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">{label}</span>
-              <span className="text-sm text-zinc-200">{value}</span>
+              <span className="text-xs text-ink-muted uppercase tracking-wide">{label}</span>
+              <span className="text-sm text-ink">{value}</span>
             </div>
           ))}
         </div>
-        <div className="flex flex-col gap-0.5 pt-3 border-t border-zinc-800">
-          <span className="text-xs text-zinc-500 uppercase tracking-wide">Known for</span>
-          <span className="text-sm text-zinc-200">{content.known_for}</span>
+        <div className="flex flex-col gap-0.5 pt-3 border-t border-edge">
+          <span className="text-xs text-ink-muted uppercase tracking-wide">Known for</span>
+          <span className="text-sm text-ink">{content.known_for}</span>
         </div>
       </div>
     )
@@ -134,14 +166,14 @@ export default function AtAGlanceSection({ content }: Props) {
       <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-4">
         {rows.map(({ label, value }) => (
           <div key={label} className="flex flex-col gap-0.5">
-            <span className="text-xs text-zinc-500 uppercase tracking-wide">{label}</span>
-            <span className="text-sm text-zinc-200">{value}</span>
+            <span className="text-xs text-ink-muted uppercase tracking-wide">{label}</span>
+            <span className="text-sm text-ink">{value}</span>
           </div>
         ))}
       </div>
-      <div className="flex flex-col gap-0.5 pt-3 border-t border-zinc-800">
-        <span className="text-xs text-zinc-500 uppercase tracking-wide">Best for</span>
-        <span className="text-sm text-zinc-200">{content.best_for}</span>
+      <div className="flex flex-col gap-0.5 pt-3 border-t border-edge">
+        <span className="text-xs text-ink-muted uppercase tracking-wide">Best for</span>
+        <span className="text-sm text-ink">{content.best_for}</span>
       </div>
     </div>
   )

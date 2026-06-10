@@ -46,8 +46,8 @@ frontend/
   .env.example                  NEXT_PUBLIC_API_URL template
   .env.local                    actual env vars (gitignored)
   src/app/
-    layout.tsx                  root layout, Geist font, title "Deepscroll"
-    globals.css                 Tailwind import, Geist font wiring, design tokens (@theme: surface-0/1/2/overlay, edge/edge-strong, ink levels, radius-card/field), dark-only body base, heart-pop + heart-boom keyframes
+    layout.tsx                  root layout, Lamplight fonts (Newsreader serif + Source Sans 3 UI + Geist Mono data), title "Deepscroll"
+    globals.css                 Tailwind import, Lamplight design tokens (@theme: warm surface-0/1/2/3/overlay, edge/edge-strong, warm ink levels, lamp/good/bad, fmt-* format inks, radius-card/field/sheet), paper-grain body texture, focus-visible lamp ring, component vocabulary (.card/.btn/.field/.chip/.label-caps/.prose-post), heart-pop + heart-boom keyframes with reduced-motion guard
     page.tsx                    home feed: 9-tab bar (For You + Following + 7 formats derived from lib/formats.ts), horizontal snap between tabs, vertical snap within each, real-time indicator; search button top-right above the tab strip (TikTok style, tabs fade under it); Following tab uses /api/feed/following with login/empty states; BottomNav (feed active)
     onboarding/
       page.tsx                  server component — renders InterestPicker (no props)
@@ -89,9 +89,9 @@ frontend/
       likedPosts.ts             isPostLiked, likePost, unlikePost, getLikedPostIds; localStorage key "deepscroll_liked"; getCachedLikeCount/setCachedLikeCount; key "deepscroll_like_counts"; isLikeSent/markLikeSent/unmarkLikeSent; key "deepscroll_like_sent" tracks posts whose like event reached the backend — used in the server-count reconciliation formula; one-time migration seeds sent-key from liked-key; server-safe; TODO: replace with backend endpoint
       savedPosts.ts             isPostSaved, savePost, unsavePost, getSavedPostIds; localStorage key "deepscroll_saved"; server-safe; TODO: replace with backend endpoint
   src/lib/
-    formats.ts                  single source of format identity: FORMAT_IDS, FORMAT_STYLES (label, badge, accent hex, rgb, text/dot/border/indicator classes, glow, radial), formatStyle() with neutral fallback
+    formats.ts                  single source of format identity: FORMAT_IDS, FORMAT_STYLES (label, badge, Lamplight ink hex, rgb, text/dot/border/indicator classes from fmt-* tokens), formatStyle() with neutral fallback, LEGACY_SVG_ACCENT_MAP (old accent hex → new ink, used by SvgBlock)
   src/components/
-    SvgBlock.tsx                shared visual_svg renderer; user content → UTF-8-safe base64 <img>, seed → dangerouslySetInnerHTML; className/color props for per-section layout
+    SvgBlock.tsx                shared visual_svg renderer; user content → UTF-8-safe base64 <img>, seed → dangerouslySetInnerHTML; render-time re-palette of legacy accent hexes to Lamplight inks; className/color props for per-section layout
     SectionLabel.tsx            unified section header (h3, text-xs uppercase tracking-widest, zinc-500 default, color override)
     VerifiedBadge.tsx           blue user check / violet official check, size prop
     Spinner.tsx                 unified loading spinner (sm/md)
@@ -132,6 +132,7 @@ frontend/
       HistoricalContextSection.tsx stories: broader historical setting
 
 docs/REVIEW.md                  full-pass audit (June 2026): categorized findings + design direction and token set
+docs/DESIGN.md                  "Lamplight" design identity (June 2026 redesign): rationale, full token set, format ink palette, type system, component vocabulary
 .claude/skills/commit.md        conventional commit format rules for this project
 ```
 
@@ -429,6 +430,7 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 - Stats page, verification system, saved posts
 - Real-time chat: DMs + group chats over WebSocket (see CHAT / WEBSOCKET DESIGN), conversation list + chat view, chat in bottom nav (search moved top-right)
 - Security hardening pass (June 2026, see SECURITY_REVIEW.md)
+- "Lamplight" visual redesign (June 2026, see docs/DESIGN.md): warm dark token system in globals.css drives every screen; Newsreader serif + Source Sans 3 + Geist Mono type system; muted book-spine format inks; per-post --accent CSS variable replaces hardcoded section colors; seed SVGs re-paletted at render time in SvgBlock (content JSON untouched); shared component vocabulary (.card/.btn/.field/.chip/.label-caps)
 
 **Next**
 - Content for academy format
