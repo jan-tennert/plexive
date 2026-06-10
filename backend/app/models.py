@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, JSON, String, Table, Text, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, JSON, String, Table, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -88,6 +88,33 @@ class Follow(Base):
 
     follower  = relationship("User", foreign_keys=[follower_id])
     following = relationship("User", foreign_keys=[following_id])
+
+
+class UserElo(Base):
+    __tablename__ = "user_elo"
+    __table_args__ = (UniqueConstraint("user_id", "format", name="uq_user_elo"),)
+
+    id             = Column(Integer, primary_key=True)
+    user_id        = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    format         = Column(String, nullable=False)
+    rating         = Column(Float, nullable=False, default=1000.0)
+    answered_count = Column(Integer, nullable=False, default=0)
+
+
+class QuizAnswer(Base):
+    __tablename__ = "quiz_answers"
+    __table_args__ = (
+        UniqueConstraint("user_id", "post_id", "question_index", name="uq_quiz_answer"),
+    )
+
+    id             = Column(Integer, primary_key=True)
+    user_id        = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    post_id        = Column(Integer, ForeignKey("posts.id"), nullable=False, index=True)
+    question_index = Column(Integer, nullable=False)
+    chosen_index   = Column(Integer, nullable=False)
+    is_correct     = Column(Boolean, nullable=False)
+    rating_delta   = Column(Float, nullable=False, default=0.0)
+    created_at     = Column(DateTime, default=datetime.utcnow)
 
 
 class Comment(Base):

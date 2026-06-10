@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import Comment, Event, Post, User
+from ..elo import format_ratings, global_rating
+from ..models import Comment, Event, Post, QuizAnswer, User
 
 router = APIRouter(tags=["stats"])
 
@@ -524,6 +525,42 @@ def get_my_stats(
         db.query(func.count(Comment.id)).filter(Comment.user_id == uid).scalar() or 0
     )
 
+    # --- Posts I liked (saved posts live in localStorage, counted client-side) ---
+    posts_liked = (
+        db.query(func.count(func.distinct(Event.post_id)))
+        .filter(Event.event_type == "like", Event.user_id == uid)
+        .scalar() or 0
+    )
+
+    # --- My likes given by format ---
+    my_likes_given_by_format = [
+        {"format": r.format, "count": r.cnt}
+        for r in db.query(Post.format, func.count(Event.id).label("cnt"))
+        .join(Event, and_(Event.post_id == Post.id, Event.event_type == "like"))
+        .filter(Event.user_id == uid)
+        .group_by(Post.format)
+        .all()
+    ]
+
+    # --- My knowledge score (Elo) ---
+    my_elo = {
+        "global_rating": global_rating(db, uid),
+        "formats": format_ratings(db, uid),
+    }
+    quiz_answered = (
+        db.query(func.count(QuizAnswer.id)).filter(QuizAnswer.user_id == uid).scalar() or 0
+    )
+    quiz_correct = (
+        db.query(func.count(QuizAnswer.id))
+        .filter(QuizAnswer.user_id == uid, QuizAnswer.is_correct == True)
+        .scalar() or 0
+    )
+    my_quiz = {
+        "answered": quiz_answered,
+        "correct": quiz_correct,
+        "accuracy": round(quiz_correct / quiz_answered * 100, 1) if quiz_answered else 0.0,
+    }
+
     # --- My comments written by format ---
     my_comments_written_by_format = [
         {"format": r.format, "count": r.cnt}
@@ -702,7 +739,7 @@ def get_my_stats(
             "likes_received": likes_received,
             "comments_received": comments_received,
             "posts_saved": -1,
-            "posts_liked": -1,
+            "posts_liked": posts_liked,
         },
         "my_posts_over_time": my_posts_over_time,
         "my_likes_received_over_time": my_likes_received_over_time,
@@ -728,5 +765,7 @@ def get_my_stats(
             "best_days": best_streak,
         },
         "my_milestones": milestones,
-        "my_likes_given_by_format": [],
+        "my_likes_given_by_format": my_likes_given_by_format,
+        "my_elo": my_elo,
+        "my_quiz": my_quiz,
     }
