@@ -1,0 +1,405 @@
+{
+  "feed_card": {
+    "field": "Computational Neuroscience",
+    "title": "The free-energy principle: a unified brain theory?",
+    "authors_compact": "Friston, 2010",
+    "key_finding_one_line": "Perception, action, attention, and learning all minimize a single quantity, the variational free energy that upper-bounds the surprise of an agent's sensory states.",
+    "teasers": [
+      "One quantity behind perception and action",
+      "An upper bound replaces intractable surprise",
+      "The brain theory machine learning quietly shares"
+    ],
+    "post_reading_time_min": 15,
+    "post_difficulty": 3,
+    "published_year": 2010,
+    "venue": "Nat. Rev. Neurosci."
+  },
+  "sections": [
+    {
+      "type": "paper_card",
+      "order": 1,
+      "content": {
+        "title": "The free-energy principle: a unified brain theory?",
+        "authors": [
+          {
+            "name": "Karl J. Friston",
+            "affiliation": "Wellcome Trust Centre for Neuroimaging, Institute of Neurology, University College London"
+          }
+        ],
+        "venue": "Nature Reviews Neuroscience, 11(2), 127-138",
+        "year": 2010,
+        "doi": "https://doi.org/10.1038/nrn2787",
+        "funding_source": "Wellcome Trust"
+      }
+    },
+    {
+      "type": "quiz_badge",
+      "order": 2,
+      "content": "🎯 7 questions at the end, earn Elo"
+    },
+    {
+      "type": "tldr",
+      "order": 3,
+      "content": "A system that resists dispersion into disorder must keep its sensory states within narrow bounds, which is the same as keeping the surprise of those states low. An agent cannot evaluate surprise directly, because that requires the intractable model evidence $p(\\tilde{s} \\mid m)$, but it can minimize variational free energy $F$, an upper bound on surprise built only from quantities the agent already encodes. Minimizing $F$ performs approximate Bayesian inference about the causes of sensation, and when the same quantity is reduced by acting on the world instead of by revising beliefs, perception and action become two routes to one objective."
+    },
+    {
+      "type": "headline_figure",
+      "order": 4,
+      "content": {
+        "visual_svg": "<svg viewBox='0 0 400 300' xmlns='http://www.w3.org/2000/svg' fill='none'><rect x='22' y='116' width='84' height='68' rx='10' stroke='currentColor' stroke-width='2' opacity='0.8'/><rect x='294' y='116' width='84' height='68' rx='10' stroke='#818cf8' stroke-width='2.5'/><circle cx='200' cy='80' r='28' stroke='currentColor' stroke-width='2'/><circle cx='200' cy='220' r='28' stroke='currentColor' stroke-width='2'/><g stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' opacity='0.55'><path d='M100 124 Q138 86 174 74'/><path d='M174 74 l-2 11 m2 -11 l9 6'/><path d='M226 74 Q262 86 300 124'/><path d='M300 124 l-10 -4 m10 4 l-3 10'/><path d='M300 176 Q262 214 226 226'/><path d='M226 226 l9 -6 m-9 6 l2 -11'/><path d='M174 226 Q138 214 100 176'/><path d='M100 176 l3 10 m-3 -10 l10 -4'/></g><g font-family='system-ui, sans-serif' text-anchor='middle'><text x='64' y='146' fill='currentColor' font-size='12' font-weight='600'>World</text><text x='64' y='164' fill='currentColor' font-size='10' opacity='0.7'>causes ϑ</text><text x='336' y='146' fill='#818cf8' font-size='12' font-weight='700'>Agent</text><text x='336' y='164' fill='#818cf8' font-size='10' opacity='0.9'>internal μ</text><text x='200' y='77' fill='currentColor' font-size='11' font-weight='600'>sensory</text><text x='200' y='91' fill='currentColor' font-size='10' opacity='0.7'>s</text><text x='200' y='217' fill='currentColor' font-size='11' font-weight='600'>active</text><text x='200' y='231' fill='currentColor' font-size='10' opacity='0.7'>a</text><text x='200' y='154' fill='#818cf8' font-size='13' font-weight='700'>min F</text><text x='272' y='104' fill='currentColor' font-size='10' font-weight='600' opacity='0.7'>perception</text><text x='128' y='200' fill='currentColor' font-size='10' font-weight='600' opacity='0.7'>action</text></g></svg>",
+        "image_caption": "An agent minimizes free energy across a Markov blanket that separates its internal states from the world. Sensory states carry the world's effects inward and drive perception, which updates internal states to better predict those sensations. Active states carry the agent's effects outward and drive action, which changes the world so that sensations match predictions. Both routes reduce the same quantity $F$."
+      }
+    },
+    {
+      "type": "at_a_glance",
+      "order": 5,
+      "content": {
+        "study_type": "theoretical",
+        "pre_registered": false,
+        "open_data": false,
+        "open_code": false,
+        "replication_status": "none",
+        "peer_review_status": "published",
+        "result_direction": "positive",
+        "post_reading_time_min": 15,
+        "post_difficulty": 3
+      }
+    },
+    {
+      "type": "the_question",
+      "order": 6,
+      "content": "Neuroscience had accumulated a set of partial theories: predictive coding for cortical hierarchies, the Bayesian brain for perceptual inference, reinforcement learning and optimal control for action, efficient coding for sensory representation. Each explained one faculty and stopped at the border of the next. Friston asks whether a single quantity, minimized by the brain, generates all of them. Stated precisely: is there one objective function whose optimization yields Bayesian perception, adaptive action, attention, and learning as special cases, rather than as separate mechanisms bolted together?"
+    },
+    {
+      "type": "the_big_idea",
+      "order": 7,
+      "content": "Strip away the neuroscience and the claim is about any system that persists. A system that stays alive occupies a small set of states. Your body holds its temperature, pH, and glucose within tight ranges and visits the vast space of lethal states almost never. In the language of probability, the states the system occupies have high probability under a model of what it is, and the states it avoids have low probability, meaning high surprise. A system that lasts is therefore one that keeps the surprise of its own sensory states low over time. Surprise cannot be measured directly, because doing so means summing over every way the world could have produced a sensation. The move the theory rests on is to replace this intractable quantity with a tractable upper bound borrowed from variational Bayes, the same bound that machine learning calls the evidence lower bound. An agent that pushes the bound down, by adjusting its internal model and by acting to change its inputs, behaves as if it were performing Bayesian inference and pursuing its own survival, without ever computing either directly."
+    },
+    {
+      "type": "field_context",
+      "order": 8,
+      "content": {
+        "body": "The pieces were already in place. Helmholtz argued in the 1860s that perception is unconscious inference, the brain's best guess at the hidden causes of its sensations. A century later this became the Bayesian brain: perception as the inversion of a generative model, computing a posterior over causes given sensory data. Rao and Ballard gave it a cortical implementation in 1999 with predictive coding, in which higher levels send predictions down and lower levels return only the prediction error. Separately, optimal control and reinforcement learning described action as the maximization of expected reward or the minimization of cost. These accounts shared a Bayesian and variational vocabulary but no common objective. Friston's earlier work on variational filtering and dynamic expectation maximization supplied the mathematical machinery, the free-energy bound on model evidence, that the 2010 paper uses to join them.",
+        "key_priors": [
+          {
+            "citation": "Helmholtz, 1860s",
+            "claim": "Perception is unconscious inference about the hidden causes of sensation."
+          },
+          {
+            "citation": "Rao & Ballard, 1999",
+            "claim": "The cortex implements perception as predictive coding, passing prediction errors up a hierarchy and predictions down."
+          },
+          {
+            "citation": "Knill & Pouget, 2004",
+            "claim": "The brain represents and computes with probability distributions, the Bayesian-brain hypothesis."
+          },
+          {
+            "citation": "Dayan, Hinton, Neal & Zemel, 1995",
+            "claim": "The Helmholtz machine learns a generative model by minimizing a free-energy bound, linking inference to variational methods."
+          }
+        ]
+      }
+    },
+    {
+      "type": "approach",
+      "order": 9,
+      "content": {
+        "body": "The agent carries a generative model $m$, a joint density $p(\\tilde{s}, \\vartheta \\mid m)$ over sensory states $\\tilde{s}$ and their hidden causes $\\vartheta$. Inference would require the posterior $p(\\vartheta \\mid \\tilde{s}, m)$, which is intractable because the model evidence $p(\\tilde{s} \\mid m)$ in its denominator integrates over all possible causes. Variational Bayes sidesteps this by introducing a recognition density $q(\\vartheta \\mid \\mu)$, a tractable approximation to the posterior parameterized by the agent's internal states $\\mu$, which in the brain are physical quantities such as neuronal activity and synaptic strengths. Free energy $F$ is a functional of $q$ and the sensory states, and the agent has two ways to reduce it. It can change its internal states $\\mu$, which improves the approximation $q$ to the true posterior, and this is perception. Or it can change action $a$, which alters the sensory states the agent samples, and this is behaviour. Friston casts both as gradient descent on the same $F$, run in generalized coordinates of motion so the scheme tracks trajectories rather than static points. None of this requires the agent to evaluate surprise or the posterior, only to descend a gradient on a quantity built from its own model and its current sensations.",
+        "visual_svg": "<svg viewBox='0 0 400 300' xmlns='http://www.w3.org/2000/svg' fill='none'><rect x='10' y='120' width='104' height='60' rx='10' stroke='currentColor' stroke-width='2' opacity='0.8'/><rect x='148' y='120' width='104' height='60' rx='10' stroke='#818cf8' stroke-width='2.5'/><rect x='286' y='120' width='104' height='60' rx='10' stroke='currentColor' stroke-width='2' opacity='0.8'/><g stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' opacity='0.55'><path d='M114 150 h34'/><path d='M148 150 l-11 -6 m11 6 l-11 6'/><path d='M252 150 h34'/><path d='M286 150 l-11 -6 m11 6 l-11 6'/><path d='M338 182 C338 216 200 216 200 184'/><path d='M200 184 l-6 10 m6 -10 l6 10'/></g><g font-family='system-ui, sans-serif' text-anchor='middle'><text x='62' y='146' fill='currentColor' font-size='11' font-weight='600'>Generative</text><text x='62' y='162' fill='currentColor' font-size='10' opacity='0.7'>model p(s,ϑ)</text><text x='200' y='146' fill='#818cf8' font-size='11' font-weight='700'>Free energy</text><text x='200' y='163' fill='#818cf8' font-size='11' font-weight='700'>F</text><text x='338' y='146' fill='currentColor' font-size='11' font-weight='600'>Recognition</text><text x='338' y='162' fill='currentColor' font-size='10' opacity='0.7'>q ≈ posterior</text><text x='131' y='110' fill='currentColor' font-size='10' opacity='0.7'>invert</text><text x='269' y='110' fill='currentColor' font-size='10' opacity='0.7'>minimize</text><text x='270' y='208' fill='currentColor' font-size='10' opacity='0.7'>descend ∂F: update μ, a</text></g></svg>"
+      }
+    },
+    {
+      "type": "formalism",
+      "order": 10,
+      "content": {
+        "body": "Free energy is the expected difference, under the recognition density, between the log of that density and the log of the generative model. Writing $\\langle \\cdot \\rangle_{q}$ for expectation under $q$, three rearrangements of the same expression reveal what minimizing it accomplishes.",
+        "equations": [
+          {
+            "latex": "F = -\\langle \\ln p(\\tilde{s}, \\vartheta \\mid m) \\rangle_{q} + \\langle \\ln q(\\vartheta \\mid \\mu) \\rangle_{q}",
+            "label": "Free energy",
+            "description": "Free energy is energy minus entropy. The first term is the energy, the expected negative log probability of sensations and their causes under the generative model, low when the model assigns high probability to what is sensed. The second term is the negative entropy of the recognition density. Every quantity on the right belongs to the agent's own model, which is why $F$ is computable where surprise is not."
+          },
+          {
+            "latex": "F = D_{\\mathrm{KL}}\\big[\\, q(\\vartheta \\mid \\mu) \\,\\|\\, p(\\vartheta \\mid \\tilde{s}, m) \\,\\big] - \\ln p(\\tilde{s} \\mid m)",
+            "label": "Divergence and evidence",
+            "description": "Rearranged this way, $F$ splits into the Kullback-Leibler divergence between the recognition density and the true posterior, plus the surprise $-\\ln p(\\tilde{s} \\mid m)$. The divergence measures how far the agent's approximate belief sits from the posterior it is trying to recover. Driving $F$ down by changing internal states shrinks this divergence, so $q(\\vartheta \\mid \\mu)$ converges on the true posterior. This is the formal sense in which perception is Bayesian inference."
+          },
+          {
+            "latex": "F \\;\\geq\\; -\\ln p(\\tilde{s} \\mid m)",
+            "label": "Bound on surprise",
+            "description": "A Kullback-Leibler divergence is never negative, so free energy sits above surprise for any recognition density, with equality exactly when $q$ matches the posterior. An agent that keeps $F$ low over time keeps surprise low over time without ever evaluating it, which is the property a system needs to stay within its viable states."
+          },
+          {
+            "latex": "F = \\underbrace{D_{\\mathrm{KL}}\\big[\\, q(\\vartheta \\mid \\mu) \\,\\|\\, p(\\vartheta \\mid m) \\,\\big]}_{\\text{complexity}} - \\underbrace{\\langle \\ln p(\\tilde{s} \\mid \\vartheta, m) \\rangle_{q}}_{\\text{accuracy}}",
+            "label": "Complexity minus accuracy",
+            "description": "A third rearrangement separates $F$ into complexity and accuracy. Accuracy is how well the inferred causes explain the sensations. Complexity is how far the recognition density has to move from the prior to achieve that fit. Minimizing free energy maximizes accuracy while paying a complexity cost for departing from prior belief, which is a precise statement of Occam's razor: the agent prefers the simplest explanation that fits."
+          },
+          {
+            "latex": "\\dot{\\mu} = -\\,\\partial_{\\mu} F, \\qquad \\dot{a} = -\\,\\partial_{a} F",
+            "label": "Perception and action",
+            "description": "The agent descends the free-energy gradient along two axes. Changing internal states $\\mu$ optimizes the recognition density and is perception. Changing action $a$ changes the data the agent samples and is behaviour, because action enters $F$ only through the sensory states it produces, so $\\partial_{a} F$ runs through $\\partial \\tilde{s} / \\partial a$. Perception adjusts the model to fit the world; action adjusts the world to fit the model. The two share one objective."
+          }
+        ],
+        "notation_legend": [
+          {
+            "symbol": "F",
+            "meaning": "variational free energy, the quantity the agent minimizes"
+          },
+          {
+            "symbol": "\\tilde{s}",
+            "meaning": "sensory states in generalized coordinates of motion (position, velocity, acceleration, and higher orders)"
+          },
+          {
+            "symbol": "\\vartheta",
+            "meaning": "hidden causes in the environment that produce sensations"
+          },
+          {
+            "symbol": "\\mu",
+            "meaning": "internal states of the agent, such as neuronal activity and synaptic strengths, that parameterize the recognition density"
+          },
+          {
+            "symbol": "a",
+            "meaning": "action states through which the agent changes its sensory input"
+          },
+          {
+            "symbol": "m",
+            "meaning": "the agent's generative model of how causes produce sensations"
+          },
+          {
+            "symbol": "q(\\vartheta \\mid \\mu)",
+            "meaning": "recognition density, the agent's approximate posterior over causes"
+          },
+          {
+            "symbol": "p(\\vartheta \\mid \\tilde{s}, m)",
+            "meaning": "the true posterior over causes, generally intractable"
+          },
+          {
+            "symbol": "p(\\tilde{s} \\mid m)",
+            "meaning": "model evidence; its negative logarithm is surprise"
+          },
+          {
+            "symbol": "D_{\\mathrm{KL}}[\\,\\cdot \\,\\|\\, \\cdot\\,]",
+            "meaning": "Kullback-Leibler divergence, a non-negative measure of how far one distribution sits from another"
+          }
+        ]
+      }
+    },
+    {
+      "type": "key_findings",
+      "order": 11,
+      "content": [
+        {
+          "title": "Free energy bounds surprise from above",
+          "finding": "The governing inequality is $F \\geq -\\ln p(\\tilde{s} \\mid m)$. Surprise, the negative log model evidence, is intractable because evaluating it means integrating over every possible cause of a sensation. Free energy reproduces it up to a non-negative gap, the divergence between the recognition density and the true posterior, and unlike surprise it is built only from quantities the agent encodes. An agent that minimizes $F$ minimizes a computable proxy for surprise.",
+          "source_in_paper": "Box 1"
+        },
+        {
+          "title": "Minimizing free energy performs Bayesian inference",
+          "finding": "When the agent reduces $F$ by changing internal states alone, the divergence $D_{\\mathrm{KL}}[\\,q(\\vartheta \\mid \\mu) \\,\\|\\, p(\\vartheta \\mid \\tilde{s})\\,]$ falls and the recognition density converges on the true posterior. Perception is then the optimization of a probabilistic belief rather than the construction of a static representation. Under linear, Gaussian assumptions the scheme reduces exactly to predictive coding, with prediction errors weighted by their precision.",
+          "source_in_paper": "Box 2, Fig. 2"
+        },
+        {
+          "title": "Action and perception minimize the same quantity",
+          "finding": "The agent can also reduce $F$ by acting, since action changes the sensory states it samples. Behaviour becomes a form of inference: the agent moves so its sensations conform to its predictions. Friston calls this active inference. Reflexes, motor control, and goal-directed action all follow from the action term $\\dot{a} = -\\,\\partial_{a} F$ rather than from separate optimal-control machinery.",
+          "source_in_paper": "Box 3"
+        },
+        {
+          "title": "Attention falls out as precision weighting",
+          "finding": "Free-energy minimization weights each prediction error by its expected precision, the inverse variance of the noise on that channel. Optimizing these precision parameters changes the gain on prediction-error units. On this account attention is a parameter inside the inference itself, the gain on prediction errors, rather than a separate spotlight added to perception. Estimating that a channel is reliable raises the weight on its errors, which is attending to it.",
+          "source_in_paper": "Box 4"
+        },
+        {
+          "title": "One objective subsumes learning and value",
+          "finding": "Over slower timescales the same descent on $F$ optimizes the parameters of the generative model, which is learning, and the priors that encode preferred states, which supplies the role played by value and reward in other theories. Perception, action, attention, learning, and value become five timescales of one optimization rather than five separate mechanisms. The complexity-accuracy split shows the cost paid throughout: fit the data well while straying as little as possible from prior belief.",
+          "source_in_paper": "Boxes 5-6",
+          "visual_svg": "<svg viewBox='0 0 400 300' xmlns='http://www.w3.org/2000/svg' fill='none'><text x='200' y='48' fill='currentColor' font-family='system-ui, sans-serif' font-size='13' font-weight='700' text-anchor='middle'>minimize F = complexity - accuracy</text><line x1='60' y1='214' x2='360' y2='214' stroke='currentColor' stroke-width='2' stroke-linecap='round' opacity='0.5'/><rect x='108' y='92' width='74' height='122' fill='#818cf8' fill-opacity='0.18' stroke='#818cf8' stroke-width='2.5' stroke-linejoin='round'/><rect x='238' y='150' width='74' height='64' stroke='currentColor' stroke-width='2' stroke-linejoin='round' opacity='0.8'/><g font-family='system-ui, sans-serif' text-anchor='middle'><text x='145' y='234' fill='#818cf8' font-size='12' font-weight='700'>accuracy</text><text x='145' y='250' fill='currentColor' font-size='10' opacity='0.7'>fit to data</text><text x='275' y='234' fill='currentColor' font-size='12' font-weight='600'>complexity</text><text x='275' y='250' fill='currentColor' font-size='10' opacity='0.7'>stray from prior</text></g></svg>"
+        }
+      ]
+    },
+    {
+      "type": "robustness",
+      "order": 12,
+      "content": "The relevant test for a unifying account is whether it reproduces the established theories it claims to contain. It does. Under linear dynamics and Gaussian noise, free-energy minimization reduces to predictive coding and, in the static case, to a Kalman filter, schemes whose neural and behavioural predictions are already tested. Relaxing the Gaussian assumption recovers more general Bayesian filters. The same gradient descent, run on parameters rather than states, yields the delta rule and Hebbian plasticity. The principle does not contradict the partial theories; it recovers each in its own limit, which is what a candidate unification has to do before its broader claims are worth weighing."
+    },
+    {
+      "type": "limitations",
+      "order": 13,
+      "content": "Friston is explicit that the principle is not a mechanistic theory and makes no predictions on its own. The free-energy bound is close to a mathematical tautology: any system at a non-equilibrium steady state can be described as if it minimizes free energy, so the formalism by itself does not say which systems are brains or how a particular brain works. The content lies entirely in the generative model, and the principle is silent on where that model comes from or what form it takes. He also notes that the theory specifies the quantity optimized, not the priors that define an agent's preferred states; those have to be supplied separately, for instance by evolution. He frames the principle as a constraint that any plausible brain theory must satisfy, not as a finished model of cognition."
+    },
+    {
+      "type": "objections",
+      "order": 14,
+      "content": "Critics outside the programme have pressed harder. Colombo and Series argued in 2012 that the Bayesian-brain commitments the principle leans on are underdetermined by the neural evidence. A recurring objection, raised in different forms by Colombo, Klein, and others, is that the principle risks unfalsifiability: if every persisting system can be redescribed as minimizing free energy, the claim explains everything and forbids nothing. The dark-room problem is the sharpest version. If an agent only minimizes surprise, why does it not retreat to a dark, silent room where sensations are perfectly predictable? Proponents answer that prior expectations encode the states an agent expects to occupy, so a creature that expects to forage finds a dark room highly surprising. Critics reply that this rescues the theory only by loading the answer into priors the principle does not itself constrain. Whether the free-energy principle is a substantive empirical theory or a powerful modelling language remains open."
+    },
+    {
+      "type": "implications",
+      "order": 15,
+      "content": "For neuroscience the principle reorganizes a scattered field around one computation. Predictive coding stops being one model among many and becomes the form free-energy minimization takes in a cortical hierarchy, which predicts specific microcircuitry: superficial pyramidal cells carrying prediction errors upward, deep cells carrying predictions downward, and neuromodulators such as dopamine and acetylcholine setting the precision the formalism requires. Attention becomes a precision parameter, which ties attentional and perceptual deficits to a common failure of precision estimation, a framing now used to model hallucinations and the symptoms of schizophrenia and autism as aberrant precision. Action and perception share a currency, so motor control and perceptual inference can be written with the same equations. The principle turns separate research programmes into special cases of one message-passing scheme, and it makes the generative model, rather than the mechanism, the object you have to specify to explain any particular brain function."
+    },
+    {
+      "type": "connections_to_other_fields",
+      "order": 16,
+      "content": "The free-energy bound is the same object machine learning minimizes as the evidence lower bound, so a variational autoencoder trained with the ELBO and a brain minimizing free energy optimize identical quantities; the recognition density is the encoder and the generative model is the decoder. This identity made active inference a route to building agents that explore and act under one objective, an alternative to reward-only reinforcement learning. In physics the principle connects to the statistics of systems held away from thermodynamic equilibrium, where a Markov blanket separating internal from external states is the condition for a system to possess anything describable as beliefs, a line Friston later developed toward a physics of self-organization. In biology the same Markov-blanket argument applies below the brain, to single cells and to morphogenesis, suggesting inference-like dynamics are a general feature of things that hold a boundary against their environment. The bridges run both ways: variational Bayes gave neuroscience its objective, and neuroscience gave machine learning a reason to take active, model-based agents seriously."
+    },
+    {
+      "type": "quiz",
+      "order": 17,
+      "content": [
+        {
+          "question": "Why can a biological agent not minimize surprise directly?",
+          "options": [
+            "Surprise is a subjective feeling that cannot be quantified",
+            "Evaluating surprise requires the model evidence, an integral over all possible causes that is intractable",
+            "Surprise depends on future sensations the agent has not yet received",
+            "The brain lacks the precision to represent negative log probabilities"
+          ],
+          "answer_index": 1,
+          "explanation": "Surprise is $-\\ln p(\\tilde{s} \\mid m)$, and the evidence $p(\\tilde{s} \\mid m)$ marginalizes over every hidden cause, which is the integral variational methods exist to avoid. Free energy substitutes a computable bound for it."
+        },
+        {
+          "question": "Free energy equals the divergence between the recognition density and the true posterior plus surprise. What follows from that divergence being non-negative?",
+          "options": [
+            "Free energy is a lower bound on surprise",
+            "Surprise can be negative whenever the divergence is large",
+            "Free energy is an upper bound on surprise, tight when the recognition density matches the posterior",
+            "Free energy equals surprise only when the prior equals the likelihood"
+          ],
+          "answer_index": 2,
+          "explanation": "A non-negative divergence sits on top of surprise, so $F \\geq -\\ln p(\\tilde{s} \\mid m)$. The bound is tight exactly when $q(\\vartheta \\mid \\mu)$ equals $p(\\vartheta \\mid \\tilde{s}, m)$ and the divergence vanishes."
+        },
+        {
+          "question": "In the complexity-accuracy decomposition, what does the complexity term measure?",
+          "options": [
+            "The number of parameters in the generative model",
+            "The computational time required to invert the model",
+            "The entropy of the sensory states",
+            "The divergence of the recognition density from the prior, the cost of moving belief to fit the data"
+          ],
+          "answer_index": 3,
+          "explanation": "Complexity is $D_{\\mathrm{KL}}[\\,q(\\vartheta \\mid \\mu) \\,\\|\\, p(\\vartheta \\mid m)\\,]$, how far posterior belief departs from the prior. Minimizing free energy trades accuracy against this cost, which is why the scheme enacts Occam's razor."
+        },
+        {
+          "question": "On this account, what distinguishes perception from action?",
+          "options": [
+            "Perception changes internal states to fit the model to sensations; action changes sensations to fit the model, both minimizing $F$",
+            "Perception minimizes free energy, while action maximizes a separate reward function",
+            "Perception is Bayesian, while action is governed by classical optimal control",
+            "Perception runs on fast timescales and action only on slow, evolutionary ones"
+          ],
+          "answer_index": 0,
+          "explanation": "Both descend the same free-energy gradient. Perception adjusts $\\mu$ so the recognition density fits the data; action adjusts $a$ so the sampled data fits the predictions. The dual descent $\\dot{\\mu} = -\\,\\partial_{\\mu} F$, $\\dot{a} = -\\,\\partial_{a} F$ is the whole of active inference."
+        },
+        {
+          "question": "The principle identifies attention with precision. What does precision weighting do in the scheme?",
+          "options": [
+            "It selects which generative model the agent uses",
+            "It determines the prior probability of each hidden cause",
+            "It fixes the learning rate for synaptic plasticity alone",
+            "It sets the gain on prediction-error signals according to their estimated reliability"
+          ],
+          "answer_index": 3,
+          "explanation": "Precision is the inverse variance of the noise, and free-energy minimization weights each prediction error by it. Estimating precision raises or lowers the gain on error units, the operation the theory equates with attention."
+        },
+        {
+          "question": "What does the dark-room problem claim, and how do proponents answer it?",
+          "options": [
+            "That the brain cannot represent darkness; proponents reply that vision is not required",
+            "That free energy diverges when sensory input is zero; proponents add a regularization term",
+            "That a surprise-minimizing agent should seek a perfectly predictable dark room; proponents reply that prior expectations make such a room highly surprising",
+            "That the model evidence is undefined in the dark; proponents add a constant"
+          ],
+          "answer_index": 2,
+          "explanation": "If agents only minimized surprise, a constant dark room would be optimal. The reply is that an agent's priors encode the states it expects to occupy, so a foraging creature finds the dark room surprising. Critics note this works only by loading the result into priors the principle does not constrain."
+        },
+        {
+          "question": "Which statement matches Friston's own framing of the principle's main limitation?",
+          "options": [
+            "The bound is close to a tautology, so the explanatory content sits in the generative model, which the principle does not itself specify",
+            "The principle predicts behaviour precisely but cannot be tested with current imaging",
+            "The principle covers perception but breaks down for action",
+            "Free-energy minimization holds only for linear, Gaussian systems"
+          ],
+          "answer_index": 0,
+          "explanation": "Friston presents the principle as a constraint any brain theory must satisfy, not a mechanistic model. Because almost any persisting system can be described as minimizing free energy, the substance lies in the particular generative model and priors, which sit outside the principle."
+        }
+      ]
+    },
+    {
+      "type": "related_posts",
+      "order": 18,
+      "content": [
+        {
+          "post_id": "",
+          "title": "Bayesian Inference",
+          "format": "concepts",
+          "mini_teaser": "The rule for updating beliefs with evidence that the free-energy principle approximates when it casts perception as posterior inference."
+        },
+        {
+          "post_id": "",
+          "title": "Hermann von Helmholtz",
+          "format": "people",
+          "mini_teaser": "The physicist and physiologist who first argued that perception is unconscious inference, the idea the free-energy principle formalizes."
+        },
+        {
+          "post_id": "",
+          "title": "Auto-Encoding Variational Bayes",
+          "format": "academy",
+          "mini_teaser": "Kingma and Welling's variational autoencoder minimizes the same evidence lower bound, the machine-learning twin of free energy."
+        }
+      ]
+    },
+    {
+      "type": "authors_context",
+      "order": 19,
+      "content": [
+        {
+          "name": "Karl J. Friston",
+          "role": "Sole author",
+          "one_line": "Neuroscientist who introduced statistical parametric mapping and the free-energy principle, and one of the most cited researchers in neuroimaging.",
+          "affiliation": "Wellcome Trust Centre for Neuroimaging, University College London"
+        }
+      ]
+    },
+    {
+      "type": "historical_context",
+      "order": 20,
+      "content": "The lineage runs from Helmholtz through twentieth-century cybernetics to Friston's own methods work. Friston had already reshaped neuroimaging once, with statistical parametric mapping, the standard analysis across functional brain imaging. Through the 2000s he developed variational schemes for inverting dynamic models of brain responses, dynamic expectation maximization and generalized filtering, which produced the free-energy bound as a by-product of fitting models to data. The 2010 review gathered a decade of that work and a longer prehistory into one claim: that the bound the methods minimized was not only a tool for analysing brains but a principle the brains themselves obey. The paper sits at the head of a programme that has since grown into active inference, computational psychiatry, and a proposed physics of self-organizing systems."
+    },
+    {
+      "type": "sources",
+      "order": 21,
+      "content": [
+        {
+          "label": "Friston K. The free-energy principle: a unified brain theory? Nature Reviews Neuroscience 2010;11(2):127-138",
+          "url": "https://doi.org/10.1038/nrn2787",
+          "type": "paper"
+        },
+        {
+          "label": "Friston K, Kilner J, Harrison L. A free energy principle for the brain. Journal of Physiology-Paris 2006;100(1-3):70-87",
+          "url": "https://doi.org/10.1016/j.jphysparis.2006.10.001",
+          "type": "paper"
+        },
+        {
+          "label": "Rao RPN, Ballard DH. Predictive coding in the visual cortex. Nature Neuroscience 1999;2(1):79-87",
+          "url": "https://doi.org/10.1038/4580",
+          "type": "paper"
+        },
+        {
+          "label": "Bogacz R. A tutorial on the free-energy framework for modelling perception and learning. Journal of Mathematical Psychology 2017;76:198-211",
+          "url": "https://doi.org/10.1016/j.jmp.2015.11.003",
+          "type": "paper"
+        },
+        {
+          "label": "Colombo M, Series P. Bayes in the brain: on Bayesian modelling in neuroscience. British Journal for the Philosophy of Science 2012;63(3):697-723",
+          "url": "https://doi.org/10.1093/bjps/axr043",
+          "type": "paper"
+        },
+        {
+          "label": "Wikipedia: Free energy principle",
+          "url": "https://en.wikipedia.org/wiki/Free_energy_principle",
+          "type": "wikipedia"
+        }
+      ]
+    }
+  ]
+}
