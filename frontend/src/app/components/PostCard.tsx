@@ -15,16 +15,31 @@ export type { Post }
 
 const MIN_DWELL_MS = 500
 
+// Difficulty dots take the per-format ink from the card's --accent variable.
 function DotScale({ value }: { value: 1 | 2 | 3 }) {
   return (
     <span className="flex gap-0.5">
       {[1, 2, 3].map((i) => (
         <span
           key={i}
-          className={`inline-block w-1.5 h-1.5 rounded-full ${i <= value ? "bg-amber-400" : "bg-zinc-600"}`}
+          className={`inline-block w-1.5 h-1.5 rounded-full ${i <= value ? "bg-(--accent)" : "bg-surface-3"}`}
         />
       ))}
     </span>
+  )
+}
+
+// Teaser bullet list shared by every format card.
+function Teasers({ items }: { items: string[] }) {
+  return (
+    <div className="mt-2 space-y-1.5">
+      {items.map((teaser, i) => (
+        <div key={i} className="flex items-start gap-2.5">
+          <span className="text-(--accent) text-sm mt-0.5 shrink-0">&mdash;</span>
+          <span className="text-sm text-ink-dim leading-snug">{teaser}</span>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -203,7 +218,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
     <div
       ref={cardRef}
       onClick={handleCardClick}
-      style={{ cursor: "pointer" }}
+      // --accent drives every format-colored detail inside the card.
+      style={{ cursor: "pointer", ["--accent" as string]: style.accent }}
       className="h-[100dvh] relative shrink-0 snap-start [scroll-snap-stop:always] flex flex-col bg-surface-0 pl-5 pr-5 pt-12 pb-8"
     >
       {/* Double-tap heart overlay */}
@@ -213,7 +229,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="w-24 h-24 text-rose-400 heart-boom"
+            className="w-24 h-24 text-bad heart-boom"
             onAnimationEnd={() => setShowHeartAnim(false)}
           >
             <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.218l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
@@ -225,12 +241,12 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
       <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full shrink-0 ${style.dot}`} />
-          <span className={`text-xs font-semibold tracking-widest ${style.text}`}>
+          <span className={`label-caps ${style.text}`}>
             {style.badge}
           </span>
         </div>
         {post.format === "books" && fcNum(fc, "post_reading_time_min") ? (
-          <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
+          <span className="text-ink-muted text-xs font-mono">{fcNum(fc, "post_reading_time_min")} min read</span>
         ) : null}
       </div>
 
@@ -242,17 +258,17 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           }`}
         >
           {post.format === "books" && fc ? (
-            <div className="bg-surface-1 rounded-card px-5 py-5 flex flex-col gap-3">
+            <div className="card border-l-2 border-l-(--accent) px-5 py-5 flex flex-col gap-3">
               {/* Title row + cover */}
-              <div className="flex gap-3 items-start">
+              <div className="flex gap-4 items-start">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
+                  <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                     {fc.title as string}
                   </h2>
-                  <p className="text-amber-400 text-sm font-medium mt-1">{fc.author as string}</p>
+                  <p className="text-(--accent) text-sm font-medium mt-1">{fc.author as string}</p>
                 </div>
                 {fcStr(fc, "cover_url") && (
-                  <div className="shrink-0 rounded-lg overflow-hidden shadow-lg w-16 h-24 bg-zinc-800">
+                  <div className="shrink-0 rounded-md overflow-hidden w-16 h-24 bg-surface-2 border border-edge">
                     <img
                       src={fcStr(fc, "cover_url")}
                       alt=""
@@ -265,33 +281,26 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               </div>
 
               {/* Essence */}
-              <p className="text-zinc-300 text-sm leading-relaxed">{fc.essence as string}</p>
+              <p className="font-serif italic text-[15px] text-ink-body leading-relaxed">{fc.essence as string}</p>
 
               {/* Teasers */}
               {Array.isArray(fc.teasers) && (fc.teasers as string[]).length > 0 && (
-                <div className="mt-3 mb-1 space-y-1">
-                  {(fc.teasers as string[]).map((teaser, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-amber-400 text-sm mt-0.5 shrink-0">→</span>
-                      <span className="text-sm text-zinc-300/70 leading-snug">{teaser}</span>
-                    </div>
-                  ))}
-                </div>
+                <Teasers items={fc.teasers as string[]} />
               )}
 
               {/* Metadata bar */}
-              <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
+              <div className="flex items-center gap-3 pt-2 border-t border-edge">
                 <DotScale value={fc.post_difficulty as 1 | 2 | 3} />
-                <span className="text-zinc-500 text-xs">{fc.year as number}</span>
-                <span className="text-zinc-600 text-xs">·</span>
-                <span className="text-zinc-500 text-xs">{fc.genre as string}</span>
+                <span className="text-ink-muted text-xs font-mono">{fc.year as number}</span>
+                <span className="text-ink-faint text-xs">·</span>
+                <span className="text-ink-muted text-xs">{fc.genre as string}</span>
               </div>
             </div>
           ) : post.format === "people" && fc ? (
-            <div className="bg-surface-1 rounded-card px-5 py-5 flex flex-col gap-3">
+            <div className="card border-l-2 border-l-(--accent) px-5 py-5 flex flex-col gap-3">
               <div className="flex gap-4 items-start">
                 {(fc.portrait as { image_url?: string } | undefined)?.image_url && (
-                  <div className="shrink-0 w-20 h-20 rounded-full overflow-hidden bg-zinc-800 border-2 border-rose-400/40">
+                  <div className="shrink-0 w-20 h-20 rounded-full overflow-hidden bg-surface-2 border border-(--accent)/40">
                     <img
                       src={(fc.portrait as { image_url: string }).image_url}
                       alt=""
@@ -303,171 +312,136 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
                 )}
                 <div className="flex-1 min-w-0">
                   {fcStr(fc, "role") && (
-                    <p className="text-xs font-semibold tracking-widest text-rose-400 uppercase mb-0.5">
+                    <p className="label-caps text-(--accent) mb-0.5">
                       {fcStr(fc, "role")}
                     </p>
                   )}
-                  <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
+                  <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                     {fc.name as string}
                   </h2>
                   {fcStr(fc, "lifespan") && (
-                    <p className="text-zinc-500 text-xs mt-0.5">{fcStr(fc, "lifespan")}</p>
+                    <p className="text-ink-muted text-xs font-mono mt-0.5">{fcStr(fc, "lifespan")}</p>
                   )}
                 </div>
               </div>
 
-              <p className="text-zinc-300 text-sm leading-relaxed">{fc.essence as string}</p>
+              <p className="font-serif italic text-[15px] text-ink-body leading-relaxed">{fc.essence as string}</p>
 
               {Array.isArray(fc.teasers) && (fc.teasers as string[]).length > 0 && (
-                <div className="mt-1 space-y-1">
-                  {(fc.teasers as string[]).map((teaser, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-rose-400 text-sm mt-0.5 shrink-0">→</span>
-                      <span className="text-sm text-zinc-300/70 leading-snug">{teaser}</span>
-                    </div>
-                  ))}
-                </div>
+                <Teasers items={fc.teasers as string[]} />
               )}
 
-              <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
+              <div className="flex items-center gap-3 pt-2 border-t border-edge">
                 <DotScale value={fc.post_difficulty as 1 | 2 | 3} />
                 {fcNum(fc, "post_reading_time_min") > 0 && (
-                  <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
+                  <span className="text-ink-muted text-xs font-mono">{fcNum(fc, "post_reading_time_min")} min read</span>
                 )}
               </div>
             </div>
           ) : post.format === "facts" && fc ? (
-            <div className="bg-surface-1 rounded-card px-5 py-5 flex flex-col gap-3">
+            <div className="card border-l-2 border-l-(--accent) px-5 py-5 flex flex-col gap-3">
               {fcStr(fc, "field") && (
-                <p className="text-xs font-semibold tracking-widest text-cyan-600 uppercase">{fcStr(fc, "field")}</p>
+                <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
-              <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
+              <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                 {fc.headline as string}
               </h2>
 
               {Array.isArray(fc.teasers) && (fc.teasers as string[]).length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {(fc.teasers as string[]).map((teaser, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-cyan-400 text-sm mt-0.5 shrink-0">→</span>
-                      <span className="text-sm text-zinc-300/70 leading-snug">{teaser}</span>
-                    </div>
-                  ))}
-                </div>
+                <Teasers items={fc.teasers as string[]} />
               )}
 
-              <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
+              <div className="flex items-center gap-3 pt-2 border-t border-edge">
                 <DotScale value={fc.post_difficulty as 1 | 2 | 3} />
                 {fcNum(fc, "post_reading_time_min") > 0 && (
-                  <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
+                  <span className="text-ink-muted text-xs font-mono">{fcNum(fc, "post_reading_time_min")} min read</span>
                 )}
               </div>
             </div>
           ) : post.format === "concepts" && fc ? (
-            <div className="bg-surface-1 rounded-card px-5 py-5 flex flex-col gap-3">
+            <div className="card border-l-2 border-l-(--accent) px-5 py-5 flex flex-col gap-3">
               {fcStr(fc, "field") && (
-                <p className="text-xs font-semibold tracking-widest text-violet-500 uppercase">{fcStr(fc, "field")}</p>
+                <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
-              <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
+              <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                 {fcStr(fc, "concept_name")}
               </h2>
               {fcStr(fc, "one_line") && (
-                <p className="text-sm text-zinc-400 leading-relaxed">{fcStr(fc, "one_line")}</p>
+                <p className="font-serif italic text-[15px] text-ink-body leading-relaxed">{fcStr(fc, "one_line")}</p>
               )}
 
               {Array.isArray(fc.teasers) && (fc.teasers as string[]).length > 0 && (
-                <div className="mt-1 space-y-1">
-                  {(fc.teasers as string[]).map((teaser, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-violet-400 text-sm mt-0.5 shrink-0">→</span>
-                      <span className="text-sm text-zinc-300/70 leading-snug">{teaser}</span>
-                    </div>
-                  ))}
-                </div>
+                <Teasers items={fc.teasers as string[]} />
               )}
 
-              <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
+              <div className="flex items-center gap-3 pt-2 border-t border-edge">
                 <DotScale value={fc.post_difficulty as 1 | 2 | 3} />
                 {fcNum(fc, "post_reading_time_min") > 0 && (
-                  <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
+                  <span className="text-ink-muted text-xs font-mono">{fcNum(fc, "post_reading_time_min")} min read</span>
                 )}
               </div>
             </div>
           ) : post.format === "questions" && fc ? (
-            <div className="bg-surface-1 rounded-card px-5 py-5 flex flex-col gap-3">
+            <div className="card border-l-2 border-l-(--accent) px-5 py-5 flex flex-col gap-3">
               {fcStr(fc, "field") && (
-                <p className="text-xs font-semibold tracking-widest text-emerald-600 uppercase">{fcStr(fc, "field")}</p>
+                <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
-              <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
+              <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                 {fcStr(fc, "the_question")}
               </h2>
               {fcStr(fc, "framing_line") && (
-                <p className="text-sm text-zinc-400 leading-relaxed">{fcStr(fc, "framing_line")}</p>
+                <p className="font-serif italic text-[15px] text-ink-body leading-relaxed">{fcStr(fc, "framing_line")}</p>
               )}
 
               {Array.isArray(fc.teasers) && (fc.teasers as string[]).length > 0 && (
-                <div className="mt-1 space-y-1">
-                  {(fc.teasers as string[]).map((teaser, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-emerald-400 text-sm mt-0.5 shrink-0">→</span>
-                      <span className="text-sm text-zinc-300/70 leading-snug">{teaser}</span>
-                    </div>
-                  ))}
-                </div>
+                <Teasers items={fc.teasers as string[]} />
               )}
 
-              <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
+              <div className="flex items-center gap-3 pt-2 border-t border-edge">
                 <DotScale value={fc.post_difficulty as 1 | 2 | 3} />
                 {fcNum(fc, "post_reading_time_min") > 0 && (
-                  <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
+                  <span className="text-ink-muted text-xs font-mono">{fcNum(fc, "post_reading_time_min")} min read</span>
                 )}
               </div>
             </div>
           ) : post.format === "stories" && fc ? (
-            <div className="bg-surface-1 rounded-card px-5 py-5 flex flex-col gap-3">
+            <div className="card border-l-2 border-l-(--accent) px-5 py-5 flex flex-col gap-3">
               <div className="flex items-center gap-2 flex-wrap">
                 {fcStr(fc, "era_label") && (
-                  <span className="text-xs font-semibold tracking-widest text-orange-400 uppercase">
+                  <span className="label-caps text-(--accent)">
                     {fcStr(fc, "era_label")}
                   </span>
                 )}
                 {fcStr(fc, "category") && (
-                  <span className="text-xs text-zinc-600 uppercase tracking-wide">{fcStr(fc, "category")}</span>
+                  <span className="label-caps text-ink-faint">{fcStr(fc, "category")}</span>
                 )}
               </div>
-              <h2 className="text-xl font-bold tracking-tight text-white leading-snug">
+              <h2 className="font-serif text-2xl font-medium tracking-tight text-ink leading-snug">
                 {fcStr(fc, "headline")}
               </h2>
 
               {Array.isArray(fc.teasers) && (fc.teasers as string[]).length > 0 && (
-                <div className="mt-1 space-y-1">
-                  {(fc.teasers as string[]).map((teaser, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-orange-400 text-sm mt-0.5 shrink-0">→</span>
-                      <span className="text-sm text-zinc-300/70 leading-snug">{teaser}</span>
-                    </div>
-                  ))}
-                </div>
+                <Teasers items={fc.teasers as string[]} />
               )}
 
-              <div className="flex items-center gap-3 pt-1 border-t border-zinc-800">
+              <div className="flex items-center gap-3 pt-2 border-t border-edge">
                 <DotScale value={fc.post_difficulty as 1 | 2 | 3} />
                 {fcNum(fc, "post_reading_time_min") > 0 && (
-                  <span className="text-zinc-500 text-xs">{fcNum(fc, "post_reading_time_min")} min read</span>
+                  <span className="text-ink-muted text-xs font-mono">{fcNum(fc, "post_reading_time_min")} min read</span>
                 )}
                 {fcStr(fc, "era") && (
-                  <span className="text-zinc-600 text-xs">{fcStr(fc, "era")}</span>
+                  <span className="text-ink-faint text-xs font-mono">{fcStr(fc, "era")}</span>
                 )}
               </div>
             </div>
           ) : (
             /* Fallback for other formats */
-            <div className="bg-surface-1 rounded-card px-5 py-6 flex flex-col gap-3">
-              <h2 className="text-3xl font-bold tracking-tight text-white leading-snug">
+            <div className="card border-l-2 border-l-(--accent) px-5 py-6 flex flex-col gap-3">
+              <h2 className="font-serif text-3xl font-medium tracking-tight text-ink leading-snug">
                 {post.title}
               </h2>
               {fcStr(fc, "essence") && (
-                <p className="text-zinc-300 text-base leading-relaxed">{fcStr(fc, "essence")}</p>
+                <p className="font-serif italic text-base text-ink-body leading-relaxed">{fcStr(fc, "essence")}</p>
               )}
             </div>
           )}
@@ -479,7 +453,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
         {post.interests.map((name) => (
           <span
             key={name}
-            className="bg-zinc-800/80 text-zinc-400 text-xs px-2.5 py-1 rounded-full"
+            className="bg-surface-2/90 border border-edge text-ink-dim text-xs px-2.5 py-1 rounded-full"
           >
             {name}
           </span>
@@ -496,18 +470,18 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           >
             <svg
               viewBox="0 0 24 24"
-              fill={liked ? "rgb(244,63,94)" : "none"}
+              fill={liked ? "var(--color-bad)" : "none"}
               stroke={liked ? "none" : "currentColor"}
               strokeWidth={liked ? 0 : 2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`w-6 h-6 text-zinc-400 ${animatingLike ? "heart-pop" : ""}`}
+              className={`w-6 h-6 text-ink-dim ${animatingLike ? "heart-pop" : ""}`}
               onAnimationEnd={() => setAnimatingLike(false)}
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </button>
-          <span className="text-xs text-zinc-300 leading-none mt-1">{likesCount}</span>
+          <span className="text-xs text-ink-dim font-mono leading-none mt-1">{likesCount}</span>
         </div>
 
         {/* Comment */}
@@ -524,12 +498,12 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-6 h-6 text-zinc-400"
+              className="w-6 h-6 text-ink-dim"
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </button>
-          <span className="text-xs text-zinc-300 leading-none mt-1">{commentsCount}</span>
+          <span className="text-xs text-ink-dim font-mono leading-none mt-1">{commentsCount}</span>
         </div>
 
         {/* Save */}
@@ -540,18 +514,18 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           >
             <svg
               viewBox="0 0 24 24"
-              fill={saved ? "rgb(251,191,36)" : "none"}
+              fill={saved ? "var(--color-lamp)" : "none"}
               stroke={saved ? "none" : "currentColor"}
               strokeWidth={saved ? 0 : 2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`w-6 h-6 text-zinc-400 ${animatingSave ? "heart-pop" : ""}`}
+              className={`w-6 h-6 text-ink-dim ${animatingSave ? "heart-pop" : ""}`}
               onAnimationEnd={() => setAnimatingSave(false)}
             >
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
             </svg>
           </button>
-          <span className="text-xs text-zinc-300 leading-none mt-1">{saveCount}</span>
+          <span className="text-xs text-ink-dim font-mono leading-none mt-1">{saveCount}</span>
         </div>
 
         {/* Share */}
@@ -564,7 +538,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-6 h-6 text-zinc-400"
+              className="w-6 h-6 text-ink-dim"
             >
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />

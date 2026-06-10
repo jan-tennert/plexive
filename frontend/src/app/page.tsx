@@ -23,8 +23,9 @@ interface FeedTab {
 }
 
 const TABS: FeedTab[] = [
-  { id: "for-you", label: "For You", format: null, accent: "#ffffff", rgb: [255, 255, 255] },
-  { id: "following", label: "Following", format: null, accent: "#ffffff", rgb: [255, 255, 255] },
+  // Non-format tabs use the primary ink color (--color-ink).
+  { id: "for-you", label: "For You", format: null, accent: "#efe9de", rgb: [239, 233, 222] },
+  { id: "following", label: "Following", format: null, accent: "#efe9de", rgb: [239, 233, 222] },
   ...FORMAT_IDS.map((id) => ({
     id,
     label: FORMAT_STYLES[id].label,
@@ -38,7 +39,7 @@ const HALF_IND = 8 // half of w-4 (16px indicator width)
 
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-[100dvh] bg-zinc-950 flex justify-center">
+    <div className="h-[100dvh] bg-surface-0 flex justify-center">
       <div className="w-full max-w-[430px] h-[100dvh] relative">{children}</div>
     </div>
   )
@@ -89,34 +90,34 @@ function TabPage({
   return (
     <div ref={scrollRef} className="w-full shrink-0 snap-start h-[100dvh] overflow-y-scroll snap-y snap-mandatory overscroll-y-contain [&::-webkit-scrollbar]:hidden [scrollbar-width:none] pb-14">
       {!isActivated ? (
-        <div className="h-full bg-zinc-950" />
+        <div className="h-full bg-surface-0" />
       ) : isFollowingTab && !authLoading && !user ? (
-        <div className="h-full flex flex-col items-center justify-center gap-3 bg-zinc-950 px-8 text-center">
-          <p className="text-white font-semibold">See posts from people you follow</p>
-          <Link href="/login" className="bg-white text-zinc-950 rounded-xl px-5 py-2 text-sm font-semibold">
+        <div className="h-full flex flex-col items-center justify-center gap-3 bg-surface-0 px-8 text-center">
+          <p className="text-ink font-serif font-medium text-lg">See posts from people you follow</p>
+          <Link href="/login" className="btn btn-primary px-5 py-2">
             Log in
           </Link>
         </div>
       ) : isFollowingTab && posts !== null && posts.length === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center gap-3 bg-zinc-950 px-8 text-center">
-          <p className="text-white font-semibold">Nothing here yet</p>
-          <p className="text-zinc-500 text-sm">Posts from people you follow will show up here.</p>
-          <Link href="/search" className="bg-white text-zinc-950 rounded-xl px-5 py-2 text-sm font-semibold">
+        <div className="h-full flex flex-col items-center justify-center gap-3 bg-surface-0 px-8 text-center">
+          <p className="text-ink font-serif font-medium text-lg">Nothing here yet</p>
+          <p className="text-ink-muted text-sm">Posts from people you follow will show up here.</p>
+          <Link href="/search" className="btn btn-primary px-5 py-2">
             Find people
           </Link>
         </div>
       ) : posts === null ? (
-        <div className="h-full flex items-center justify-center bg-zinc-950">
+        <div className="h-full flex items-center justify-center bg-surface-0">
           <Spinner />
         </div>
       ) : posts.length === 0 && tab.format ? (
-        <div className="h-full flex items-center justify-center bg-zinc-950">
+        <div className="h-full flex items-center justify-center bg-surface-0">
           <EmptyState format={tab.format} accentColor={tab.accent} />
         </div>
       ) : posts.length === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center gap-3 bg-zinc-950">
-          <p className="text-white font-semibold">Nothing here yet</p>
-          <p className="text-zinc-500 text-sm">Try adjusting your interests</p>
+        <div className="h-full flex flex-col items-center justify-center gap-3 bg-surface-0">
+          <p className="text-ink font-serif font-medium text-lg">Nothing here yet</p>
+          <p className="text-ink-muted text-sm">Try adjusting your interests</p>
         </div>
       ) : (
         posts.map((post) => <PostCard key={post.id} post={post} activeTabId={tab.id} />)
@@ -265,15 +266,15 @@ export default function Home() {
     <PhoneFrame>
       {/* Tab bar — single sliding indicator, TikTok style */}
       <div className="absolute top-0 left-0 right-0 z-20">
-        <div className="relative bg-zinc-950/90 backdrop-blur-md">
+        <div className="relative bg-surface-0/90 backdrop-blur-md">
           {/* Left edge fade */}
-          <div className="absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-zinc-950 to-transparent pointer-events-none z-10" />
+          <div className="absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-surface-0 to-transparent pointer-events-none z-10" />
           {/* Right edge fade — wider so tab labels tuck under the search button */}
-          <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-l from-zinc-950 via-zinc-950/90 to-transparent pointer-events-none z-10" />
+          <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-l from-surface-0 via-surface-0/90 to-transparent pointer-events-none z-10" />
           {/* Search — top-right, TikTok style */}
           <button
             onClick={() => router.push("/search")}
-            className="absolute right-1 top-0 h-[44px] w-10 flex items-center justify-center text-zinc-300 z-20"
+            className="absolute right-1 top-0 h-[44px] w-10 flex items-center justify-center text-ink-dim hover:text-ink transition-colors duration-150 cursor-pointer z-20"
             aria-label="Search"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -293,10 +294,10 @@ export default function Home() {
                   key={tab.id}
                   ref={(el) => { tabRefs.current[tab.id] = el }}
                   onClick={() => handleTabClick(i)}
-                  className={`snap-center shrink-0 px-4 h-[44px] flex items-center justify-center transition-all duration-200 ${
+                  className={`snap-center shrink-0 px-4 h-[44px] flex items-center justify-center cursor-pointer transition-all duration-200 ${
                     isActive
-                      ? "text-white scale-100 font-semibold"
-                      : "text-zinc-500 scale-90 font-medium"
+                      ? "text-ink scale-100 font-semibold"
+                      : "text-ink-muted scale-90 font-medium"
                   }`}
                 >
                   <span className="text-sm whitespace-nowrap">{tab.label}</span>
@@ -307,7 +308,7 @@ export default function Home() {
             <div
               ref={indicatorRef}
               className="absolute bottom-0 h-[4px] w-4 rounded-full pointer-events-none"
-              style={{ left: 0, backgroundColor: "rgb(255,255,255)" }}
+              style={{ left: 0, backgroundColor: "rgb(239,233,222)" }}
             />
           </div>
         </div>
