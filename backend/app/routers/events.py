@@ -22,11 +22,19 @@ def create_events(
         raise HTTPException(status_code=422, detail="Too many events in one batch.")
 
     # Drop events that reference nonexistent posts instead of storing garbage.
+    # Only posts visible to this caller count, so the stored-count response
+    # cannot be used as an existence oracle for pending post ids.
     requested_ids = {e.post_id for e in events}
-    valid_ids = {
-        row[0]
-        for row in db.query(Post.id).filter(Post.id.in_(requested_ids)).all()
-    } if requested_ids else set()
+    valid_ids = set()
+    if requested_ids:
+        query = db.query(Post.id).filter(Post.id.in_(requested_ids))
+        if optional_user:
+            query = query.filter(
+                (Post.status == "published") | (Post.author_id == optional_user.id)
+            )
+        else:
+            query = query.filter(Post.status == "published")
+        valid_ids = {row[0] for row in query.all()}
 
     new_events = []
     batch_liked_post_ids: set[int] = set()

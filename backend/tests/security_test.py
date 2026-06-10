@@ -91,6 +91,13 @@ check("event batch larger than 50 rejected", r.status_code == 422, r.text)
 r = client.post("/api/events", json=[{"post_id": 999999, "event_type": "like"}])
 check("events for nonexistent posts dropped", r.status_code == 200 and r.json()["stored"] == 0, r.text)
 
+# stored-count must not reveal whether a pending post id exists.
+r = client.post("/api/events", json=[{"post_id": pending_id, "event_type": "view"}])
+check("events give no existence oracle for pending posts", r.status_code == 200 and r.json()["stored"] == 0, r.text)
+
+r = client.post("/api/events", json=[{"post_id": pending_id, "event_type": "view"}], headers=auth(author["access_token"]))
+check("author events on own pending post still stored", r.status_code == 200 and r.json()["stored"] == 1, r.text)
+
 # --- username format (forward-only) ----------------------------------------------
 
 r = client.post("/api/auth/register", json={
