@@ -204,7 +204,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     <div className="h-[100dvh] bg-surface-0 flex justify-center">
       <div className="w-full max-w-[430px] h-[100dvh] relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-surface-0 flex flex-col"
+          className="absolute inset-0 bg-surface-0 flex flex-col z-40"
           // --accent drives every format-colored detail in the header and sections.
           style={{
             animation: closing
@@ -355,11 +355,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             )}
           </div>
 
-          {/* Sticky comment bar. 64px clears the bottom nav; safe-area adds
-              extra space on phones with a home indicator. */}
+          {/* Sticky comment bar — sits above bottom nav (z-40 > nav z-30).
+              Only needs safe-area clearance for the iOS home indicator. */}
           <div
             className="flex-none border-t border-edge bg-surface-overlay backdrop-blur-md"
-            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 64px)" }}
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
           >
             <div className="flex items-center gap-2 px-3 py-2">
               <div className="flex-1 min-w-0">
