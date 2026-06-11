@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/app/lib/auth"
 
@@ -11,6 +11,16 @@ type ActiveTab = "feed" | "search" | "chat" | "create" | "stats" | "profile"
 export default function BottomNav({ activeTab }: { activeTab: ActiveTab }) {
   const router = useRouter()
   const { user } = useAuth()
+
+  // Prefetch the sibling routes so the first tap on a nav item does not pay
+  // the route-chunk download (no-op in dev; effective in production builds).
+  useEffect(() => {
+    router.prefetch("/")
+    router.prefetch("/chat")
+    router.prefetch("/stats")
+    router.prefetch("/create")
+    if (user) router.prefetch(`/profile/${user.username}`)
+  }, [router, user])
 
   function icon(tab: ActiveTab) {
     return activeTab === tab ? "text-lamp" : "text-ink-muted hover:text-ink-dim"
