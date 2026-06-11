@@ -80,10 +80,10 @@ interface GlobalStats {
     total_likes: number
     avg_posts_per_user: number
   }
-  top_creators_by_posts: { username: string; is_verified: boolean; post_count: number }[]
-  top_creators_by_likes: { username: string; is_verified: boolean; like_count: number }[]
-  top_creators_by_comments: { username: string; is_verified: boolean; comment_count: number }[]
-  top_creators_by_avg_read_time: { username: string; is_verified: boolean; avg_duration_ms: number }[]
+  top_creators_by_posts: { username: string; is_verified: number; post_count: number }[]
+  top_creators_by_likes: { username: string; is_verified: number; like_count: number }[]
+  top_creators_by_comments: { username: string; is_verified: number; comment_count: number }[]
+  top_creators_by_avg_read_time: { username: string; is_verified: number; avg_duration_ms: number }[]
   top_creators_per_format: Record<string, { username: string; post_count: number }[]>
   top_posts_by_likes: { post_id: number; title: string; format: string; author: string; like_count: number }[]
   posts_over_time: { period: string; count: number }[]
@@ -2170,7 +2170,7 @@ function MyStatsTab({
 
 interface FriendStats {
   username: string
-  is_verified: boolean
+  is_verified: number
   global_rating: number | null
   formats: Record<string, { rating: number; answered_count: number }>
   post_count: number
@@ -2184,7 +2184,7 @@ function shortName(u: string, me: string) {
   return label.length > 12 ? label.slice(0, 11) + "…" : label
 }
 
-function FriendsTab({ username }: { username: string }) {
+function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLevel: number }) {
   const [loading, setLoading] = useState(true)
   const [noFollowing, setNoFollowing] = useState(false)
   const [participants, setParticipants] = useState<FriendStats[]>([])
@@ -2195,7 +2195,7 @@ function FriendsTab({ username }: { username: string }) {
     async function load() {
       try {
         const [followingData, myEloData, myProfileData]: [
-          { username: string; is_verified: boolean }[],
+          { username: string; is_verified: number }[],
           { global_rating: number | null; formats: Record<string, { rating: number; answered_count: number }> },
           { post_count: number; follower_count: number; following_count: number },
         ] = await Promise.all([
@@ -2212,7 +2212,7 @@ function FriendsTab({ username }: { username: string }) {
 
         const me: FriendStats = {
           username,
-          is_verified: true,
+          is_verified: verifiedLevel,
           global_rating: myEloData.global_rating,
           formats: myEloData.formats,
           post_count: myProfileData.post_count,
@@ -2926,7 +2926,7 @@ export default function StatsPage() {
         )}
 
         {activeTab === "friends" && user && (
-          <FriendsTab username={user.username} />
+          <FriendsTab username={user.username} verifiedLevel={user.is_verified} />
         )}
       </div>
 

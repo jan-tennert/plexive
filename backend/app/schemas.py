@@ -16,7 +16,7 @@ class UserOut(BaseModel):
     email: str
     username: str
     created_at: datetime
-    is_verified: bool
+    is_verified: int
     is_private: bool
     bio: str | None
     avatar_url: str | None
@@ -396,7 +396,7 @@ class PostOut(BaseModel):
     sections: list[dict]
     author_id: int | None = None
     author_username: str | None = None
-    author_is_verified: bool | None = None
+    author_is_verified: int | None = None
     status: str = "published"
     created_at: datetime | None = None
     is_user_content: bool = False

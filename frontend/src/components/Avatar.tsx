@@ -3,7 +3,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL
 const RING_COLOR: Record<number, string> = {
   1: "var(--color-fmt-concepts)",
   2: "var(--color-good)",
-  3: "var(--color-fmt-academy)",
+  3: "#b91c1c",
 }
 
 function ringColor(level: number): string {

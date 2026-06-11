@@ -403,7 +403,7 @@ export interface Post {
   sections: Section[]
   author_id: number | null
   author_username: string | null
-  author_is_verified: boolean | null
+  author_is_verified: number | null
   status: string
   created_at: string
   is_user_content: boolean

@@ -1,11 +1,13 @@
 "use client"
 
 import { relativeTime } from "@/app/lib/relativeTime"
+import VerifiedBadge from "@/components/VerifiedBadge"
 
 export interface Comment {
   id: number
   post_id: number
   username: string
+  is_verified: number
   body: string
   created_at: string
 }
@@ -27,8 +29,9 @@ export default function CommentsSection({ comments, currentUsername, onDelete, d
       <div>
         {comments.map((comment) => (
           <div key={comment.id} className="mb-4 pb-4 border-b border-edge last:border-b-0">
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-center gap-1.5">
               <span className="text-sm font-medium text-ink">{comment.username}</span>
+              {comment.is_verified > 0 && <VerifiedBadge size={13} level={comment.is_verified} />}
               <span className="text-xs text-ink-muted">{relativeTime(comment.created_at)}</span>
               {currentUsername === comment.username && (
                 <button

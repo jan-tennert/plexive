@@ -69,7 +69,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     created_at    = Column(DateTime, default=datetime.utcnow)
     is_active     = Column(Boolean, default=True, nullable=False)
-    is_verified   = Column(Boolean, default=False, nullable=False)
+    is_verified   = Column(Integer, default=0, nullable=False)
     is_private    = Column(Boolean, default=False, nullable=False)
     bio           = Column(String, nullable=True)
     avatar_url    = Column(String, nullable=True)

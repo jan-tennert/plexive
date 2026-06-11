@@ -5,7 +5,7 @@ Open source social media app that replaces doomscrolling with valuable content.
 ## Tech Stack
 - Backend: Python FastAPI
 - Frontend: Next.js
-- Database: SQLite (PostgreSQL later)
+- Database: Supabase PostgreSQL (connection via `DATABASE_URL` in `backend/.env`)
 - License: AGPL v3
 
 ## Content Model

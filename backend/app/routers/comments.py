@@ -41,6 +41,7 @@ class CommentOut(BaseModel):
     id: int
     post_id: int
     username: str
+    is_verified: int
     body: str
     created_at: datetime
 
@@ -54,6 +55,7 @@ class CommentOut(BaseModel):
                 "id": data.id,
                 "post_id": data.post_id,
                 "username": data.user.username,
+                "is_verified": data.user.is_verified,
                 "body": data.body,
                 "created_at": data.created_at,
             }

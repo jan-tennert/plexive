@@ -9,7 +9,7 @@ export interface AuthUser {
   email: string
   username: string
   created_at: string
-  is_verified: boolean
+  is_verified: number
   is_private: boolean
   bio: string | null
   avatar_url: string | null

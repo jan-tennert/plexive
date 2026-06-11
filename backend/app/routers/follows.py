@@ -16,14 +16,14 @@ class FollowUserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     username: str
-    is_verified: bool
+    is_verified: int
     is_private: bool
     avatar_url: Optional[str] = None
 
 
 class ProfileOut(BaseModel):
     username: str
-    is_verified: bool
+    is_verified: int
     is_private: bool
     bio: Optional[str]
     avatar_url: Optional[str]
