@@ -13,6 +13,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts"
 import Link from "next/link"
+import useSWR from "swr"
 import { useAuth } from "../lib/auth"
 import { apiFetch } from "../lib/api"
 import { getSavedPostIds } from "../lib/savedPosts"
@@ -2809,30 +2810,17 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
 export default function StatsPage() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<"global" | "my" | "friends">("global")
-  const [globalData, setGlobalData] = useState<GlobalStats | null>(null)
-  const [myData, setMyData] = useState<MyStats | null>(null)
-  const [globalLoading, setGlobalLoading] = useState(true)
-  const [myLoading, setMyLoading] = useState(false)
   const [savedCount, setSavedCount] = useState(0)
 
-  // Fetch global stats on mount
-  useEffect(() => {
-    apiFetch("/api/stats/global")
-      .then(r => r.json())
-      .then(setGlobalData)
-      .finally(() => setGlobalLoading(false))
-  }, [])
+  // Global stats via SWR: a revisit renders the cached data instantly and
+  // refreshes silently in the background (stats are aggregates, no reorder).
+  const { data: globalData, error: globalError } = useSWR<GlobalStats>("/api/stats/global")
+  const globalLoading = !globalData && !globalError
 
-  // Prefetch personal stats in parallel with the global fetch, so opening
-  // the Personal tab does not start a second full wait.
-  useEffect(() => {
-    if (!user || myData) return
-    setMyLoading(true)
-    apiFetch("/api/stats/me")
-      .then(r => r.json())
-      .then(setMyData)
-      .finally(() => setMyLoading(false))
-  }, [user, myData])
+  // Personal stats prefetched in parallel with the global fetch (key is null
+  // until the session is restored), so opening the Personal tab is instant.
+  const { data: myData, error: myError } = useSWR<MyStats>(user ? "/api/stats/me" : null)
+  const myLoading = !myData && !myError
 
   // Read localStorage saved count client-side
   useEffect(() => {
