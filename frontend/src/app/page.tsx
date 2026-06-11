@@ -267,10 +267,6 @@ export default function Home() {
       {/* Tab bar — single sliding indicator, TikTok style */}
       <div className="absolute top-0 left-0 right-0 z-20">
         <div className="relative bg-surface-0/90 backdrop-blur-md">
-          {/* Left edge fade */}
-          <div className="absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-surface-0 to-transparent pointer-events-none z-10" />
-          {/* Right edge fade — wider so tab labels tuck under the search button */}
-          <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-l from-surface-0 via-surface-0/90 to-transparent pointer-events-none z-10" />
           {/* Search — top-right, TikTok style */}
           <button
             onClick={() => router.push("/search")}
@@ -286,6 +282,14 @@ export default function Home() {
           <div
             ref={tabStripRef}
             className="relative flex overflow-x-scroll snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [scrollbar-width:none] h-[44px] items-center px-[calc(50%-40px)]"
+            // Labels fade out at both edges instead of hard-clipping; the wider
+            // right ramp keeps them legible until they tuck under the search button.
+            style={{
+              maskImage:
+                "linear-gradient(to right, transparent 0, black 32px, black calc(100% - 88px), transparent calc(100% - 36px))",
+              WebkitMaskImage:
+                "linear-gradient(to right, transparent 0, black 32px, black calc(100% - 88px), transparent calc(100% - 36px))",
+            }}
           >
             {TABS.map((tab, i) => {
               const isActive = activeTab === tab.id
