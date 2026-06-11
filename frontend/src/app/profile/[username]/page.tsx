@@ -88,24 +88,28 @@ export default function PublicProfilePage() {
   const { data: postsData, error: postsError } = useSWR<Post[]>(`/api/feed/user/${username}`)
   const posts: Post[] | null = postsError ? [] : postsData ?? null
 
-  // Saved/liked tabs: only load for own profile from localStorage
+  // Saved/liked tabs: only load for own profile from localStorage, and only
+  // when the tab is first opened — each saved/liked id costs one full
+  // GET /api/posts/{id}, so fetching them on mount made every own-profile
+  // visit pay for tabs that were never opened. The null state still renders
+  // the existing spinner on first open.
   useEffect(() => {
-    if (!isOwnProfile) return
+    if (!isOwnProfile || activeTab !== "saved" || savedPosts !== null) return
     const ids = getSavedPostIds()
     if (ids.length === 0) { setSavedPosts([]); return }
     Promise.all(ids.map((id) => apiFetch(`/api/posts/${id}`).then((r) => (r.ok ? r.json() : null))))
       .then((results) => setSavedPosts(results.filter(Boolean) as Post[]))
       .catch(() => setSavedPosts([]))
-  }, [isOwnProfile])
+  }, [isOwnProfile, activeTab, savedPosts])
 
   useEffect(() => {
-    if (!isOwnProfile) return
+    if (!isOwnProfile || activeTab !== "liked" || likedPosts !== null) return
     const ids = getLikedPostIds()
     if (ids.length === 0) { setLikedPosts([]); return }
     Promise.all(ids.map((id) => apiFetch(`/api/posts/${id}`).then((r) => (r.ok ? r.json() : null))))
       .then((results) => setLikedPosts(results.filter(Boolean) as Post[]))
       .catch(() => setLikedPosts([]))
-  }, [isOwnProfile])
+  }, [isOwnProfile, activeTab, likedPosts])
 
   async function handleFollow() {
     if (!profile) return
