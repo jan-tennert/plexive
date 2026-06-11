@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import Annotated, List, Literal, Union
 
@@ -15,7 +16,7 @@ class UserOut(BaseModel):
     email: str
     username: str
     created_at: datetime
-    is_verified: bool
+    is_verified: int
     is_private: bool
     bio: str | None
     avatar_url: str | None
@@ -368,12 +369,14 @@ class PostCreate(BaseModel):
 
 
 def _check_image_urls(data: dict) -> None:
-    """Recursively verify any image_url in user-submitted content uses /uploads/."""
+    """Recursively verify any image_url in user-submitted content uses the Supabase storage URL."""
+    supabase_url = os.environ.get("SUPABASE_URL", "")
+    storage_prefix = f"{supabase_url}/storage/v1/object/public/uploads/"
     for key, value in data.items():
         if key == "image_url" and isinstance(value, str) and value:
-            if not value.startswith("/uploads/"):
+            if not value.startswith(storage_prefix):
                 raise ValueError(
-                    "image_url must reference our upload endpoint (/uploads/...)"
+                    "image_url must reference our upload endpoint"
                 )
         elif isinstance(value, dict):
             _check_image_urls(value)
@@ -393,7 +396,7 @@ class PostOut(BaseModel):
     sections: list[dict]
     author_id: int | None = None
     author_username: str | None = None
-    author_is_verified: bool | None = None
+    author_is_verified: int | None = None
     status: str = "published"
     created_at: datetime | None = None
     is_user_content: bool = False

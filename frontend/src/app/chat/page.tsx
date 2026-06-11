@@ -14,7 +14,7 @@ import type { ChatParticipant, Conversation } from "@/app/lib/chatSocket"
 
 interface UserResult {
   username: string
-  is_verified: boolean
+  is_verified: number
   avatar_url: string | null
   is_self: boolean
 }
@@ -33,7 +33,7 @@ function ConversationAvatar({ conv, me }: { conv: Conversation; me: string }) {
     )
   }
   const other = conv.participants.find((p) => p.username !== me)
-  return <Avatar username={other?.username ?? "?"} avatarUrl={other?.avatar_url} size={48} />
+  return <Avatar username={other?.username ?? "?"} avatarUrl={other?.avatar_url} size={48} verified={other?.is_verified} />
 }
 
 function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated: (id: number) => void }) {
@@ -145,10 +145,10 @@ function NewChatOverlay({ onClose, onCreated }: { onClose: () => void; onCreated
               onClick={() => toggle(u)}
               className="w-full flex items-center gap-3 py-2.5 text-left cursor-pointer"
             >
-              <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} />
+              <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} verified={u.is_verified} />
               <span className="flex-1 flex items-center gap-1.5 text-ink text-sm font-medium truncate">
                 @{u.username}
-                {u.is_verified && <VerifiedBadge size={14} />}
+                {u.is_verified > 0 && <VerifiedBadge size={14} level={u.is_verified} />}
               </span>
               <span className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "bg-lamp border-lamp" : "border-edge-strong"}`}>
                 {isSelected && (

@@ -15,7 +15,7 @@ import Avatar from "@/components/Avatar"
 
 interface ProfileData {
   username: string
-  is_verified: boolean
+  is_verified: number
   is_private: boolean
   bio: string | null
   avatar_url: string | null
@@ -32,7 +32,7 @@ interface EloData {
 
 interface ListUser {
   username: string
-  is_verified: boolean
+  is_verified: number
   is_private: boolean
   avatar_url: string | null
 }
@@ -199,12 +199,12 @@ export default function PublicProfilePage() {
         {/* Profile section */}
         <div className="px-4 pt-4 pb-2">
           {/* Avatar */}
-          <Avatar username={username} avatarUrl={profile.avatar_url} size={72} className="mb-3" />
+          <Avatar username={username} avatarUrl={profile.avatar_url} size={72} verified={profile.is_verified} className="mb-3" />
 
           {/* Username + verified */}
           <div className="flex items-center gap-1.5 mb-0.5">
             <span className="font-serif text-ink text-2xl font-medium">{username}</span>
-            {profile.is_verified && <VerifiedBadge size={18} />}
+            {profile.is_verified > 0 && <VerifiedBadge size={18} level={profile.is_verified} />}
           </div>
 
           {/* Private label */}
@@ -330,10 +330,10 @@ export default function PublicProfilePage() {
                       onClick={() => setListOpen(null)}
                       className="flex items-center gap-3 px-2 py-2 rounded-field hover:bg-surface-2 transition-colors duration-150"
                     >
-                      <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} />
+                      <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} verified={u.is_verified} />
                       <span className="flex items-center gap-1.5 text-ink text-sm font-medium">
                         @{u.username}
-                        {u.is_verified && <VerifiedBadge size={14} />}
+                        {u.is_verified > 0 && <VerifiedBadge size={14} level={u.is_verified} />}
                       </span>
                     </Link>
                   ))

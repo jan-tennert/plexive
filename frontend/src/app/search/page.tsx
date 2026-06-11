@@ -23,7 +23,7 @@ type Scope = "posts" | "accounts"
 
 interface UserResult {
   username: string
-  is_verified: boolean
+  is_verified: number
   is_private: boolean
   bio: string | null
   avatar_url: string | null
@@ -80,11 +80,11 @@ function UserRow({ user, loggedIn }: { user: UserResult; loggedIn: boolean }) {
       onClick={() => router.push(`/profile/${user.username}`)}
       className="w-full text-left card px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-surface-2 transition-colors duration-150"
     >
-      <Avatar username={user.username} avatarUrl={user.avatar_url} size={44} />
+      <Avatar username={user.username} avatarUrl={user.avatar_url} size={44} verified={user.is_verified} />
       <div className="flex-1 min-w-0">
         <p className="flex items-center gap-1.5 text-ink text-sm font-semibold truncate">
           @{user.username}
-          {user.is_verified && <VerifiedBadge size={14} />}
+          {user.is_verified > 0 && <VerifiedBadge size={14} level={user.is_verified} />}
         </p>
         {user.bio && <p className="text-ink-muted text-xs truncate">{user.bio}</p>}
         {user.is_private && !user.bio && <p className="text-ink-faint text-xs">Private account</p>}
@@ -283,7 +283,7 @@ export default function SearchPage() {
                         @{post.author_username}
                       </Link>
                     ) : "Deepscroll"}
-                    {post.is_user_content && post.author_is_verified && <VerifiedBadge size={14} />}
+                    {post.is_user_content && post.author_is_verified != null && post.author_is_verified > 0 && <VerifiedBadge size={14} level={post.author_is_verified} />}
                   </p>
                   <Snippet post={post} />
                 </button>

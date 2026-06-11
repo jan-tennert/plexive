@@ -16,7 +16,7 @@ export interface ChatMessage {
 export interface ChatParticipant {
   username: string
   avatar_url: string | null
-  is_verified: boolean
+  is_verified: number
 }
 
 export interface Conversation {

@@ -13,7 +13,7 @@ import { formatStyle } from "@/lib/formats"
 
 interface ListUser {
   username: string
-  is_verified: boolean
+  is_verified: number
   is_private: boolean
   avatar_url: string | null
 }
@@ -55,7 +55,7 @@ export default function ProfilePage() {
   const [privacyLoading, setPrivacyLoading] = useState(false)
 
   // Follow requests
-  const [pendingRequests, setPendingRequests] = useState<{ username: string; is_verified: boolean; avatar_url?: string | null; created_at: string }[]>([])
+  const [pendingRequests, setPendingRequests] = useState<{ username: string; is_verified: number; avatar_url?: string | null; created_at: string }[]>([])
   const [showRequests, setShowRequests] = useState(false)
   const [requestActionLoading, setRequestActionLoading] = useState<string | null>(null)
 
@@ -298,7 +298,7 @@ export default function ProfilePage() {
         {/* Header — avatar + identity */}
         <div className="flex flex-col items-center pt-16 pb-6 px-6">
           <div className="relative mb-4">
-            <Avatar username={user.username} avatarUrl={user.avatar_url} size={88} className={avatarLoading ? "opacity-50" : ""} />
+            <Avatar username={user.username} avatarUrl={user.avatar_url} size={88} verified={user.is_verified} className={avatarLoading ? "opacity-50" : ""} />
             <button
               onClick={() => avatarInputRef.current?.click()}
               disabled={avatarLoading}
@@ -321,7 +321,7 @@ export default function ProfilePage() {
           {avatarError && <p className="text-bad text-xs mb-2">{avatarError}</p>}
           <p className="flex items-center gap-1.5 font-serif text-ink text-2xl font-medium">
             @{user.username}
-            {user.is_verified && <VerifiedBadge size={20} />}
+            {user.is_verified > 0 && <VerifiedBadge size={20} level={user.is_verified} />}
           </p>
 
           {/* Followers / Following / Posts row */}
@@ -455,9 +455,9 @@ export default function ProfilePage() {
                   pendingRequests.map((req) => (
                     <div key={req.username} className="flex items-center justify-between gap-3">
                       <Link href={`/profile/${req.username}`} className="flex items-center gap-2 min-w-0">
-                        <Avatar username={req.username} avatarUrl={req.avatar_url} size={32} />
+                        <Avatar username={req.username} avatarUrl={req.avatar_url} size={32} verified={req.is_verified} />
                         <span className="text-ink text-sm font-medium truncate">@{req.username}</span>
-                        {req.is_verified && <VerifiedBadge size={14} />}
+                        {req.is_verified > 0 && <VerifiedBadge size={14} level={req.is_verified} />}
                       </Link>
                       <div className="flex gap-2">
                         <button
@@ -657,10 +657,10 @@ export default function ProfilePage() {
                       onClick={() => setListOpen(null)}
                       className="flex items-center gap-3 px-2 py-2 rounded-field hover:bg-surface-2 transition-colors duration-150"
                     >
-                      <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} />
+                      <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} verified={u.is_verified} />
                       <span className="flex items-center gap-1.5 text-ink text-sm font-medium">
                         @{u.username}
-                        {u.is_verified && <VerifiedBadge size={14} />}
+                        {u.is_verified > 0 && <VerifiedBadge size={14} level={u.is_verified} />}
                       </span>
                     </a>
                   ))

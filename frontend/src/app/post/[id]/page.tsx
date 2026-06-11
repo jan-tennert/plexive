@@ -274,7 +274,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                         <Link href={`/profile/${post.author_username}`} className="hover:text-ink-body transition-colors">
                           @{post.author_username}
                         </Link>
-                        {post.author_is_verified && <VerifiedBadge size={16} />}
+                        {post.author_is_verified != null && post.author_is_verified > 0 && <VerifiedBadge size={16} level={post.author_is_verified} />}
                       </span>
                     ) : !post.is_user_content ? (
                       <>

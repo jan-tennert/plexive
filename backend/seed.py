@@ -86,7 +86,7 @@ def _get_or_create_marlo(db) -> User:
     marlo = db.query(User).filter_by(email=SEED_EMAIL).first()
     if marlo:
         if not marlo.is_verified:
-            marlo.is_verified = True
+            marlo.is_verified = 2
             db.commit()
         return marlo
 
@@ -114,7 +114,7 @@ def _get_or_create_marlo(db) -> User:
         username=SEED_USERNAME,
         password_hash=hash_password(password),
         is_active=True,
-        is_verified=True,
+        is_verified=2,
     )
     db.add(marlo)
     db.commit()
