@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import useSWR from "swr"
 import { useAuth } from "@/app/lib/auth"
 import { apiFetch } from "@/app/lib/api"
 import { getSavedPostIds } from "@/app/lib/savedPosts"
@@ -53,35 +54,27 @@ export default function PublicProfilePage() {
   const router = useRouter()
   const { user } = useAuth()
 
-  const [profile, setProfile] = useState<ProfileData | null>(null)
-  const [posts, setPosts] = useState<Post[] | null>(null)
   const [savedPosts, setSavedPosts] = useState<Post[] | null>(null)
   const [likedPosts, setLikedPosts] = useState<Post[] | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>("posts")
   const [followLoading, setFollowLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [elo, setElo] = useState<EloData | null>(null)
   const [listOpen, setListOpen] = useState<"followers" | "following" | null>(null)
   const [listUsers, setListUsers] = useState<ListUser[] | null>(null)
 
   const isOwnProfile = user?.username === username
 
-  useEffect(() => {
-    apiFetch(`/api/users/${username}/profile`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Not found")
-        return r.json() as Promise<ProfileData>
-      })
-      .then(setProfile)
-      .catch(() => setError("Profile not found."))
-  }, [username])
+  // Profile, elo and posts via SWR: repeat visits render the cached data
+  // instantly and refresh silently in the background. Error mapping mirrors
+  // the previous fetch handlers exactly.
+  const {
+    data: profile,
+    error: profileError,
+    mutate: mutateProfile,
+  } = useSWR<ProfileData>(`/api/users/${username}/profile`)
+  const error = profileError ? "Profile not found." : ""
 
-  useEffect(() => {
-    apiFetch(`/api/users/${username}/elo`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then(setElo)
-      .catch(() => {})
-  }, [username])
+  const { data: eloData } = useSWR<EloData>(`/api/users/${username}/elo`)
+  const elo = eloData ?? null
 
   function openList(kind: "followers" | "following") {
     setListOpen(kind)
@@ -92,44 +85,46 @@ export default function PublicProfilePage() {
       .catch(() => setListUsers([]))
   }
 
-  useEffect(() => {
-    apiFetch(`/api/feed/user/${username}`)
-      .then((r) => r.json())
-      .then((data: Post[]) => setPosts(data))
-      .catch(() => setPosts([]))
-  }, [username])
+  const { data: postsData, error: postsError } = useSWR<Post[]>(`/api/feed/user/${username}`)
+  const posts: Post[] | null = postsError ? [] : postsData ?? null
 
-  // Saved/liked tabs: only load for own profile from localStorage
+  // Saved/liked tabs: only load for own profile from localStorage, and only
+  // when the tab is first opened — each saved/liked id costs one full
+  // GET /api/posts/{id}, so fetching them on mount made every own-profile
+  // visit pay for tabs that were never opened. The null state still renders
+  // the existing spinner on first open.
   useEffect(() => {
-    if (!isOwnProfile) return
+    if (!isOwnProfile || activeTab !== "saved" || savedPosts !== null) return
     const ids = getSavedPostIds()
     if (ids.length === 0) { setSavedPosts([]); return }
     Promise.all(ids.map((id) => apiFetch(`/api/posts/${id}`).then((r) => (r.ok ? r.json() : null))))
       .then((results) => setSavedPosts(results.filter(Boolean) as Post[]))
       .catch(() => setSavedPosts([]))
-  }, [isOwnProfile])
+  }, [isOwnProfile, activeTab, savedPosts])
 
   useEffect(() => {
-    if (!isOwnProfile) return
+    if (!isOwnProfile || activeTab !== "liked" || likedPosts !== null) return
     const ids = getLikedPostIds()
     if (ids.length === 0) { setLikedPosts([]); return }
     Promise.all(ids.map((id) => apiFetch(`/api/posts/${id}`).then((r) => (r.ok ? r.json() : null))))
       .then((results) => setLikedPosts(results.filter(Boolean) as Post[]))
       .catch(() => setLikedPosts([]))
-  }, [isOwnProfile])
+  }, [isOwnProfile, activeTab, likedPosts])
 
   async function handleFollow() {
     if (!profile) return
     setFollowLoading(true)
     try {
+      // Optimistic update written into the SWR cache (revalidate: false keeps
+      // the previous behavior of trusting the computed counts, no refetch).
       const followStatus = profile.follow_status
       if (followStatus === "accepted" || followStatus === "pending") {
         await apiFetch(`/api/users/${username}/follow`, { method: "DELETE" })
-        setProfile((p) => p ? { ...p, follow_status: "none", follower_count: Math.max(0, p.follower_count - (followStatus === "accepted" ? 1 : 0)) } : p)
+        mutateProfile((p) => p ? { ...p, follow_status: "none", follower_count: Math.max(0, p.follower_count - (followStatus === "accepted" ? 1 : 0)) } : p, { revalidate: false })
       } else {
         const r = await apiFetch(`/api/users/${username}/follow`, { method: "POST" })
         const data = await r.json()
-        setProfile((p) => p ? { ...p, follow_status: data.status, follower_count: data.status === "accepted" ? p.follower_count + 1 : p.follower_count } : p)
+        mutateProfile((p) => p ? { ...p, follow_status: data.status, follower_count: data.status === "accepted" ? p.follower_count + 1 : p.follower_count } : p, { revalidate: false })
       }
     } finally {
       setFollowLoading(false)

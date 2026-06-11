@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import useSWR from "swr"
 import { useAuth } from "@/app/lib/auth"
 import { apiFetch } from "@/app/lib/api"
+import { invalidateFeedCaches } from "@/app/lib/swr"
 import { FORMAT_IDS, FORMAT_STYLES, type FormatId } from "@/lib/formats"
 import { fcStr, type Post } from "@/types/post"
 import { CATEGORIES } from "@/app/onboarding/InterestPicker"
@@ -151,7 +153,10 @@ export default function CreatePage() {
 
   // Interests
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
-  const [allInterests, setAllInterests] = useState<Interest[]>([])
+  // Interests via SWR: the list is static, so a revisit renders it from
+  // cache instead of refetching. Error keeps the old behavior (empty list).
+  const { data: interestsData } = useSWR<Interest[]>("/api/interests")
+  const allInterests: Interest[] = interestsData ?? []
 
   // Cover upload
   const [coverUploading, setCoverUploading] = useState(false)
@@ -162,13 +167,6 @@ export default function CreatePage() {
   const [serverError, setServerError] = useState("")
 
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    apiFetch("/api/interests")
-      .then((r) => r.json())
-      .then((data: Interest[]) => setAllInterests(data))
-      .catch(() => {})
-  }, [])
 
   useEffect(() => {
     if (step !== 2) return
@@ -496,7 +494,9 @@ export default function CreatePage() {
           interests: selectedInterests,
         }
         const res = await apiFetch("/api/posts", { method: "POST", body: JSON.stringify(payload) })
-        if (res.status === 201) { setStep("success") }
+        // Cached feed lists may now be missing the new post; drop them so the
+        // next feed visit fetches fresh.
+        if (res.status === 201) { invalidateFeedCaches(); setStep("success") }
         else { const data = await res.json(); setServerError(data.detail ?? "Something went wrong.") }
       } catch { setServerError("Network error. Please try again.") }
       finally { setSubmitting(false) }
@@ -534,6 +534,7 @@ export default function CreatePage() {
       }
       const res = await apiFetch("/api/posts", { method: "POST", body: JSON.stringify(payload) })
       if (res.status === 201) {
+        invalidateFeedCaches()
         setStep("success")
       } else {
         const data = await res.json()
