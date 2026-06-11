@@ -131,8 +131,12 @@ body::before {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    /* Shape baseline: field radius, sans at medium weight, room to breathe.
+       Call sites may override size with utilities; icon circles use
+       rounded-full + p-0 deliberately. Text buttons are never pills. */
+    padding: 0.5rem 1rem;
     font-family: var(--font-sans);
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.875rem;
     line-height: 1.25rem;
     border-radius: var(--radius-field);

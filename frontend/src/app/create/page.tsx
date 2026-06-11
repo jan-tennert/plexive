@@ -575,7 +575,7 @@ export default function CreatePage() {
       <div className="h-[100dvh] bg-surface-0 flex justify-center">
         <div className="w-full max-w-[430px] h-[100dvh] relative flex flex-col items-center justify-center px-8 text-center gap-4">
           <p className="font-serif text-ink text-xl font-medium">Sign in to create a post</p>
-          <button onClick={() => router.push("/login")} className="btn btn-primary rounded-full px-8 py-3">Sign in</button>
+          <button onClick={() => router.push("/login")} className="btn btn-primary px-8 py-3">Sign in</button>
         </div>
       </div>
     )
@@ -591,8 +591,8 @@ export default function CreatePage() {
             {user?.is_verified ? "It is now live in the feed." : "It will appear once approved."}
           </p>
           <div className="flex flex-col gap-3 w-full mt-4">
-            <button onClick={resetForm} className="btn btn-primary rounded-full h-12 w-full">Create another</button>
-            <button onClick={() => router.push("/my-posts")} className="btn btn-ghost rounded-full h-12 w-full">View my posts</button>
+            <button onClick={resetForm} className="btn btn-primary h-12 w-full">Create another</button>
+            <button onClick={() => router.push("/my-posts")} className="btn btn-ghost h-12 w-full">View my posts</button>
           </div>
         </div>
       </div>
@@ -641,7 +641,7 @@ export default function CreatePage() {
               <button
                 onClick={() => { if (selectedFormat) setStep(2) }}
                 disabled={!selectedFormat}
-                className="btn btn-primary rounded-full h-12 w-full disabled:opacity-30"
+                className="btn btn-primary h-12 w-full disabled:opacity-30"
               >
                 Next &rarr;
               </button>
@@ -678,7 +678,7 @@ export default function CreatePage() {
                   })}
                 </div>
               )}
-              <button onClick={() => setStep(3)} className="btn btn-primary rounded-full h-12 w-full mt-4">
+              <button onClick={() => setStep(3)} className="btn btn-primary h-12 w-full mt-4">
                 Continue anyway
               </button>
             </>
@@ -906,7 +906,7 @@ export default function CreatePage() {
                 </Accordion>
 
                 {serverError && <p className="text-bad text-sm mb-3">{serverError}</p>}
-                <button onClick={handleSubmit} disabled={submitting} className="btn btn-primary rounded-full h-12 w-full mt-4">
+                <button onClick={handleSubmit} disabled={submitting} className="btn btn-primary h-12 w-full mt-4">
                   {submitting ? "Submitting..." : "Submit post"}
                 </button>
               </>
@@ -1238,7 +1238,7 @@ export default function CreatePage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="btn btn-primary rounded-full h-12 w-full mt-4"
+                className="btn btn-primary h-12 w-full mt-4"
               >
                 {submitting ? "Submitting..." : "Submit post"}
               </button>

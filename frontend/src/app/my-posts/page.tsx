@@ -66,7 +66,7 @@ export default function MyPostsPage() {
               <p className="text-ink-dim text-sm">You haven&apos;t created any posts yet.</p>
               <button
                 onClick={() => router.push("/create")}
-                className="btn btn-primary rounded-full px-6 py-2.5"
+                className="btn btn-primary px-6 py-2.5"
               >
                 Create your first post
               </button>

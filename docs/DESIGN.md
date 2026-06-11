@@ -137,5 +137,11 @@ Chips, badges and avatars are full pills/circles.
 | `.chip` + `.chip-on/off`    | selectable pill (filters, interests, tabs)  |
 | `.label-caps`               | uppercase section/meta label                |
 
+`.btn` shape baseline: field radius (10px), Source Sans 3 at weight 500
+(medium — never bold, never thin), 8/16px default padding so unsized
+buttons still breathe. Call sites may size with utilities. Icon-only send
+buttons are circles (`rounded-full p-0`); text-label buttons are never
+pills. Ghost buttons always border with `edge-strong`.
+
 Every screen must be expressible in tokens + vocabulary. If a screen needs a
 new pattern, add it here and to globals.css first, then use it.
