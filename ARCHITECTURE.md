@@ -25,7 +25,7 @@ backend/
     upload_config.py            Supabase client (SUPABASE_URL + SUPABASE_SERVICE_KEY from env), SUPABASE_BUCKET="uploads", size limits (5 MB images, 512 KB SVGs)
     rate_limit.py               in-memory per-user rate limiter (dict of timestamps); check_rate_limit(user_id, key, max, window_secs); identity may also be a string ("ip:...", "email:...") for unauthenticated endpoints
     post_counts.py              attach_counts(posts, db) / attach_counts_one(post, db) — batched like_count+comment_count attachment shared by posts/feed/search routers
-    scoring.py                    score_posts() — interest match (tier-scaled), format engagement, repeat penalty
+    scoring.py                    score_posts() — interest match (tier-scaled), format engagement, repeat penalty; engagement read as one joined tuple query (events x post format, last 30 days)
     routers/
       interests.py              GET /api/interests
       feed.py                   GET /api/feed — three-tier: direct matches → related co-tags → all remaining; GET /api/feed/following (auth, posts from followed users, limit 50); GET /api/feed/user/{username} (no auth, published posts by user, limit 50)
