@@ -133,6 +133,7 @@ frontend/
 
 docs/REVIEW.md                  full-pass audit (June 2026): categorized findings + design direction and token set
 docs/DESIGN.md                  "Lamplight" design identity (June 2026 redesign): rationale, full token set, format ink palette, type system, component vocabulary
+docs/SERVER.md                  Raspberry Pi deployment reference: systemd units, env vars, Tailscale IPs, update routine, debugging playbook, known pitfalls
 .claude/skills/commit.md        conventional commit format rules for this project
 ```
 
