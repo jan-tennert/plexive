@@ -880,8 +880,8 @@ export default function CreatePage() {
                     </div>
                   ))}
                   <div className="flex gap-3">
-                    {quizItems.length < 10 && <button onClick={() => setQuizItems([...quizItems, emptyQuizItem()])} className="text-lamp text-xs font-semibold cursor-pointer">+ Add question</button>}
-                    {quizItems.length > 5 && <button onClick={() => setQuizItems(quizItems.slice(0, -1))} className="text-ink-muted text-xs cursor-pointer">Remove last</button>}
+                    {quizItems.length < 10 && <button onClick={() => setQuizItems([...quizItems, emptyQuizItem()])} className="btn btn-quiet text-lamp text-xs px-1.5 py-1">+ Add question</button>}
+                    {quizItems.length > 5 && <button onClick={() => setQuizItems(quizItems.slice(0, -1))} className="btn btn-quiet text-xs px-1.5 py-1">Remove last</button>}
                   </div>
                 </Accordion>
 
@@ -900,8 +900,8 @@ export default function CreatePage() {
                     </div>
                   ))}
                   <div className="flex gap-3">
-                    {sources.length < 10 && <button onClick={() => setSources([...sources, emptySource()])} className="text-lamp text-xs font-semibold cursor-pointer">+ Add source</button>}
-                    {sources.length > 1 && <button onClick={() => setSources(sources.slice(0, -1))} className="text-ink-muted text-xs cursor-pointer">Remove last</button>}
+                    {sources.length < 10 && <button onClick={() => setSources([...sources, emptySource()])} className="btn btn-quiet text-lamp text-xs px-1.5 py-1">+ Add source</button>}
+                    {sources.length > 1 && <button onClick={() => setSources(sources.slice(0, -1))} className="btn btn-quiet text-xs px-1.5 py-1">Remove last</button>}
                   </div>
                 </Accordion>
 
@@ -1037,10 +1037,10 @@ export default function CreatePage() {
                   </div>
                 ))}
                 {voices.length < 4 && (
-                  <button onClick={() => setVoices([...voices, emptyVoice()])} className="text-lamp text-xs font-semibold cursor-pointer">+ Add quote</button>
+                  <button onClick={() => setVoices([...voices, emptyVoice()])} className="btn btn-quiet text-lamp text-xs px-1.5 py-1">+ Add quote</button>
                 )}
                 {voices.length > 3 && (
-                  <button onClick={() => setVoices(voices.slice(0, -1))} className="text-ink-muted text-xs cursor-pointer ml-3">Remove last</button>
+                  <button onClick={() => setVoices(voices.slice(0, -1))} className="btn btn-quiet text-xs px-1.5 py-1 ml-3">Remove last</button>
                 )}
               </Accordion>
 
@@ -1098,10 +1098,10 @@ export default function CreatePage() {
                 ))}
                 <div className="flex gap-3">
                   {coreIdeas.length < 12 && (
-                    <button onClick={() => setCoreIdeas([...coreIdeas, emptyCoreIdea()])} className="text-lamp text-xs font-semibold cursor-pointer">+ Add idea</button>
+                    <button onClick={() => setCoreIdeas([...coreIdeas, emptyCoreIdea()])} className="btn btn-quiet text-lamp text-xs px-1.5 py-1">+ Add idea</button>
                   )}
                   {coreIdeas.length > 6 && (
-                    <button onClick={() => setCoreIdeas(coreIdeas.slice(0, -1))} className="text-ink-muted text-xs cursor-pointer">Remove last</button>
+                    <button onClick={() => setCoreIdeas(coreIdeas.slice(0, -1))} className="btn btn-quiet text-xs px-1.5 py-1">Remove last</button>
                   )}
                 </div>
               </Accordion>
@@ -1148,10 +1148,10 @@ export default function CreatePage() {
                 ))}
                 <div className="flex gap-3">
                   {quizItems.length < 10 && (
-                    <button onClick={() => setQuizItems([...quizItems, emptyQuizItem()])} className="text-lamp text-xs font-semibold cursor-pointer">+ Add question</button>
+                    <button onClick={() => setQuizItems([...quizItems, emptyQuizItem()])} className="btn btn-quiet text-lamp text-xs px-1.5 py-1">+ Add question</button>
                   )}
                   {quizItems.length > 5 && (
-                    <button onClick={() => setQuizItems(quizItems.slice(0, -1))} className="text-ink-muted text-xs cursor-pointer">Remove last</button>
+                    <button onClick={() => setQuizItems(quizItems.slice(0, -1))} className="btn btn-quiet text-xs px-1.5 py-1">Remove last</button>
                   )}
                 </div>
               </Accordion>
@@ -1172,10 +1172,10 @@ export default function CreatePage() {
                 ))}
                 <div className="flex gap-3">
                   {sources.length < 10 && (
-                    <button onClick={() => setSources([...sources, emptySource()])} className="text-lamp text-xs font-semibold cursor-pointer">+ Add source</button>
+                    <button onClick={() => setSources([...sources, emptySource()])} className="btn btn-quiet text-lamp text-xs px-1.5 py-1">+ Add source</button>
                   )}
                   {sources.length > 1 && (
-                    <button onClick={() => setSources(sources.slice(0, -1))} className="text-ink-muted text-xs cursor-pointer">Remove last</button>
+                    <button onClick={() => setSources(sources.slice(0, -1))} className="btn btn-quiet text-xs px-1.5 py-1">Remove last</button>
                   )}
                 </div>
               </Accordion>
@@ -1195,7 +1195,7 @@ export default function CreatePage() {
                   </div>
                 ))}
                 {structure.length < 10 && (
-                  <button onClick={() => setStructure([...structure, ""])} className="text-lamp text-xs font-semibold cursor-pointer mt-1">+ Add part</button>
+                  <button onClick={() => setStructure([...structure, ""])} className="btn btn-quiet text-lamp text-xs px-1.5 py-1 mt-1">+ Add part</button>
                 )}
               </Accordion>
 

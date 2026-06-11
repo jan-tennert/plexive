@@ -2892,7 +2892,7 @@ export default function StatsPage() {
             <div className="text-ink-dim text-sm">Log in to see your personal stats</div>
             <a
               href="/login"
-              className="text-xs bg-surface-2 text-ink px-4 py-2 rounded-full hover:bg-surface-3 transition-colors"
+              className="btn btn-primary px-5 py-2"
             >
               Log in
             </a>
@@ -2918,7 +2918,7 @@ export default function StatsPage() {
             <div className="text-ink-dim text-sm">Log in to compare stats with friends</div>
             <a
               href="/login"
-              className="text-xs bg-surface-2 text-ink px-4 py-2 rounded-full hover:bg-surface-3 transition-colors"
+              className="btn btn-primary px-5 py-2"
             >
               Log in
             </a>

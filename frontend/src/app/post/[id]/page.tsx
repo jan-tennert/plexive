@@ -360,7 +360,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             <div className="flex items-center gap-2 px-3 py-2">
               <div className="flex-1 min-w-0">
                 {user ? (
-                  <form onSubmit={handleStickySubmit}>
+                  <form onSubmit={handleStickySubmit} className="flex items-center gap-2">
                     <input
                       ref={stickyInputRef}
                       value={stickyDraft}
@@ -369,13 +369,19 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                       maxLength={2000}
                       className="field rounded-full text-sm py-2"
                     />
-                    <button
-                      type="submit"
-                      disabled={!stickyDraft.trim() || posting}
-                      className="sr-only"
-                    >
-                      Post
-                    </button>
+                    {stickyDraft.trim() && (
+                      <button
+                        type="submit"
+                        disabled={posting}
+                        aria-label="Post comment"
+                        className="btn btn-primary shrink-0 w-9 h-9 rounded-full p-0"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                          <line x1="22" y1="2" x2="11" y2="13" />
+                          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                        </svg>
+                      </button>
+                    )}
                   </form>
                 ) : (
                   <p className="text-sm text-ink-muted py-1">

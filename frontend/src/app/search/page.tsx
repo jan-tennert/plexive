@@ -207,8 +207,8 @@ export default function SearchPage() {
               <button
                 key={s}
                 onClick={() => setScope(s)}
-                className={`flex-1 rounded-field py-1.5 text-xs font-semibold capitalize cursor-pointer transition-colors duration-150 ${
-                  scope === s ? "bg-surface-3 text-ink" : "bg-surface-1 text-ink-muted"
+                className={`chip flex-1 justify-center py-1.5 text-xs font-semibold capitalize ${
+                  scope === s ? "chip-on" : "chip-off"
                 }`}
               >
                 {s}

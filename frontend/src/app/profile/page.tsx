@@ -419,7 +419,7 @@ export default function ProfilePage() {
             <button
               onClick={handleSaveBio}
               disabled={bioLoading}
-              className="text-xs text-lamp font-semibold disabled:opacity-50 cursor-pointer"
+              className="btn btn-quiet text-lamp text-xs px-2 py-1"
             >
               {bioLoading ? "Saving..." : "Save bio"}
             </button>
