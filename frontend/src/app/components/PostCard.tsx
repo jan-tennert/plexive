@@ -334,12 +334,24 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           }`}
         >
           {/* Format marker floating above the slab — dot and label both carry
-              the per-format accent so the format is legible at a glance. */}
-          <div className="flex items-center gap-2 mb-3 pl-2">
+              the per-format accent so the format is legible at a glance. The
+              read-aloud placeholder sits at the row's right end — the post
+              block's top-right corner: it belongs to the post, not to the
+              social action rail. (Inside the slab surface it would collide
+              with the books cover / people portrait layouts.) */}
+          <div className="flex items-center gap-2 mb-3 px-2">
             <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-(--accent)" />
             <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
               {style.badge.toLowerCase()}
             </span>
+            <button
+              disabled
+              aria-disabled="true"
+              aria-label="Read aloud (coming soon)"
+              className="ml-auto -my-2 w-8 h-8 flex items-center justify-center text-ink-dim opacity-40 cursor-default"
+            >
+              <SpeakerIcon className="w-5 h-5" />
+            </button>
           </div>
 
           {post.format === "books" && fc ? (
@@ -597,20 +609,6 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             />
           </button>
           <span className={`h-3 text-[11px] font-mono leading-none transition-colors duration-150 ${saved ? "text-save" : "text-ink-dim"} ${saveCount === 0 && !saved ? "invisible" : ""}`}>{saveCount}</span>
-        </div>
-
-        {/* Read aloud — disabled placeholder reserving its spot in the rail;
-            no functionality yet. */}
-        <div className="flex flex-col items-center">
-          <button
-            disabled
-            aria-disabled="true"
-            aria-label="Read aloud (coming soon)"
-            className="w-11 h-11 flex items-center justify-center text-ink-dim opacity-40 cursor-default"
-          >
-            <SpeakerIcon className="w-7 h-7" />
-          </button>
-          <span className="h-3" aria-hidden="true" />
         </div>
 
         {/* Share */}
