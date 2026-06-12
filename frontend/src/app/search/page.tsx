@@ -11,7 +11,6 @@ import { useAuth } from "@/app/lib/auth"
 import BottomNav from "@/app/components/BottomNav"
 import VerifiedBadge from "@/components/VerifiedBadge"
 import Avatar from "@/components/Avatar"
-import Spinner from "@/components/Spinner"
 
 const FORMAT_CHIPS: { label: string; value: FormatId | "" }[] = [
   { label: "All", value: "" },
@@ -78,7 +77,7 @@ function UserRow({ user, loggedIn }: { user: UserResult; loggedIn: boolean }) {
   return (
     <button
       onClick={() => router.push(`/profile/${user.username}`)}
-      className="w-full text-left card px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-surface-2 transition-colors duration-150"
+      className="w-full text-left card px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-white/[0.07] transition-colors duration-150"
     >
       <Avatar username={user.username} avatarUrl={user.avatar_url} size={44} verified={user.is_verified} />
       <div className="flex-1 min-w-0">
@@ -185,7 +184,7 @@ export default function SearchPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={scope === "posts" ? "Search posts, books, questions…" : "Search accounts…"}
-                className="field text-sm pl-9 pr-9 py-2.5"
+                className="field rounded-full text-sm pl-9 pr-9 py-2.5"
               />
               {query && (
                 <button
@@ -229,7 +228,7 @@ export default function SearchPage() {
                     className={`chip shrink-0 px-3 py-1 text-xs ${
                       isActive
                         ? style
-                          ? `bg-surface-3 border-edge-strong ${style.text}`
+                          ? `bg-white/[0.12] ${style.text}`
                           : "chip-on"
                         : "chip-off"
                     }`}
@@ -245,8 +244,11 @@ export default function SearchPage() {
         {/* Results area */}
         <div className={`absolute inset-0 ${scope === "posts" ? "top-[148px]" : "top-[112px]"} overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] px-3`}>
           {loading ? (
-            <div className="flex justify-center pt-16">
-              <Spinner />
+            // Loading: pulsing slabs where the result cards will appear.
+            <div className="flex flex-col gap-2 pt-2">
+              <div className="stage-pulse card h-20 w-full" />
+              <div className="stage-pulse card h-20 w-full" />
+              <div className="stage-pulse card h-20 w-full" />
             </div>
           ) : !hasQuery ? (
             <div className="flex flex-col items-center justify-center pt-20 text-center px-6">
@@ -273,7 +275,7 @@ export default function SearchPage() {
                 <button
                   key={post.id}
                   onClick={() => router.push(`/post/${post.id}`)}
-                  className="w-full text-left card px-4 py-3 cursor-pointer hover:bg-surface-2 transition-colors duration-150"
+                  className="w-full text-left card px-4 py-3 cursor-pointer hover:bg-white/[0.07] transition-colors duration-150"
                 >
                   <FormatBadge format={post.format} />
                   <p className="text-ink font-serif font-medium text-[15px] mt-0.5 line-clamp-2">{post.title}</p>
