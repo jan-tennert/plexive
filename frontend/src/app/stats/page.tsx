@@ -52,24 +52,26 @@ const FORMAT_COLORS: Record<string, string> = Object.fromEntries(
   FORMAT_IDS.map((id) => [id, FORMAT_STYLES[id].accent]),
 )
 const FORMATS: string[] = [...FORMAT_IDS]
-const DEFAULT_COLOR = "#6e7f9e"
+const DEFAULT_COLOR = "#7888a8"
 const RANK_COLORS = ["#7c6fff", "#6655d8", "#5040a8", "#3a2e78", "#251d4a"]
 
+// Stage chart chrome: frosted dark tooltip, neutral ink axes, hairline grid.
 const TT = {
   contentStyle: {
-    background: "#0f0f1e",
-    border: "1px solid #2a2a4a",
-    borderRadius: 8,
-    color: "#eceeff",
+    background: "rgba(20,20,20,0.96)",
+    border: "none",
+    borderRadius: 16,
+    boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+    color: "#eeeeee",
     fontSize: 12,
   },
-  labelStyle: { color: "#6e7f9e" },
-  cursor: { fill: "rgba(124,111,255,0.06)" },
+  labelStyle: { color: "#8a8a8a" },
+  cursor: { fill: "rgba(255,255,255,0.04)" },
   wrapperStyle: { zIndex: 50 },
 }
 
-const AXIS = { fill: "#6e7f9e", fontSize: 11 }
-const GRID = { stroke: "#1e1e32", strokeDasharray: "3 3" }
+const AXIS = { fill: "#8a8a8a", fontSize: 11 }
+const GRID = { stroke: "rgba(200,200,200,0.07)", strokeDasharray: "3 3" }
 
 // --- Type definitions ---
 
@@ -147,7 +149,7 @@ function WaffleChart({ data }: { data: { label: string; value: number; color: st
     const n = Math.round((d.value / total) * 100)
     for (let i = 0; i < n; i++) squares.push(d.color)
   }
-  while (squares.length < 100) squares.push(squares[squares.length - 1] ?? "#1e1e32")
+  while (squares.length < 100) squares.push(squares[squares.length - 1] ?? "#222222")
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-10 gap-0.5">
@@ -190,7 +192,7 @@ function CalendarHeatmap({ data }: { data: { period: string; count: number }[] }
               className="w-full h-8 rounded-lg"
               style={{
                 backgroundColor:
-                  count === 0 ? "#0f0f1e" : `rgba(91,200,188,${0.2 + intensity * 0.8})`,
+                  count === 0 ? "#1a1a1a" : `rgba(124,111,255,${0.2 + intensity * 0.8})`,
               }}
               title={`${m.label} ${m.year}: ${count}`}
             />
@@ -204,7 +206,7 @@ function CalendarHeatmap({ data }: { data: { period: string; count: number }[] }
 
 function ActivityHeatmap({
   data,
-  color = "34,211,238",
+  color = "124,111,255",
 }: {
   data: { weekday: number; hour: number; count: number }[]
   color?: string
@@ -237,7 +239,7 @@ function ActivityHeatmap({
                   className="w-3 h-3 rounded-sm"
                   style={{
                     backgroundColor:
-                      count === 0 ? "#0f0f1e" : `rgba(${color},${0.15 + intensity * 0.85})`,
+                      count === 0 ? "#1a1a1a" : `rgba(${color},${0.15 + intensity * 0.85})`,
                   }}
                   title={`${days[wd]} ${hr}:00 — ${count}`}
                 />
@@ -254,7 +256,7 @@ function GaugeChart({
   value,
   max,
   label,
-  color = "#5bc8bc",
+  color = "#7c6fff",
   size = 160,
 }: {
   value: number
@@ -288,7 +290,7 @@ function GaugeChart({
         <path
           d={`M ${sx} ${sy} A ${r} ${r} 0 0 0 ${ex} ${ey}`}
           fill="none"
-          stroke="#2a2a4a"
+          stroke="rgba(255,255,255,0.08)"
           strokeWidth={size * 0.065}
           strokeLinecap="round"
         />
@@ -301,20 +303,20 @@ function GaugeChart({
             strokeLinecap="round"
           />
         )}
-        <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#eceeff" strokeWidth="2" strokeLinecap="round" />
-        <circle cx={cx} cy={cy} r={size * 0.025} fill="#eceeff" />
+        <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#eeeeee" strokeWidth="2" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r={size * 0.025} fill="#eeeeee" />
         <text
           x={cx}
           y={cy + size * 0.1}
           textAnchor="middle"
-          fill="#eceeff"
+          fill="#eeeeee"
           fontSize={size * 0.1}
           fontWeight="bold"
         >
           {displayValue}
         </text>
         {label && (
-          <text x={cx} y={cy + size * 0.2} textAnchor="middle" fill="#6e7f9e" fontSize={size * 0.065}>
+          <text x={cx} y={cy + size * 0.2} textAnchor="middle" fill="#8a8a8a" fontSize={size * 0.065}>
             {label}
           </text>
         )}
@@ -409,14 +411,14 @@ function TreemapCell(props: {
   if (width <= 0 || height <= 0) return null
   return (
     <g>
-      <rect x={x} y={y} width={width} height={height} fill={fill ?? "#2a2a4a"} rx={2} />
+      <rect x={x} y={y} width={width} height={height} fill={fill ?? "#222222"} rx={2} />
       {width > 40 && height > 18 && (
         <text
           x={x + width / 2}
           y={y + height / 2}
           textAnchor="middle"
           dominantBaseline="middle"
-          fill="#eceeff"
+          fill="#eeeeee"
           fontSize={11}
         >
           {name}
@@ -497,7 +499,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         data={topByPosts.map((r, i) => ({
           name: r.username,
           size: r.post_count,
-          fill: RANK_COLORS[i] ?? "#2a2a4a",
+          fill: RANK_COLORS[i] ?? "#251d4a",
         }))}
         dataKey="size"
         nameKey="name"
@@ -701,7 +703,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
         <XAxis dataKey="format" tick={{ ...AXIS, angle: -30, textAnchor: "end" }} interval={0} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Legend wrapperStyle={{ fontSize: 11, color: "#6e7f9e" }} />
+        <Legend wrapperStyle={{ fontSize: 11, color: "#8a8a8a" }} />
         <Bar dataKey="first" name="1st" fill="#7c6fff" radius={[2, 2, 0, 0]} />
         <Bar dataKey="second" name="2nd" fill="#6655d8" radius={[2, 2, 0, 0]} />
         <Bar dataKey="third" name="3rd" fill="#5040a8" radius={[2, 2, 0, 0]} />
@@ -748,7 +750,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
                     style={{
                       backgroundColor:
                         cnt === 0
-                          ? "#0f0f1e"
+                          ? "#1a1a1a"
                           : `${FORMAT_COLORS[fmt]}${Math.round(40 + (cnt / maxVal) * 175).toString(16).padStart(2, "0")}`,
                     }}
                     title={`${u} / ${fmt}: ${cnt}`}
@@ -940,7 +942,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           <YAxis yAxisId="left" tick={AXIS} />
           <YAxis yAxisId="right" orientation="right" tick={AXIS} />
           <Tooltip {...TT} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#6e7f9e" }} />
+          <Legend wrapperStyle={{ fontSize: 11, color: "#8a8a8a" }} />
           <Line yAxisId="left" type="monotone" dataKey={label1} stroke={color1} dot={false} strokeWidth={2} />
           <Line yAxisId="right" type="monotone" dataKey={label2} stroke={color2} dot={false} strokeWidth={2} />
         </LineChart>
@@ -960,7 +962,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           </Pie>
           <Tooltip {...TT} />
           <Legend
-            formatter={(v: string) => <span style={{ color: "#6e7f9e", fontSize: 11 }}>{v}</span>}
+            formatter={(v: string) => <span style={{ color: "#8a8a8a", fontSize: 11 }}>{v}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -978,7 +980,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           </Pie>
           <Tooltip {...TT} />
           <Legend
-            formatter={(v: string) => <span style={{ color: "#6e7f9e", fontSize: 11 }}>{v}</span>}
+            formatter={(v: string) => <span style={{ color: "#8a8a8a", fontSize: 11 }}>{v}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -1016,9 +1018,9 @@ function GlobalTab({ data }: { data: GlobalStats }) {
   const makeRadar = (byFormat: Record<string, number>) => (
     <ResponsiveContainer width="100%" height={200}>
       <RadarChart data={formatRadarData(byFormat)}>
-        <PolarGrid stroke="#1e1e32" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#6e7f9e", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#6e7f9e", fontSize: 9 }} />
+        <PolarGrid stroke="rgba(200,200,200,0.07)" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#8a8a8a", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#8a8a8a", fontSize: 9 }} />
         <Radar dataKey="count" stroke="#7c6fff" fill="#7c6fff" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
@@ -1065,9 +1067,9 @@ function GlobalTab({ data }: { data: GlobalStats }) {
   const wdRadar = (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={data.activity_by_weekday.map(d => ({ subject: d.weekday, count: d.count }))}>
-        <PolarGrid stroke="#1e1e32" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#6e7f9e", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#6e7f9e", fontSize: 9 }} />
+        <PolarGrid stroke="rgba(200,200,200,0.07)" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#8a8a8a", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#8a8a8a", fontSize: 9 }} />
         <Radar dataKey="count" stroke="#7c6fff" fill="#7c6fff" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
@@ -1117,14 +1119,14 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           count: data.activity_by_hour[h]?.count ?? 0,
         }))}
       >
-        <PolarGrid stroke="#1e1e32" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#6e7f9e", fontSize: 11 }} />
+        <PolarGrid stroke="rgba(200,200,200,0.07)" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#8a8a8a", fontSize: 11 }} />
         <Radar dataKey="count" stroke="#5bc8bc" fill="#5bc8bc" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
     </ResponsiveContainer>
   )
-  const hrHeatmap = <ActivityHeatmap data={data.activity_heatmap} color="34,211,238" />
+  const hrHeatmap = <ActivityHeatmap data={data.activity_heatmap} />
 
   // 17. Post quality over time
   const qualityLine = (
@@ -1177,7 +1179,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
           </Pie>
           <Tooltip {...TT} />
           <Legend
-            formatter={(v: string) => <span style={{ color: "#6e7f9e", fontSize: 11 }}>{v}</span>}
+            formatter={(v: string) => <span style={{ color: "#8a8a8a", fontSize: 11 }}>{v}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -1578,7 +1580,7 @@ function MyStatsTab({
             {data2.map(d => <Cell key={d.format} fill={FORMAT_COLORS[d.format] ?? DEFAULT_COLOR} />)}
           </Pie>
           <Tooltip {...TT} />
-          <Legend formatter={(v: string) => <span style={{ color: "#6e7f9e", fontSize: 11 }}>{v}</span>} />
+          <Legend formatter={(v: string) => <span style={{ color: "#8a8a8a", fontSize: 11 }}>{v}</span>} />
         </PieChart>
       </ResponsiveContainer>
     )
@@ -1601,9 +1603,9 @@ function MyStatsTab({
   const makeFormatRadar = (arr: { format: string; count: number }[]) => (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={arr.map(d => ({ subject: d.format, count: d.count }))}>
-        <PolarGrid stroke="#1e1e32" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#6e7f9e", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#6e7f9e", fontSize: 9 }} />
+        <PolarGrid stroke="rgba(200,200,200,0.07)" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#8a8a8a", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#8a8a8a", fontSize: 9 }} />
         <Radar dataKey="count" stroke="#7c6fff" fill="#7c6fff" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
@@ -1655,7 +1657,7 @@ function MyStatsTab({
           <YAxis yAxisId="left" tick={AXIS} />
           <YAxis yAxisId="right" orientation="right" tick={AXIS} />
           <Tooltip {...TT} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#6e7f9e" }} />
+          <Legend wrapperStyle={{ fontSize: 11, color: "#8a8a8a" }} />
           <Line yAxisId="left" type="monotone" dataKey="posts" stroke="#7c6fff" dot={false} strokeWidth={2} />
           <Line yAxisId="right" type="monotone" dataKey="likes" stroke="#c47dcc" dot={false} strokeWidth={2} />
         </LineChart>
@@ -1689,9 +1691,9 @@ function MyStatsTab({
   const myPolar = (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={data.my_activity_by_weekday.map(d => ({ subject: d.weekday, count: d.count }))}>
-        <PolarGrid stroke="#1e1e32" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#6e7f9e", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#6e7f9e", fontSize: 9 }} />
+        <PolarGrid stroke="rgba(200,200,200,0.07)" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#8a8a8a", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#8a8a8a", fontSize: 9 }} />
         <Radar dataKey="count" stroke="#7c6fff" fill="#7c6fff" fillOpacity={0.3} />
         <Tooltip {...TT} />
       </RadarChart>
@@ -1719,9 +1721,9 @@ function MyStatsTab({
   const readTimeRadar = (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={readTimeArr.map(d => ({ subject: d.format, avg_sec: d.avg_sec }))}>
-        <PolarGrid stroke="#1e1e32" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#6e7f9e", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#6e7f9e", fontSize: 9 }} />
+        <PolarGrid stroke="rgba(200,200,200,0.07)" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#8a8a8a", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#8a8a8a", fontSize: 9 }} />
         <Radar dataKey="avg_sec" stroke="#5bc8bc" fill="#5bc8bc" fillOpacity={0.3} />
         <Tooltip {...TT} formatter={(v: unknown) => [`${v}s`, "Avg read time"]} />
       </RadarChart>
@@ -2392,12 +2394,12 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
   const radarChart = radarData.length === 0 ? <NoData /> : (
     <ResponsiveContainer width="100%" height={240}>
       <RadarChart data={radarData}>
-        <PolarGrid stroke="#1e1e32" />
-        <PolarAngleAxis dataKey="subject" tick={{ fill: "#6e7f9e", fontSize: 11 }} />
-        <PolarRadiusAxis tick={{ fill: "#6e7f9e", fontSize: 9 }} />
+        <PolarGrid stroke="rgba(200,200,200,0.07)" />
+        <PolarAngleAxis dataKey="subject" tick={{ fill: "#8a8a8a", fontSize: 11 }} />
+        <PolarRadiusAxis tick={{ fill: "#8a8a8a", fontSize: 9 }} />
         <Radar dataKey="me" name="You" stroke="#7c6fff" fill="#7c6fff" fillOpacity={0.3} />
         <Radar dataKey="friends_avg" name="Friends avg" stroke={DEFAULT_COLOR} fill={DEFAULT_COLOR} fillOpacity={0.15} />
-        <Legend wrapperStyle={{ fontSize: 11, color: "#6e7f9e" }} />
+        <Legend wrapperStyle={{ fontSize: 11, color: "#8a8a8a" }} />
         <Tooltip {...TT} />
       </RadarChart>
     </ResponsiveContainer>
@@ -2417,7 +2419,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
         <XAxis dataKey="format" tick={{ ...AXIS, angle: -30, textAnchor: "end" }} interval={0} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Legend wrapperStyle={{ fontSize: 11, color: "#6e7f9e" }} />
+        <Legend wrapperStyle={{ fontSize: 11, color: "#8a8a8a" }} />
         <Bar dataKey="you" name="You" fill="#7c6fff" radius={[2, 2, 0, 0]} />
         <Bar dataKey="friends_avg" name="Friends avg" fill={DEFAULT_COLOR} radius={[2, 2, 0, 0]} />
       </BarChart>
@@ -2482,7 +2484,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
         <XAxis dataKey="format" tick={{ ...AXIS, angle: -30, textAnchor: "end" }} interval={0} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} formatter={(v: unknown) => [String(v), "Answers"]} />
-        <Legend wrapperStyle={{ fontSize: 11, color: "#6e7f9e" }} />
+        <Legend wrapperStyle={{ fontSize: 11, color: "#8a8a8a" }} />
         <Bar dataKey="you" name="You" fill="#7c6fff" radius={[2, 2, 0, 0]} />
         <Bar dataKey="friends_avg" name="Friends avg" fill={DEFAULT_COLOR} radius={[2, 2, 0, 0]} />
       </BarChart>
@@ -2502,12 +2504,12 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
     return (
       <ResponsiveContainer width="100%" height={240}>
         <RadarChart data={data}>
-          <PolarGrid stroke="#1e1e32" />
-          <PolarAngleAxis dataKey="subject" tick={{ fill: "#6e7f9e", fontSize: 11 }} />
-          <PolarRadiusAxis tick={{ fill: "#6e7f9e", fontSize: 9 }} />
+          <PolarGrid stroke="rgba(200,200,200,0.07)" />
+          <PolarAngleAxis dataKey="subject" tick={{ fill: "#8a8a8a", fontSize: 11 }} />
+          <PolarRadiusAxis tick={{ fill: "#8a8a8a", fontSize: 9 }} />
           <Radar dataKey="you" name="You" stroke="#7c6fff" fill="#7c6fff" fillOpacity={0.3} />
           <Radar dataKey="friends_avg" name="Friends avg" stroke={DEFAULT_COLOR} fill={DEFAULT_COLOR} fillOpacity={0.15} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#6e7f9e" }} />
+          <Legend wrapperStyle={{ fontSize: 11, color: "#8a8a8a" }} />
           <Tooltip {...TT} />
         </RadarChart>
       </ResponsiveContainer>
@@ -2581,7 +2583,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
             {FORMAT_IDS.map(fmt => {
               const hasAnswers = (p.formats[fmt]?.answered_count ?? 0) > 0
               return (
-                <div key={fmt} className="w-5 h-5 rounded-sm flex items-center justify-center" style={{ backgroundColor: hasAnswers ? FORMAT_COLORS[fmt] + "55" : "#0f0f1e", border: `1px solid ${hasAnswers ? FORMAT_COLORS[fmt] + "80" : "#1e1e32"}` }} title={fmt}>
+                <div key={fmt} className="w-5 h-5 rounded-sm flex items-center justify-center" style={{ backgroundColor: hasAnswers ? FORMAT_COLORS[fmt] + "55" : "#1a1a1a", border: `1px solid ${hasAnswers ? FORMAT_COLORS[fmt] + "80" : "#222222"}` }} title={fmt}>
                   {hasAnswers && <span className="text-[7px] font-bold" style={{ color: FORMAT_COLORS[fmt] }}>{fmt[0].toUpperCase()}</span>}
                 </div>
               )
@@ -2607,7 +2609,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
               {data.map(d => <Cell key={d.name} fill={d.fill} />)}
             </Pie>
             <Tooltip {...TT} />
-            <Legend formatter={(v: string) => <span style={{ color: "#6e7f9e", fontSize: 11 }}>{v}</span>} />
+            <Legend formatter={(v: string) => <span style={{ color: "#8a8a8a", fontSize: 11 }}>{v}</span>} />
           </PieChart>
         </ResponsiveContainer>
         <p className="text-ink-muted text-xs text-center">Formats explored (out of {FORMAT_IDS.length})</p>
@@ -2696,7 +2698,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
         <XAxis dataKey="name" tick={{ ...AXIS, angle: -30, textAnchor: "end" }} interval={0} />
         <YAxis tick={AXIS} />
         <Tooltip {...TT} />
-        <Legend wrapperStyle={{ fontSize: 11, color: "#6e7f9e" }} />
+        <Legend wrapperStyle={{ fontSize: 11, color: "#8a8a8a" }} />
         <Bar dataKey="followers" name="Followers" fill="#7c6fff" radius={[2, 2, 0, 0]} />
         <Bar dataKey="following" name="Following" fill={DEFAULT_COLOR} radius={[2, 2, 0, 0]} />
       </BarChart>
