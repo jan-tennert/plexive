@@ -55,11 +55,11 @@ frontend/
     page.tsx                    home feed: 9-tab bar (For You + Following + 7 formats derived from lib/formats.ts) rendered by FeedHeader, horizontal snap between tabs, vertical snap within each; real-time indicator JS interpolates the neutral pill's left+width between tab buttons mid-swipe (no color interpolation — accents live on the cards and switch hard on snap-settle); tabs read via useSWR cache-first (revalidateIfStale false — server jitters feed order, a background refetch would reshuffle visibly), so revisiting the feed renders instantly from cache; tab alignment: first tab snaps left, last tab snaps right, middle tabs center; Stage states per tab (stage-pulse slab loading, slab empty/login states); TabPage pb-24 clears the floating dock; BottomNav (feed active)
     onboarding/
       page.tsx                  server component — renders InterestPicker (no props)
-      InterestPicker.tsx        client — fetches /api/interests, groups 145 pills into 10 categories, sticky header/footer, saves slugs to localStorage
+      InterestPicker.tsx        client — fetches /api/interests, groups 145 frosted pills into 10 categories (chip-on neutral active fill), stage-pulse pill loading placeholders, sticky header/footer, saves slugs to localStorage
     login/
-      page.tsx                  login form: email + password, inline error messages, redirects to / on success or if already logged in
+      page.tsx                  login form in a frosted slab: pill email + password fields, inline error messages, redirects to / on success or if already logged in
     register/
-      page.tsx                  register form: email + username + password, inline error messages, redirects to / on success or if already logged in
+      page.tsx                  register form in a frosted slab: pill email + username + password fields, inline error messages, redirects to / on success or if already logged in
     profile/
       page.tsx                  account page in Stage slabs: Avatar with frosted camera-button upload (POST /api/auth/me/avatar), @username, email, "View public profile" link, knowledge score slab (global + per-format frosted chips from /api/users/{me}/elo), My posts / Saved posts slab rows, bio slab (160 chars), private account toggle (off = white/10% fill, on = lamp), follow requests panel with avatars (private accounts only, accept/decline each), inline forms for change username / change password / sign out / delete account; followers/following list opens a Stage floating sheet (inset rounded-3xl, stage-sheet-in); BottomNav (profile active)
       [username]/

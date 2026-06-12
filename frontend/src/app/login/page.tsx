@@ -50,7 +50,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="off"
               required
-              className="field text-sm py-3"
+              className="field rounded-full text-sm py-3"
             />
             <input
               type="password"
@@ -59,7 +59,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="off"
               required
-              className="field text-sm py-3"
+              className="field rounded-full text-sm py-3"
             />
             {error && <p className="text-bad text-sm">{error}</p>}
             <button

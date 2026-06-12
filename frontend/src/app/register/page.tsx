@@ -51,7 +51,7 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="off"
               required
-              className="field text-sm py-3"
+              className="field rounded-full text-sm py-3"
             />
             <input
               type="text"
@@ -60,7 +60,7 @@ export default function RegisterPage() {
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="off"
               required
-              className="field text-sm py-3"
+              className="field rounded-full text-sm py-3"
             />
             <input
               type="password"
@@ -69,7 +69,7 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
               required
-              className="field text-sm py-3"
+              className="field rounded-full text-sm py-3"
             />
             {error && <p className="text-bad text-sm">{error}</p>}
             <button
