@@ -17,15 +17,15 @@ export default function PostRow({ post }: Props) {
   return (
     <Pressable
       onPress={() => router.push(`/post/${post.id}`)}
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? "rgba(255, 255, 255, 0.07)" : fills.slab,
+      style={{
+        backgroundColor: fills.slab,
         borderRadius: radius.slab,
         paddingHorizontal: 16,
         paddingVertical: 12,
         flexDirection: "row",
         alignItems: "flex-start",
         gap: 12,
-      })}
+      }}
     >
       <View
         style={{

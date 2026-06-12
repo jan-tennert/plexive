@@ -43,16 +43,17 @@ export default function CategorySection({ title, charts }: { title: string; char
       {charts.length > 1 && (
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
           {charts.map((c, i) => (
+            // Plain object style: NativeWind's css-interop drops Pressable
+            // style callback functions (nativewind issue #1105).
             <Pressable
               key={c.label}
               onPress={() => setSelected(i)}
-              style={({ pressed }) => ({
+              style={{
                 backgroundColor: selected === i ? fills.active12 : "transparent",
                 borderRadius: 999,
                 paddingHorizontal: 14,
                 paddingVertical: 6,
-                transform: [{ scale: pressed ? 0.96 : 1 }],
-              })}
+              }}
             >
               <Text
                 style={{

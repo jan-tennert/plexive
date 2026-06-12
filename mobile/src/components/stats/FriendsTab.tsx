@@ -162,10 +162,7 @@ export default function FriendsTab({
         >
           Follow people to compare your knowledge scores and activity with them.
         </Text>
-        <Pressable
-          onPress={() => router.push("/search")}
-          style={({ pressed }) => [ghostPillStyle, { transform: [{ scale: pressed ? 0.96 : 1 }] }]}
-        >
+        <Pressable onPress={() => router.push("/search")} style={ghostPillStyle}>
           <Text style={{ fontFamily: fonts.sansMedium, fontSize: 12, color: colors["ink-body"] }}>
             Find people to follow
           </Text>

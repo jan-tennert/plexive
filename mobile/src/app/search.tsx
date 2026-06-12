@@ -45,6 +45,8 @@ function snippet(post: Post): string {
   return text.length > 120 ? text.slice(0, 120) + "…" : text
 }
 
+// Plain object styles on every Pressable in this file: NativeWind's
+// css-interop drops Pressable style callback functions (nativewind #1105).
 function PostResultCard({ post }: { post: Post }) {
   const router = useRouter()
   const style = FORMAT_STYLES[post.format as FormatId]
@@ -52,12 +54,12 @@ function PostResultCard({ post }: { post: Post }) {
   return (
     <Pressable
       onPress={() => router.push(`/post/${post.id}`)}
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? "rgba(255, 255, 255, 0.07)" : fills.slab,
+      style={{
+        backgroundColor: fills.slab,
         borderRadius: radius.slab,
         paddingHorizontal: 16,
         paddingVertical: 12,
-      })}
+      }}
     >
       {style && (
         <Text
@@ -119,15 +121,15 @@ function UserRow({ user, loggedIn }: { user: UserResult; loggedIn: boolean }) {
   return (
     <Pressable
       onPress={() => router.push(`/profile/${user.username}`)}
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? "rgba(255, 255, 255, 0.07)" : fills.slab,
+      style={{
+        backgroundColor: fills.slab,
         borderRadius: radius.slab,
         paddingHorizontal: 16,
         paddingVertical: 12,
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-      })}
+      }}
     >
       <Avatar username={user.username} avatarUrl={user.avatar_url} size={44} verified={user.is_verified} />
       <View style={{ flex: 1 }}>
@@ -150,14 +152,13 @@ function UserRow({ user, loggedIn }: { user: UserResult; loggedIn: boolean }) {
           onPress={onToggleFollow}
           disabled={busy}
           hitSlop={6}
-          style={({ pressed }) => ({
+          style={{
             backgroundColor: following || requested ? fills.chrome : "rgba(124, 111, 255, 0.15)",
             borderRadius: 999,
             paddingHorizontal: 12,
             paddingVertical: 6,
             opacity: busy ? 0.5 : 1,
-            transform: [{ scale: pressed && !busy ? 0.96 : 1 }],
-          })}
+          }}
         >
           <Text
             style={{
@@ -271,12 +272,7 @@ export default function SearchScreen() {
             <Pressable
               onPress={() => router.back()}
               hitSlop={8}
-              style={({ pressed }) => ({
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-                transform: [{ scale: pressed ? 0.95 : 1 }],
-              })}
+              style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
             >
               <BackIcon size={24} color={colors["ink-dim"]} />
             </Pressable>

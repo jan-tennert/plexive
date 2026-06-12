@@ -89,20 +89,21 @@ function Chevron({ open }: { open?: boolean }) {
   )
 }
 
-// Small flat lamp pill (web .btn-primary at text-xs sizes).
+// Small flat lamp pill (web .btn-primary at text-xs sizes). Plain object
+// styles throughout this file: NativeWind's css-interop drops Pressable
+// style callback functions (nativewind issue #1105).
 function SmallPrimary({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => ({
+      style={{
         backgroundColor: "rgba(124, 111, 255, 0.15)",
         borderRadius: 999,
         paddingHorizontal: 14,
         paddingVertical: 7,
         opacity: disabled ? 0.45 : 1,
-        transform: [{ scale: pressed && !disabled ? 0.96 : 1 }],
-      })}
+      }}
     >
       <Text style={{ fontFamily: fonts.sansMedium, fontSize: 12, color: "#9d93ff" }}>{label}</Text>
     </Pressable>
@@ -114,14 +115,13 @@ function SmallGhost({ label, onPress, disabled }: { label: string; onPress: () =
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => ({
+      style={{
         backgroundColor: fills.chrome,
         borderRadius: 999,
         paddingHorizontal: 14,
         paddingVertical: 7,
         opacity: disabled ? 0.45 : 1,
-        transform: [{ scale: pressed && !disabled ? 0.96 : 1 }],
-      })}
+      }}
     >
       <Text style={{ fontFamily: fonts.sansMedium, fontSize: 12, color: colors["ink-body"] }}>{label}</Text>
     </Pressable>
@@ -134,14 +134,13 @@ function SubmitButton({ label, onPress, disabled, destructive }: { label: string
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => ({
+      style={{
         backgroundColor: destructive ? "rgba(192, 88, 112, 0.15)" : "rgba(124, 111, 255, 0.15)",
         borderRadius: 999,
         paddingVertical: 12,
         alignItems: "center",
         opacity: disabled ? 0.45 : 1,
-        transform: [{ scale: pressed && !disabled ? 0.97 : 1 }],
-      })}
+      }}
     >
       <Text style={{ fontFamily: fonts.sansMedium, fontSize: 14, color: destructive ? colors.bad : "#9d93ff" }}>
         {label}
@@ -412,12 +411,7 @@ export default function ProfileSettingsScreen() {
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          style={({ pressed }) => ({
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            transform: [{ scale: pressed ? 0.95 : 1 }],
-          })}
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
           <BackIcon size={24} color={colors["ink-dim"]} />
         </Pressable>
@@ -493,10 +487,7 @@ export default function ProfileSettingsScreen() {
             </Text>
             <Pressable
               onPress={() => router.push(`/profile/${user.username}`)}
-              style={({ pressed }) => [
-                ghostPillStyle,
-                { marginTop: 8, transform: [{ scale: pressed ? 0.96 : 1 }] },
-              ]}
+              style={[ghostPillStyle, { marginTop: 8 }]}
             >
               <Text style={{ fontFamily: fonts.sansMedium, fontSize: 13, color: colors["ink-body"] }}>
                 View public profile

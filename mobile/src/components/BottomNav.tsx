@@ -34,17 +34,18 @@ function NavButton({
   children: React.ReactNode
 }) {
   return (
+    // Plain object style: NativeWind's css-interop drops Pressable style
+    // callback functions (nativewind issue #1105).
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => ({
+      style={{
         width: 44,
         height: 44,
         borderRadius: 22,
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: active ? fills.active12 : "transparent",
-        transform: [{ scale: pressed ? 0.95 : 1 }],
-      })}
+      }}
     >
       {children}
     </Pressable>

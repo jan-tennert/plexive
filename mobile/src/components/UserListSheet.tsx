@@ -136,15 +136,14 @@ export default function UserListSheet({ title, users, emptyMessage = "Nothing he
                 renderItem={({ item: u }) => (
                   <Pressable
                     onPress={() => openProfile(u.username)}
-                    style={({ pressed }) => ({
+                    style={{
                       flexDirection: "row",
                       alignItems: "center",
                       gap: 12,
                       paddingHorizontal: 8,
                       paddingVertical: 8,
                       borderRadius: 16,
-                      backgroundColor: pressed ? "rgba(255, 255, 255, 0.06)" : "transparent",
-                    })}
+                    }}
                   >
                     <Avatar username={u.username} avatarUrl={u.avatar_url} size={40} verified={u.is_verified} />
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>

@@ -52,6 +52,8 @@ interface RowPost {
 
 const TAB_ORDER = ["posts", "saved", "liked"] as const
 
+// Plain object styles on every Pressable in this file: NativeWind's
+// css-interop drops Pressable style callback functions (nativewind #1105).
 function HeaderCircle({ onPress, children }: { onPress?: () => void; children: React.ReactNode }) {
   return (
     <Frosted borderRadius={999} style={{ width: 44, height: 44 }}>
@@ -59,12 +61,7 @@ function HeaderCircle({ onPress, children }: { onPress?: () => void; children: R
         onPress={onPress}
         disabled={!onPress}
         hitSlop={8}
-        style={({ pressed }) => ({
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          transform: [{ scale: pressed && onPress ? 0.95 : 1 }],
-        })}
+        style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
       >
         {children}
       </Pressable>
@@ -88,14 +85,13 @@ function WidePill({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => ({
+      style={{
         backgroundColor: variant === "primary" ? "rgba(124, 111, 255, 0.15)" : fills.chrome,
         borderRadius: 999,
         paddingVertical: 10,
         alignItems: "center",
         opacity: disabled ? 0.5 : 1,
-        transform: [{ scale: pressed && !disabled ? 0.97 : 1 }],
-      })}
+      }}
     >
       <Text
         style={{
