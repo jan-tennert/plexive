@@ -131,29 +131,41 @@ frontend/
       CastSection.tsx           stories: array of character cards (name/role/one_line/lifespan)
       HistoricalContextSection.tsx stories: broader historical setting
 
-mobile/                         React Native app (Expo SDK 56, TypeScript, expo-router, NativeWind 4 + tailwindcss 3.4); phase 2 = auth + onboarding + 9-tab feed navigation
+mobile/                         React Native app (Expo SDK 56, TypeScript, expo-router, NativeWind 4 + tailwindcss 3.4); phase 3 = post detail with all 80 section types + like/save/comment/share/quiz actions
   package.json                  main: expo-router/entry; deps incl. reanimated 4, gesture-handler, react-native-svg, expo-image, async-storage, expo-secure-store, react-native-pager-view, @expo-google-fonts/{newsreader,source-sans-3,geist-mono}
   babel.config.js               babel-preset-expo (jsxImportSource nativewind) + nativewind/babel
   metro.config.js               expo/metro-config wrapped in withNativeWind (input global.css)
   tailwind.config.js            NativeWind preset; colors/radii/fontFamily generated from src/theme/tokens.ts so web class vocabulary (bg-surface-1, text-ink-dim, rounded-card) works
-  src/config.ts                 BASE_URL/WS_URL from EXPO_PUBLIC_API_URL; dev default http://10.0.2.2:8000 (emulator-to-host); comments document emulator / device-on-WLAN / HTTPS cases
+  src/config.ts                 BASE_URL/WS_URL from EXPO_PUBLIC_API_URL; dev default http://10.0.2.2:8000 (emulator-to-host); WEB_URL (share links) + SEED_IMAGE_ORIGIN + resolveImageUrl() for web-relative /seed-images/ paths
   src/theme/tokens.ts           Circuit tokens (surfaces, edges, ink, lamp/like/save/good/bad, fmt-*) + radii px + expo-font family names; mirrors frontend globals.css @theme
   src/lib/api.ts                apiFetch port; module-level cachedToken filled from expo-secure-store (Keystore/Keychain) by initAuthToken() at startup so apiFetch reads it synchronously; setAuthToken keeps cache+storage in sync; getAuthToken() sync read for AuthProvider; skips Content-Type for FormData
   src/lib/auth.tsx              AuthContext port of frontend lib/auth.tsx: JWT via setAuthToken (SecureStore), session restore via /api/auth/me on mount, user/loading/login/register/logout/updateUser, detailToMessage error normalization
   src/lib/interests.ts          getInterestSlugs/setInterestSlugs; AsyncStorage key "deepscroll_interests" (same meaning as web localStorage); null = onboarding not done
-  src/lib/likedPosts.ts         async AsyncStorage port of web likedPosts.ts (keys deepscroll_liked/like_counts/like_sent, migrateSentKey dropped); not yet wired to UI (no action rail this phase)
-  src/lib/savedPosts.ts         async AsyncStorage port of web savedPosts.ts (key deepscroll_saved); not yet wired to UI
+  src/lib/likedPosts.ts         async AsyncStorage port of web likedPosts.ts (keys deepscroll_liked/like_counts/like_sent, migrateSentKey dropped); consumed by usePostActions
+  src/lib/savedPosts.ts         async AsyncStorage port of web savedPosts.ts (key deepscroll_saved); consumed by usePostActions
+  src/lib/eventQueue.ts         port of web eventQueue (batch 5 events / 5s to POST /api/events via apiFetch); flush on AppState leaving foreground instead of visibilitychange
+  src/lib/accent.tsx            AccentContext + useAccent(); RN replacement for the web per-post --accent CSS variable (provider set by post detail screen)
+  src/lib/usePostActions.ts     shared like/save hook for PostCard + detail: AsyncStorage state, eventQueue like, web server-count reconciliation formula (GET /likes)
+  src/lib/share.ts              sharePost() via RN Share API (system sheet; title + WEB_URL/post/{id}); expo-sharing deliberately not used (files only)
   src/lib/feedTabs.ts           TABS: For You + Following + 7 format tabs (FeedTabDef {id,label,format,accent,rgb}), ported from web page.tsx
   src/lib/formats.ts            FORMAT_IDS/FORMAT_STYLES/formatStyle/LEGACY_SVG_ACCENT_MAP port (web Tailwind class strings dropped, accent hex kept)
   src/lib/relativeTime.ts       relativeTime(iso) port, unchanged
   src/types/post.ts             Post/Section/SectionType/feed-card types + fcStr/fcNum, identical to frontend/src/types/post.ts
   src/app/_layout.tsx           root layout: loads Newsreader/Source Sans 3/Geist Mono via useFonts, awaits initAuthToken, holds splash until ready, wraps Stack in AuthProvider, dark Stack on surface-0, GestureHandlerRootView
   src/app/index.tsx             home: 9-tab feed container; interests gate (AsyncStorage -> redirect /onboarding), FeedTabBar + PagerView (9 FeedTab pages, collapsable=false, lazy activation set) + BottomNav + Toast; measured pager height drives card height
+  src/app/post/[id].tsx         post detail port of web post/[id]/page.tsx: slide_from_bottom Stack animation, gesture-handler Pan swipe-right-to-close (dx>80 && dx>|dy|), header (badge/attribution/Books cover/title/interest chips), AccentProvider wraps SectionRenderer, bottom bar = comment field opening CommentsBottomSheet + like/save (lamp when active) + share
   src/app/login.tsx             port of web login page: centered card, email+password fields, inline error in bad color, PrimaryButton, link to /register; redirects to / when logged in
   src/app/register.tsx          port of web register page: email+username+password, otherwise same pattern as login.tsx
   src/app/onboarding.tsx        InterestPicker port: CATEGORIES map copied verbatim, GET /api/interests, pill grid in 10 sections + Other, min 1 selection, saves slugs via setInterestSlugs, router.replace("/")
-  src/components/PostCard.tsx   memoized full-screen card; per-format layouts (books/people/facts/concepts/questions/stories/academy + fallback) mirroring web PostCard core elements; expo-linear-gradient card surface, accent left border, badge glow via textShadow/boxShadow, interest tags, author initial; no actions/navigation this phase
-  src/components/SafeSvg.tsx    SvgBlock counterpart: seed -> inline SvgXml with legacy-hex re-palette; user content -> expo-image with svg+xml data URI (no script execution)
+  src/components/PostCard.tsx   memoized full-screen card; per-format layouts (books/people/facts/concepts/questions/stories/academy + fallback) mirroring web PostCard core elements; expo-linear-gradient card surface, accent left border, badge glow via textShadow/boxShadow, interest tags, author initial; tap -> /post/{id}, double-tap (300ms) -> like, right action rail (like red / comment sheet / save yellow / share, counts hidden at zero) via usePostActions
+  src/components/SafeSvg.tsx    SvgBlock counterpart: seed -> inline SvgXml with legacy-hex re-palette; user content -> expo-image with svg+xml data URI (no script execution); optional color prop for currentColor strokes
+  src/components/SectionRenderer.tsx  port of web SectionRenderer: sorts by order, dispatches all 80 section types, isUserContent to SVG sections, postId to QuizSection; divide-y becomes per-section borderTop
+  src/components/sections/      80 section ports mirroring frontend sections/ 1:1; primitives.tsx supplies SectionBlock (px-6 py-8), SectionLabel (.label-caps), Prose (.prose-post 17/29 serif), sans/mono style builders, SvgFigure (viewBox aspect parse + SafeSvg + max-width), CaptionedImage (resolveImageUrl), makeLabeledProse factory (the ~30 label+paragraph sections are one-liners), NumberBubble
+  src/components/sections/QuizSection.tsx  quiz port: POST /api/quiz/answer, good/bad option coloring + explanation + Elo delta chip, state restore via GET /api/quiz/state, summary card, login hint
+  src/components/CommentsBottomSheet.tsx  Modal port of web sheet: backdrop, drag handle (up=75%, down=50%/close), FlatList comments + VerifiedBadge + delete own, sticky input (no statusBarTranslucent so Android adjustResize keeps input above keyboard)
+  src/components/VerifiedBadge.tsx  react-native-svg port of web VerifiedBadge (level colors + official variant)
+  src/components/MathText.tsx   $...$ parser port; math segments render as Geist Mono text (no KaTeX/HTML in RN - known fidelity gap for academy/formalism)
+  src/components/icons.tsx      shared heart/bookmark/comment/share/back SVG glyphs copied from web action buttons
   src/components/PrimaryButton.tsx  web .btn-primary recipe (lamp gradient pill) as Pressable+LinearGradient; label/onPress/disabled
   src/components/FeedTab.tsx    one pager page: lazy fetch on first activation (GET /api/feed?interests&format; Following -> /api/feed/following with login/empty states); posts reset on user change; vertical paging FlatList from phase 1
   src/components/FeedTabBar.tsx tab strip + sliding 16x4 indicator; reanimated progress from PagerView onPageScroll, translateX over measured tab centers + interpolateColor over tab accents; auto-centers active tab (clamped); inert search icon
@@ -464,6 +476,7 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 
 - Mobile app phase 1 (mobile/): Expo/React Native For You feed with TikTok-style vertical paging, Circuit tokens + web fonts, all 7 format card layouts
 - Mobile app phase 2 (mobile/): JWT auth (SecureStore) with login/register screens + session restore, onboarding interest picker (AsyncStorage gate), 9-tab feed via PagerView with animated tab indicator, BottomNav + toast for unbuilt destinations
+- Mobile app phase 3 (mobile/): post detail screen with all 80 section types (sections/ ports + AccentContext for per-post accent), seed-vs-user SVG security preserved in SafeSvg, quiz answering with Elo correction UI, like/save/comment/share on card rail + detail bar (eventQueue batching, CommentsBottomSheet, RN Share)
 
 **Next**
 - Content for academy format
