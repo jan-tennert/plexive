@@ -1,36 +1,46 @@
 import { memo, useRef, useState } from "react"
-import { Pressable, Text, View } from "react-native"
+import { Pressable, Text, View, useWindowDimensions } from "react-native"
 import { Image } from "expo-image"
-import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated"
 import { fcNum, fcStr, type Post } from "../types/post"
 import { formatStyle } from "../lib/formats"
 import { resolveImageUrl } from "../config"
 import { usePostActions } from "../lib/usePostActions"
 import { sharePost } from "../lib/share"
-import { colors, fonts, radius } from "../theme/tokens"
-import SafeSvg from "./SafeSvg"
+import { colors, fills, fonts, radius } from "../theme/tokens"
+import { SlabAccent, SlabGlow } from "./stage"
 import CommentsBottomSheet from "./CommentsBottomSheet"
-import { HeartIcon, BookmarkIcon, CommentIcon, ShareIcon } from "./icons"
+import VerifiedBadge from "./VerifiedBadge"
+import { HeartIcon, BookmarkIcon, CommentIcon, ShareIcon, SpeakerIcon } from "./icons"
 
-// Full-screen feed card, ported from frontend PostCard.tsx (Circuit design).
-// Tap opens the post detail; double tap likes (web 300ms double-tap rule).
-// Action rail on the right: like (red when active), comments bottom sheet,
-// save (yellow when active), share — counts hidden while zero, like the web.
+// Full-screen Stage feed card, ported from frontend PostCard.tsx: format
+// marker floating above a borderless frosted slab, format-colored glow
+// behind it, bare-glyph action rail at the right edge, interest tags as
+// floating pills bottom-left. Tap opens the post detail; double tap likes
+// (web 300ms double-tap rule) with the heart-boom overlay.
 // Every card is exactly `height` tall so FlatList paging snaps one card per
 // swipe without measuring.
 
-function DotScale({ value, accent }: { value: number; accent: string }) {
+// Difficulty as three neutral dots; the per-format accent stays on the
+// format marker and the teaser bullets only (web DotScale).
+function DotScale({ value }: { value: number }) {
   return (
-    <View className="flex-row" style={{ gap: 2 }}>
+    <View className="flex-row" style={{ gap: 4 }}>
       {[1, 2, 3].map((i) => (
         <View
           key={i}
           style={{
-            width: 6,
-            height: 6,
-            borderRadius: 3,
-            backgroundColor: i <= value ? accent : colors["surface-3"],
+            width: 4,
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: i <= value ? colors["ink-dim"] : fills.dotOff,
           }}
         />
       ))}
@@ -38,15 +48,25 @@ function DotScale({ value, accent }: { value: number; accent: string }) {
   )
 }
 
+// Teaser bullets — reading-size text in full ink directly on the slab, the
+// accent dots carry the per-format color (web Teasers).
 function Teasers({ items, accent }: { items: string[]; accent: string }) {
   return (
-    <View style={{ gap: 6, marginTop: 8 }}>
+    <View style={{ gap: 10, marginTop: 8 }}>
       {items.map((teaser, i) => (
         <View key={i} className="flex-row items-start" style={{ gap: 10 }}>
-          <Text style={{ color: accent, fontSize: 14, lineHeight: 19 }}>{"—"}</Text>
+          <View
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: 3,
+              marginTop: 7,
+              backgroundColor: accent,
+            }}
+          />
           <Text
             className="flex-1"
-            style={{ fontFamily: fonts.sans, fontSize: 14, lineHeight: 19, color: colors["ink-dim"] }}
+            style={{ fontFamily: fonts.sans, fontSize: 17, lineHeight: 22, color: colors.ink }}
           >
             {teaser}
           </Text>
@@ -73,28 +93,61 @@ function LabelCaps({ text, color }: { text: string; color: string }) {
   )
 }
 
-function MetaBar({ children }: { children: React.ReactNode }) {
+// Slab footer: creator byline left, neutral reading metadata right. The meta
+// line is uniform across all formats — reading time + difficulty only (web
+// CardFooter; year/era/genre/venue stay in the JSON for the detail page).
+function CardFooter({ post }: { post: Post }) {
+  const fc = post.feed_card
+  const difficulty = fcNum(fc, "post_difficulty")
+  const minutes = fcNum(fc, "post_reading_time_min")
   return (
-    <View
-      className="flex-row items-center"
-      style={{ gap: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.edge }}
-    >
-      {children}
+    <View className="flex-row items-center" style={{ gap: 8, paddingTop: 4 }}>
+      {post.author_username && (
+        <View className="flex-row items-center flex-1" style={{ gap: 6 }}>
+          {post.author_avatar_url ? (
+            <Image
+              source={{ uri: post.author_avatar_url }}
+              style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: fills.chrome }}
+              contentFit="cover"
+              transition={150}
+            />
+          ) : (
+            <View
+              className="items-center justify-center"
+              style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: fills.chrome }}
+            >
+              <Text
+                style={{
+                  fontFamily: fonts.sansSemiBold,
+                  fontSize: 11,
+                  color: colors["ink-dim"],
+                  textTransform: "uppercase",
+                }}
+              >
+                {post.author_username[0]}
+              </Text>
+            </View>
+          )}
+          <Text
+            numberOfLines={1}
+            style={{ fontFamily: fonts.sans, fontSize: 12, color: colors["ink-dim"], flexShrink: 1 }}
+          >
+            @{post.author_username}
+          </Text>
+          {(post.author_is_verified ?? 0) > 0 && (
+            <VerifiedBadge size={12} level={post.author_is_verified ?? 1} />
+          )}
+        </View>
+      )}
+      <View className="flex-row items-center" style={{ gap: 8, marginLeft: "auto" }}>
+        {difficulty > 0 && <DotScale value={difficulty} />}
+        {minutes > 0 && (
+          <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors["ink-muted"] }}>
+            {minutes} min
+          </Text>
+        )}
+      </View>
     </View>
-  )
-}
-
-function MetaText({ text, faint }: { text: string; faint?: boolean }) {
-  return (
-    <Text
-      style={{
-        fontFamily: fonts.mono,
-        fontSize: 12,
-        color: faint ? colors["ink-faint"] : colors["ink-muted"],
-      }}
-    >
-      {text}
-    </Text>
   )
 }
 
@@ -120,8 +173,6 @@ function teasersOf(fc: Record<string, unknown>): string[] {
 function CardBody({ post }: { post: Post }) {
   const fc = post.feed_card
   const accent = formatStyle(post.format).accent
-  const minRead = fcNum(fc, "post_reading_time_min")
-  const difficulty = fcNum(fc, "post_difficulty")
 
   if (post.format === "books") {
     return (
@@ -129,21 +180,16 @@ function CardBody({ post }: { post: Post }) {
         <View className="flex-row items-start" style={{ gap: 16 }}>
           <View className="flex-1">
             <Text style={titleStyle}>{fcStr(fc, "title")}</Text>
-            <Text style={{ fontFamily: fonts.sansMedium, fontSize: 14, color: accent, marginTop: 4 }}>
+            <Text
+              style={{ fontFamily: fonts.sansMedium, fontSize: 14, color: colors["ink-dim"], marginTop: 4 }}
+            >
               {fcStr(fc, "author")}
             </Text>
           </View>
           {fcStr(fc, "cover_url") !== "" && (
             <Image
               source={{ uri: resolveImageUrl(fcStr(fc, "cover_url")) }}
-              style={{
-                width: 64,
-                height: 96,
-                borderRadius: 6,
-                backgroundColor: colors["surface-2"],
-                borderWidth: 1,
-                borderColor: colors.edge,
-              }}
+              style={{ width: 64, height: 96, borderRadius: 12, backgroundColor: fills.chrome }}
               contentFit="cover"
               transition={150}
             />
@@ -151,15 +197,7 @@ function CardBody({ post }: { post: Post }) {
         </View>
         <Text style={essenceStyle}>{fcStr(fc, "essence")}</Text>
         <Teasers items={teasersOf(fc)} accent={accent} />
-        <MetaBar>
-          <DotScale value={difficulty} accent={accent} />
-          {minRead > 0 && <MetaText text={`${minRead} min read`} />}
-          {fcNum(fc, "year") > 0 && <MetaText text={String(fcNum(fc, "year"))} />}
-          <MetaText text="·" faint />
-          <Text style={{ fontFamily: fonts.sans, fontSize: 12, color: colors["ink-muted"] }}>
-            {fcStr(fc, "genre")}
-          </Text>
-        </MetaBar>
+        <CardFooter post={post} />
       </>
     )
   }
@@ -172,14 +210,7 @@ function CardBody({ post }: { post: Post }) {
           {portrait && (
             <Image
               source={{ uri: resolveImageUrl(portrait) }}
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: 40,
-                backgroundColor: colors["surface-2"],
-                borderWidth: 1,
-                borderColor: accent + "66",
-              }}
+              style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: fills.chrome }}
               contentFit="cover"
               transition={150}
             />
@@ -196,28 +227,18 @@ function CardBody({ post }: { post: Post }) {
         </View>
         <Text style={essenceStyle}>{fcStr(fc, "essence")}</Text>
         <Teasers items={teasersOf(fc)} accent={accent} />
-        <MetaBar>
-          <DotScale value={difficulty} accent={accent} />
-          {minRead > 0 && <MetaText text={`${minRead} min read`} />}
-        </MetaBar>
+        <CardFooter post={post} />
       </>
     )
   }
 
   if (post.format === "facts") {
-    const miniSvg = fcStr(fc, "mini_visual_svg")
     return (
       <>
         {fcStr(fc, "field") !== "" && <LabelCaps text={fcStr(fc, "field")} color={accent} />}
         <Text style={titleStyle}>{fcStr(fc, "headline")}</Text>
-        {miniSvg !== "" && (
-          <SafeSvg svg={miniSvg} isUserContent={post.is_user_content} width={280} height={120} />
-        )}
         <Teasers items={teasersOf(fc)} accent={accent} />
-        <MetaBar>
-          <DotScale value={difficulty} accent={accent} />
-          {minRead > 0 && <MetaText text={`${minRead} min read`} />}
-        </MetaBar>
+        <CardFooter post={post} />
       </>
     )
   }
@@ -231,10 +252,7 @@ function CardBody({ post }: { post: Post }) {
         <Text style={titleStyle}>{title}</Text>
         {hook !== "" && <Text style={essenceStyle}>{hook}</Text>}
         <Teasers items={teasersOf(fc)} accent={accent} />
-        <MetaBar>
-          <DotScale value={difficulty} accent={accent} />
-          {minRead > 0 && <MetaText text={`${minRead} min read`} />}
-        </MetaBar>
+        <CardFooter post={post} />
       </>
     )
   }
@@ -250,11 +268,7 @@ function CardBody({ post }: { post: Post }) {
         </View>
         <Text style={[titleStyle, { fontSize: 24, lineHeight: 30 }]}>{fcStr(fc, "headline")}</Text>
         <Teasers items={teasersOf(fc)} accent={accent} />
-        <MetaBar>
-          <DotScale value={difficulty} accent={accent} />
-          {minRead > 0 && <MetaText text={`${minRead} min read`} />}
-          {fcStr(fc, "era") !== "" && <MetaText text={fcStr(fc, "era")} faint />}
-        </MetaBar>
+        <CardFooter post={post} />
       </>
     )
   }
@@ -272,11 +286,7 @@ function CardBody({ post }: { post: Post }) {
           <Text style={essenceStyle}>{fcStr(fc, "key_finding_one_line")}</Text>
         )}
         <Teasers items={teasersOf(fc)} accent={accent} />
-        <MetaBar>
-          <DotScale value={difficulty} accent={accent} />
-          {minRead > 0 && <MetaText text={`${minRead} min read`} />}
-          {fcNum(fc, "published_year") > 0 && <MetaText text={String(fcNum(fc, "published_year"))} />}
-        </MetaBar>
+        <CardFooter post={post} />
       </>
     )
   }
@@ -286,12 +296,14 @@ function CardBody({ post }: { post: Post }) {
     <>
       <Text style={titleStyle}>{post.title}</Text>
       {fcStr(fc, "essence") !== "" && <Text style={essenceStyle}>{fcStr(fc, "essence")}</Text>}
+      <CardFooter post={post} />
     </>
   )
 }
 
-// One action rail entry: 44px tap target with the count below; the count is
-// kept in layout but invisible at zero so icons don't shift (web .invisible).
+// One action rail entry: bare glyph in a 44px tap target with a fixed-height
+// mono count slot below, invisible at zero so button centers keep one
+// uniform interval (web rail). Press is a springy scale-down.
 function RailButton({
   onPress,
   icon,
@@ -310,16 +322,23 @@ function RailButton({
       <Pressable
         onPress={onPress}
         hitSlop={4}
-        style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}
+        style={({ pressed }) => ({
+          width: 44,
+          height: 44,
+          alignItems: "center",
+          justifyContent: "center",
+          transform: [{ scale: pressed ? 0.9 : 1 }],
+        })}
       >
         {icon}
       </Pressable>
       {count !== undefined && (
         <Text
           style={{
-            fontFamily: fonts.sans,
-            fontSize: 12,
-            lineHeight: 13,
+            height: 12,
+            fontFamily: fonts.mono,
+            fontSize: 11,
+            lineHeight: 12,
             color: countColor ?? colors["ink-dim"],
             opacity: countVisible ? 1 : 0,
           }}
@@ -334,6 +353,8 @@ function RailButton({
 function PostCard({ post, height }: { post: Post; height: number }) {
   const style = formatStyle(post.format)
   const router = useRouter()
+  const insets = useSafeAreaInsets()
+  const { width: windowWidth } = useWindowDimensions()
   const { liked, likesCount, saved, like, toggleLike, toggleSave } = usePostActions(
     post.id,
     post.like_count
@@ -347,6 +368,34 @@ function PostCard({ post, height }: { post: Post; height: number }) {
   const lastTapRef = useRef(0)
   const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Web heart-pop (rail glyph scale burst) + heart-boom (center overlay).
+  const popScale = useSharedValue(1)
+  const boomScale = useSharedValue(0)
+  const boomOpacity = useSharedValue(0)
+
+  const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: popScale.value }] }))
+  const boomStyle = useAnimatedStyle(() => ({
+    opacity: boomOpacity.value,
+    transform: [{ scale: boomScale.value }],
+  }))
+
+  function animateLike() {
+    popScale.value = withSequence(
+      withTiming(1.35, { duration: 112 }),
+      withTiming(0.9, { duration: 112 }),
+      withTiming(1, { duration: 96 })
+    )
+    boomScale.value = 0
+    boomOpacity.value = 1
+    boomScale.value = withSequence(withTiming(1.3, { duration: 300 }), withTiming(1, { duration: 300 }))
+    boomOpacity.value = withSequence(withTiming(1, { duration: 300 }), withTiming(0, { duration: 300 }))
+  }
+
+  function handleRailLike() {
+    if (!liked) animateLike()
+    toggleLike()
+  }
+
   // Web double-tap rule: a second tap within 300ms likes; otherwise navigate
   // after the window closes.
   function handleCardPress() {
@@ -359,6 +408,7 @@ function PostCard({ post, height }: { post: Post; height: number }) {
         clearTimeout(navTimerRef.current)
         navTimerRef.current = null
       }
+      if (!liked) animateLike()
       like()
       return
     }
@@ -369,135 +419,154 @@ function PostCard({ post, height }: { post: Post; height: number }) {
     }, 300)
   }
 
+  // The glow box is a square 1.5x the screen width centered on the card,
+  // clipped by the card's own overflow so it never reaches neighboring posts
+  // or the floating chrome (web SlabGlow placement).
+  const glowSize = windowWidth * 1.5
+
   return (
     <Pressable
       onPress={handleCardPress}
-      style={{ height, backgroundColor: colors["surface-0"] }}
-      className="px-5 pt-12 pb-8"
+      style={{ height, backgroundColor: colors["surface-0"], overflow: "hidden" }}
     >
-      {/* Format indicator row with the web's badge glow */}
-      <View className="flex-row items-center" style={{ gap: 8 }}>
-        <View
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: style.accent,
-            boxShadow: `0 0 8px 3px ${style.accent}dd`,
-          }}
-        />
-        <Text
-          style={{
-            fontFamily: fonts.sansSemiBold,
-            fontSize: 11,
-            letterSpacing: 2,
-            textTransform: "uppercase",
-            color: style.accent,
-            textShadowColor: style.accent,
-            textShadowRadius: 8,
-            textShadowOffset: { width: 0, height: 0 },
-          }}
-        >
-          {style.badge}
-        </Text>
-      </View>
+      <SlabGlow
+        accent={style.accent}
+        style={{
+          position: "absolute",
+          width: glowSize,
+          height: glowSize,
+          left: (windowWidth - glowSize) / 2,
+          top: (height - glowSize) / 2,
+        }}
+      />
 
-      {/* Card body — centered vertically like the web card */}
-      <View className="flex-1 justify-center">
-        <View
-          style={{
-            borderRadius: radius.card,
-            borderWidth: 1,
-            borderColor: colors.edge,
-            borderLeftWidth: 2,
-            borderLeftColor: style.accent,
-            overflow: "hidden",
-          }}
-        >
-          {/* The web .card 160deg surface gradient */}
-          <LinearGradient
-            colors={[colors["surface-1"], "#111111"]}
-            start={{ x: 0.2, y: 0 }}
-            end={{ x: 0.8, y: 1 }}
-            style={{ paddingHorizontal: 24, paddingVertical: 28, gap: 16 }}
+      {/* Content floats in the dark: marker + slab, centered vertically.
+          Top clearance for the floating tab capsule, bottom clearance for
+          the rail/tags row and the nav dock. */}
+      <View
+        className="flex-1 justify-center"
+        style={{
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 64,
+          paddingBottom: insets.bottom + 112,
+        }}
+      >
+        {/* Format marker floating above the slab — dot and label carry the
+            accent; the read-aloud placeholder (disabled, no handler) sits at
+            the row's right end, like the web. */}
+        <View className="flex-row items-center" style={{ gap: 8, marginBottom: 12, paddingHorizontal: 8 }}>
+          <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: style.accent }} />
+          <Text
+            style={{
+              fontFamily: fonts.mono,
+              fontSize: 12,
+              letterSpacing: 1.2,
+              textTransform: "lowercase",
+              color: style.accent,
+            }}
           >
-            <CardBody post={post} />
-          </LinearGradient>
+            {style.badge.toLowerCase()}
+          </Text>
+          <View style={{ marginLeft: "auto", width: 32, height: 32, alignItems: "center", justifyContent: "center", opacity: 0.4 }}>
+            <SpeakerIcon size={20} color={colors["ink-dim"]} />
+          </View>
+        </View>
 
-          {/* Author initial — bottom-right corner of the card box */}
-          {post.author_username && (
-            <View
-              className="absolute items-center justify-center"
-              style={{
-                bottom: 12,
-                right: 12,
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: colors["surface-2"],
-                borderWidth: 2,
-                borderColor: colors["edge-strong"],
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: fonts.sansSemiBold,
-                  fontSize: 14,
-                  color: colors["ink-dim"],
-                  textTransform: "uppercase",
-                }}
-              >
-                {post.author_username[0]}
-              </Text>
-            </View>
-          )}
+        {/* Borderless frosted slab with the accent edge */}
+        <View
+          style={{
+            backgroundColor: fills.slab,
+            borderRadius: radius.slab,
+            overflow: "hidden",
+            paddingHorizontal: 24,
+            paddingVertical: 28,
+            gap: 16,
+          }}
+        >
+          <SlabAccent accent={style.accent} />
+          <CardBody post={post} />
         </View>
       </View>
 
-      {/* Interest tags — right inset keeps them clear of the action rail */}
-      <View className="flex-row flex-wrap" style={{ gap: 8, paddingRight: 48 }}>
-        {post.interests.map((name) => (
-          <View
-            key={name}
-            style={{
-              backgroundColor: colors["surface-2"],
-              borderWidth: 1,
-              borderColor: colors.edge,
-              borderRadius: 999,
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-            }}
-          >
-            <Text style={{ fontFamily: fonts.sans, fontSize: 12, color: colors["ink-dim"] }}>{name}</Text>
-          </View>
-        ))}
-      </View>
+      {/* Double-tap heart overlay (web heart-boom) */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          boomStyle,
+        ]}
+      >
+        <HeartIcon size={96} color={colors.lamp} filled />
+      </Animated.View>
 
-      {/* Action rail — web PostCard right-edge icon column */}
-      <View style={{ position: "absolute", right: 8, bottom: 88, alignItems: "center", gap: 4 }}>
+      {/* Interest tags — floating frosted pills bottom-left, clear of the
+          rail, level with it just above the nav dock; wrap-reverse keeps the
+          first row hugging the bottom edge. */}
+      {post.interests.length > 0 && (
+        <View
+          className="flex-row"
+          style={{
+            position: "absolute",
+            left: 16,
+            right: 80,
+            bottom: insets.bottom + 72,
+            flexWrap: "wrap-reverse",
+            gap: 8,
+          }}
+        >
+          {post.interests.slice(0, 2).map((name) => (
+            <View
+              key={name}
+              style={{
+                backgroundColor: fills.tag,
+                borderRadius: 999,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+              }}
+            >
+              <Text style={{ fontFamily: fonts.sans, fontSize: 12, color: colors["ink-dim"] }}>{name}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Action rail — bare glyphs floating at the right edge */}
+      <View style={{ position: "absolute", right: 8, bottom: insets.bottom + 72, alignItems: "center" }}>
         <RailButton
-          onPress={toggleLike}
-          icon={<HeartIcon size={24} color={liked ? colors.like : colors["ink-body"]} filled={liked} />}
+          onPress={handleRailLike}
+          icon={
+            <Animated.View style={popStyle}>
+              <HeartIcon size={28} color={liked ? colors.like : colors["ink-dim"]} filled={liked} />
+            </Animated.View>
+          }
           count={likesCount}
           countColor={liked ? colors.like : colors["ink-dim"]}
           countVisible={likesCount > 0 || liked}
         />
         <RailButton
           onPress={() => setShowComments(true)}
-          icon={<CommentIcon size={24} color={colors["ink-body"]} />}
+          icon={<CommentIcon size={28} color={colors["ink-dim"]} />}
           count={commentsCount}
           countVisible={commentsCount > 0}
         />
         <RailButton
           onPress={toggleSave}
-          icon={<BookmarkIcon size={24} color={saved ? colors.save : colors["ink-body"]} filled={saved} />}
+          icon={<BookmarkIcon size={28} color={saved ? colors.save : colors["ink-dim"]} filled={saved} />}
           count={saveCount}
           countColor={saved ? colors.save : colors["ink-dim"]}
           countVisible={saveCount > 0 || saved}
         />
         <RailButton
           onPress={() => sharePost(post)}
-          icon={<ShareIcon size={24} color={colors["ink-body"]} />}
+          icon={<ShareIcon size={28} color={colors["ink-dim"]} />}
         />
       </View>
 
