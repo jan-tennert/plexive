@@ -41,11 +41,24 @@ export const colors = {
   "fmt-neutral": "#7888a8",
 } as const
 
-// Radii in px (web: 0.875rem / 0.625rem / 1.25rem at 16px root)
+// Stage translucent white fills (web globals.css layers these over the
+// neutral surfaces instead of opaque surface steps).
+export const fills = {
+  slab: "rgba(255, 255, 255, 0.04)", // .card slabs, loading slabs
+  chrome: "rgba(255, 255, 255, 0.06)", // chrome pills, inputs, icon circles
+  tag: "rgba(255, 255, 255, 0.05)", // feed interest tag pills
+  active10: "rgba(255, 255, 255, 0.10)", // sliding indicator, send button
+  active12: "rgba(255, 255, 255, 0.12)", // selected segment, active nav circle
+  dotOff: "rgba(255, 255, 255, 0.15)", // empty difficulty dots
+} as const
+
+// Radii in px (web: 0.875rem / 0.625rem / 1.25rem at 16px root;
+// Stage slabs and sheets use rounded-3xl = 24px)
 export const radius = {
   card: 14,
   field: 10,
   sheet: 20,
+  slab: 24,
 } as const
 
 // Font family names as registered with expo-font in app/_layout.tsx.

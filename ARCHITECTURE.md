@@ -141,12 +141,13 @@ frontend/
       HistoricalContextSection.tsx stories: broader historical setting
 
 mobile/                         React Native app (Expo SDK 56, TypeScript, expo-router, NativeWind 4 + tailwindcss 3.4); phase 3 = post detail with all 80 section types + like/save/comment/share/quiz actions
-  package.json                  main: expo-router/entry; deps incl. reanimated 4, gesture-handler, react-native-svg, expo-image, async-storage, expo-secure-store, react-native-pager-view, @expo-google-fonts/{newsreader,source-sans-3,geist-mono}
+  package.json                  main: expo-router/entry; deps incl. reanimated 4, gesture-handler, react-native-svg, expo-image, expo-blur, async-storage, expo-secure-store, react-native-pager-view, @expo-google-fonts/{newsreader,source-sans-3,geist-mono}; lockfile built with --legacy-peer-deps (react 19.2.3 vs react-dom 19.2.7 peer conflict) — install with npm ci --legacy-peer-deps
+  .env                          actual env vars (gitignored via root .gitignore): EXPO_PUBLIC_API_URL + EXPO_PUBLIC_WEB_URL, ports 8000/3000 (real phone: PC LAN IP; emulator: 10.0.2.2); restart expo with -c after edits
   babel.config.js               babel-preset-expo (jsxImportSource nativewind) + nativewind/babel
   metro.config.js               expo/metro-config wrapped in withNativeWind (input global.css)
   tailwind.config.js            NativeWind preset; colors/radii/fontFamily generated from src/theme/tokens.ts so web class vocabulary (bg-surface-1, text-ink-dim, rounded-card) works
   src/config.ts                 BASE_URL/WS_URL from EXPO_PUBLIC_API_URL; dev default http://10.0.2.2:8000 (emulator-to-host); WEB_URL (share links) + SEED_IMAGE_ORIGIN + resolveImageUrl() for web-relative /seed-images/ paths
-  src/theme/tokens.ts           Circuit tokens (surfaces, edges, ink, lamp/like/save/good/bad, fmt-*) + radii px + expo-font family names; mirrors frontend globals.css @theme
+  src/theme/tokens.ts           Circuit tokens (surfaces, edges, ink, lamp/like/save/good/bad, fmt-*) + Stage fills (translucent white slab/chrome/active overlays) + radii px (incl. slab 24) + expo-font family names; mirrors frontend globals.css @theme
   src/lib/api.ts                apiFetch port; module-level cachedToken filled from expo-secure-store (Keystore/Keychain) by initAuthToken() at startup so apiFetch reads it synchronously; setAuthToken keeps cache+storage in sync; getAuthToken() sync read for AuthProvider; skips Content-Type for FormData
   src/lib/auth.tsx              AuthContext port of frontend lib/auth.tsx: JWT via setAuthToken (SecureStore), session restore via /api/auth/me on mount, user/loading/login/register/logout/updateUser, detailToMessage error normalization
   src/lib/interests.ts          getInterestSlugs/setInterestSlugs; AsyncStorage key "deepscroll_interests" (same meaning as web localStorage); null = onboarding not done
@@ -174,7 +175,8 @@ mobile/                         React Native app (Expo SDK 56, TypeScript, expo-
   src/components/CommentsBottomSheet.tsx  Modal port of web sheet: backdrop, drag handle (up=75%, down=50%/close), FlatList comments + VerifiedBadge + delete own, sticky input (no statusBarTranslucent so Android adjustResize keeps input above keyboard)
   src/components/VerifiedBadge.tsx  react-native-svg port of web VerifiedBadge (level colors + official variant)
   src/components/MathText.tsx   $...$ parser port; math segments render as Geist Mono text (no KaTeX/HTML in RN - known fidelity gap for academy/formalism)
-  src/components/icons.tsx      shared heart/bookmark/comment/share/back SVG glyphs copied from web action buttons
+  src/components/icons.tsx      Stage glyph set (heart/comment/bookmark/share/arrow-up/speaker/back), path data copied from web icons.tsx: strokeWidth 1.8 soft outlines, filled prop turns closed shapes solid
+  src/components/stage.tsx      Stage primitives: SlabGlow (Svg radial accent halo, 8% -> transparent 70%), SlabAccent (3px left bar + 48px top tint), Frosted (BlurView chrome pill — translucent fallback on Android), PulsingSlab (stage-pulse loading), MessageSlab + ghostPillStyle for slab states
   src/components/PrimaryButton.tsx  web .btn-primary recipe (lamp gradient pill) as Pressable+LinearGradient; label/onPress/disabled
   src/components/FeedTab.tsx    one pager page: lazy fetch on first activation (GET /api/feed?interests&format; Following -> /api/feed/following with login/empty states); posts reset on user change; vertical paging FlatList from phase 1
   src/components/FeedTabBar.tsx tab strip + sliding 16x4 indicator; reanimated progress from PagerView onPageScroll, translateX over measured tab centers + interpolateColor over tab accents; auto-centers active tab (clamped); inert search icon
