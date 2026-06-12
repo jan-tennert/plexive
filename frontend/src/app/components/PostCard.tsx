@@ -479,9 +479,11 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
         </div>
       </div>
 
-      {/* Interest tags — floating pills bottom-left, clear of the actions. */}
+      {/* Interest tags — floating pills bottom-left, clear of the actions.
+          wrap-reverse keeps the first row hugging the bottom edge so it stays
+          level with the send button even if the tags wrap. */}
       {post.interests.length > 0 && (
-        <div className="absolute left-4 right-20 bottom-24 flex flex-wrap gap-2 z-10">
+        <div className="absolute left-4 right-20 bottom-24 flex flex-wrap-reverse gap-2 z-10">
           {post.interests.slice(0, 2).map((name) => (
             <span
               key={name}
@@ -495,8 +497,9 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
 
       {/* Action rail — bare glyphs floating at the right edge, no borders or
           containers, each count rendered underneath its button. Press
-          feedback is a springy scale-down. */}
-      <div className="absolute right-2 bottom-24 z-10 flex flex-col items-center gap-3">
+          feedback is a springy scale-down. The send button's bottom edge
+          sits flush at bottom-24, level with the first row of interest tags. */}
+      <div className="absolute right-2 bottom-24 z-10 flex flex-col items-center gap-1">
         {/* Like */}
         <div className="flex flex-col items-center">
           <button
@@ -552,7 +555,6 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           >
             <SpeakerIcon className="w-6 h-6" />
           </button>
-          <span className="text-[11px] font-mono leading-none invisible">0</span>
         </div>
 
         {/* Share */}
@@ -564,7 +566,6 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           >
             <SendIcon className="w-6 h-6" />
           </button>
-          <span className="text-[11px] font-mono leading-none invisible">0</span>
         </div>
       </div>
 
