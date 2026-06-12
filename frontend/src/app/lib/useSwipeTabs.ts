@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 // Shared swipe-to-switch-tabs mechanic, extracted from the home feed.
 //
@@ -44,6 +44,9 @@ export function useSwipeTabs({ count, initialIndex = 0, onSettle }: UseSwipeTabs
   // passes a fresh callback each render.
   const onSettleRef = useRef(onSettle)
   onSettleRef.current = onSettle
+  // Lets callers force a re-measure when the tab buttons mount after the
+  // pager (e.g. search shows its capsule only once a query exists).
+  const updateIndicatorRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     const el = pagerRef.current
@@ -91,6 +94,7 @@ export function useSwipeTabs({ count, initialIndex = 0, onSettle }: UseSwipeTabs
 
     // Set initial indicator position
     updateIndicator()
+    updateIndicatorRef.current = updateIndicator
 
     // Resize/rotation leaves scrollLeft mid-page; realign to the active
     // page and re-measure the indicator.
@@ -148,5 +152,9 @@ export function useSwipeTabs({ count, initialIndex = 0, onSettle }: UseSwipeTabs
     }
   }
 
-  return { activeIndex, activatedIndices, pagerRef, indicatorRef, tabRefs, selectTab }
+  const refreshIndicator = useCallback(() => {
+    updateIndicatorRef.current?.()
+  }, [])
+
+  return { activeIndex, activatedIndices, pagerRef, indicatorRef, tabRefs, selectTab, refreshIndicator }
 }
