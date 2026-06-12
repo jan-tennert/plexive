@@ -222,7 +222,7 @@ export default function ChatPage() {
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto pb-14 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+        <div className="flex-1 overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
           {!authLoading && !user ? (
             <div className="h-full flex flex-col items-center justify-center gap-3 px-8 text-center">
               <p className="font-serif text-ink font-medium text-lg">Message people you follow</p>

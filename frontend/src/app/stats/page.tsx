@@ -2853,7 +2853,7 @@ export default function StatsPage() {
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto pb-20 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         {activeTab === "global" && (
           globalLoading ? (
             <div className="flex items-center justify-center h-40 text-ink-dim text-sm">

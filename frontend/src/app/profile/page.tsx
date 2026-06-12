@@ -282,7 +282,7 @@ export default function ProfilePage() {
   return (
     <div className="h-[100dvh] bg-surface-0 flex justify-center">
       <div className="w-full max-w-[430px] h-[100dvh] relative">
-        <div className="h-full overflow-y-auto pb-14 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+        <div className="h-full overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
 
         {/* Back button */}
         <button

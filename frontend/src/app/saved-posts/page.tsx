@@ -46,7 +46,7 @@ export default function SavedPostsPage() {
 
         {/* Empty state */}
         {posts !== null && posts.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center px-8 gap-4 text-center pb-14">
+          <div className="h-full flex flex-col items-center justify-center px-8 gap-4 text-center pb-24">
             <svg
               viewBox="0 0 24 24"
               fill="none"

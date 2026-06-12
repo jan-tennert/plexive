@@ -155,7 +155,7 @@ export default function PublicProfilePage() {
 
   return (
     <div className="h-[100dvh] bg-surface-0 flex justify-center">
-      <div className="w-full max-w-[430px] h-[100dvh] relative overflow-y-auto pb-20 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+      <div className="w-full max-w-[430px] h-[100dvh] relative overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
 
         {/* Header */}
         <div className="flex items-center px-4 pt-4 pb-2">

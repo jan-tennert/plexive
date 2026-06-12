@@ -243,7 +243,7 @@ export default function SearchPage() {
         </div>
 
         {/* Results area */}
-        <div className={`absolute inset-0 ${scope === "posts" ? "top-[148px]" : "top-[112px]"} overflow-y-auto pb-14 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] px-3`}>
+        <div className={`absolute inset-0 ${scope === "posts" ? "top-[148px]" : "top-[112px]"} overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] px-3`}>
           {loading ? (
             <div className="flex justify-center pt-16">
               <Spinner />
