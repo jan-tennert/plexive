@@ -15,8 +15,9 @@ import { useSwipeTabs } from "@/app/lib/useSwipeTabs"
 
 const TABS: FeedTab[] = [
   // Non-format tabs carry no accent dot; the capsule itself stays neutral.
-  { id: "for-you", label: "For You", format: null, accent: "#eceeff" },
+  // Following sits left of For You, but For You stays the default open tab.
   { id: "following", label: "Following", format: null, accent: "#eceeff" },
+  { id: "for-you", label: "For You", format: null, accent: "#eceeff" },
   ...FORMAT_IDS.map((id) => ({
     id,
     label: FORMAT_STYLES[id].label,
@@ -24,6 +25,8 @@ const TABS: FeedTab[] = [
     accent: FORMAT_STYLES[id].accent,
   })),
 ]
+
+const DEFAULT_TAB_INDEX = TABS.findIndex((t) => t.id === "for-you")
 
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
@@ -134,7 +137,7 @@ export default function Home() {
   // color never changes — the per-post accent switches hard with the
   // settled card, not the chrome.
   const { activeIndex, activatedIndices, pagerRef, indicatorRef, tabRefs, selectTab } =
-    useSwipeTabs({ count: TABS.length })
+    useSwipeTabs({ count: TABS.length, initialIndex: DEFAULT_TAB_INDEX })
   const activeTab = TABS[activeIndex].id
   const tabStripRef     = useRef<HTMLDivElement>(null)
   const isFirstTabCenter = useRef(true)
@@ -151,13 +154,14 @@ export default function Home() {
     setSlugs(JSON.parse(saved))
 
     const savedTab = sessionStorage.getItem("feedActiveTab")
-    if (savedTab) {
-      const tabIndex = TABS.findIndex((t) => t.id === savedTab)
-      if (tabIndex !== -1) {
-        sessionStorage.removeItem("feedActiveTab")
-        selectTabRef.current(tabIndex, { behavior: "instant" })
-      }
-    }
+    if (savedTab) sessionStorage.removeItem("feedActiveTab")
+    const savedIndex = savedTab ? TABS.findIndex((t) => t.id === savedTab) : -1
+    // The default tab (For You) is not the first pager page since Following
+    // sits left of it, so the pager always needs an instant alignment on
+    // mount — to the restored tab if there is one, otherwise the default.
+    selectTabRef.current(savedIndex !== -1 ? savedIndex : DEFAULT_TAB_INDEX, {
+      behavior: "instant",
+    })
   }, [router])
 
   // Align the active tab: first tab snaps left, last tab snaps right, middle tabs center.
