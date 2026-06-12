@@ -574,7 +574,9 @@ export function PieChart({
         {slices.map((d) => {
           const sweep = (d.value / total) * Math.PI * 2
           const a0 = angle + pad / 2
-          const a1 = angle + sweep - pad / 2
+          // A full-circle arc has identical start and end points and draws
+          // nothing; cap a hair under 2 pi so a single slice still renders.
+          const a1 = Math.min(angle + sweep - pad / 2, a0 + Math.PI * 2 - 0.004)
           angle += sweep
           if (a1 <= a0) return null
           return <Path key={d.label} d={arcPath(cx, cy, r0, r1, a0, a1)} fill={d.color ?? DEFAULT_COLOR} />
