@@ -7,6 +7,7 @@ import { formatStyle } from "@/lib/formats"
 import { fcStr, type Post } from "@/types/post"
 import SectionRenderer from "@/components/SectionRenderer"
 import CommentsSection, { type Comment } from "@/app/components/CommentsSection"
+import { SlabAccent } from "@/app/components/PostCard"
 import VerifiedBadge from "@/components/VerifiedBadge"
 import { ArrowUpIcon, HeartIcon } from "@/app/components/icons"
 import { useAuth } from "@/app/lib/auth"
@@ -234,10 +235,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             {post && style ? (
               <>
                 {/* Header — frosted slab inset from the edges */}
-                <div className="mx-3 mb-3 card px-5 py-6">
+                <div className="mx-3 mb-3 card relative overflow-hidden px-5 py-6">
+                  <SlabAccent />
                   {/* Format marker — dot and label carry the accent */}
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="w-2 h-2 rounded-full shrink-0 bg-(--accent)" />
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-(--accent)" />
                     <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
                       {style.badge.toLowerCase()}
                     </span>

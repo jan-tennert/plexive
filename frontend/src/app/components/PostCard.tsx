@@ -50,6 +50,26 @@ function Teasers({ items }: { items: string[] }) {
   )
 }
 
+// Accent carriers on a slab: a thin vertical bar on the left edge plus a
+// faint tint falling from the top edge, both clipped into the slab's rounded
+// corners (the host slab adds relative + overflow-hidden). A single edge
+// accent, never a border or fill — the slab itself stays borderless and
+// neutral. Shared with the post detail header slab.
+export function SlabAccent() {
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="absolute left-0 top-0 bottom-0 w-[3px] bg-(--accent)"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-12 bg-linear-to-b from-(--accent)/8 to-transparent pointer-events-none"
+      />
+    </>
+  )
+}
+
 // Slab footer: creator byline on the left, neutral reading metadata on the
 // right. Lives inside the slab so the card carries its own context.
 function CardFooter({
@@ -293,14 +313,15 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           {/* Format marker floating above the slab — dot and label both carry
               the per-format accent so the format is legible at a glance. */}
           <div className="flex items-center gap-2 mb-3 pl-2">
-            <span className="w-2 h-2 rounded-full shrink-0 bg-(--accent)" />
+            <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-(--accent)" />
             <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
               {style.badge.toLowerCase()}
             </span>
           </div>
 
           {post.format === "books" && fc ? (
-            <div className="card px-6 py-7 flex flex-col gap-4">
+            <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
+              <SlabAccent />
               {/* Title row + cover */}
               <div className="flex gap-4 items-start">
                 <div className="flex-1 min-w-0">
@@ -333,7 +354,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               <CardFooter post={post} fc={fc} extras={[fc.year as number, fc.genre as string]} />
             </div>
           ) : post.format === "people" && fc ? (
-            <div className="card px-6 py-7 flex flex-col gap-4">
+            <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
+              <SlabAccent />
               <div className="flex gap-4 items-start">
                 {(fc.portrait as { image_url?: string } | undefined)?.image_url && (
                   <div className="shrink-0 w-20 h-20 rounded-full overflow-hidden bg-white/[0.06]">
@@ -370,7 +392,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               <CardFooter post={post} fc={fc} />
             </div>
           ) : post.format === "facts" && fc ? (
-            <div className="card px-6 py-7 flex flex-col gap-4">
+            <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
+              <SlabAccent />
               {fcStr(fc, "field") && (
                 <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
@@ -385,7 +408,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               <CardFooter post={post} fc={fc} />
             </div>
           ) : post.format === "concepts" && fc ? (
-            <div className="card px-6 py-7 flex flex-col gap-4">
+            <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
+              <SlabAccent />
               {fcStr(fc, "field") && (
                 <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
@@ -403,7 +427,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               <CardFooter post={post} fc={fc} />
             </div>
           ) : post.format === "questions" && fc ? (
-            <div className="card px-6 py-7 flex flex-col gap-4">
+            <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
+              <SlabAccent />
               {fcStr(fc, "field") && (
                 <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
@@ -421,7 +446,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               <CardFooter post={post} fc={fc} />
             </div>
           ) : post.format === "stories" && fc ? (
-            <div className="card px-6 py-7 flex flex-col gap-4">
+            <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
+              <SlabAccent />
               <div className="flex items-center gap-2 flex-wrap">
                 {fcStr(fc, "era_label") && (
                   <span className="label-caps text-(--accent)">
@@ -443,7 +469,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
               <CardFooter post={post} fc={fc} extras={[fcStr(fc, "era")]} />
             </div>
           ) : post.format === "academy" && fc ? (
-            <div className="card px-6 py-7 flex flex-col gap-4">
+            <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
+              <SlabAccent />
               {fcStr(fc, "field") && (
                 <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
@@ -467,7 +494,8 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             </div>
           ) : (
             /* Fallback for unknown formats */
-            <div className="card px-6 py-7 flex flex-col gap-4">
+            <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
+              <SlabAccent />
               <h2 className="font-serif text-3xl font-medium tracking-tight text-ink leading-snug">
                 {post.title}
               </h2>
