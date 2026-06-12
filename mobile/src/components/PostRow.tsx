@@ -19,7 +19,7 @@ export default function PostRow({ post }: Props) {
       onPress={() => router.push(`/post/${post.id}`)}
       style={({ pressed }) => ({
         backgroundColor: pressed ? "rgba(255, 255, 255, 0.07)" : fills.slab,
-        borderRadius: radius.card,
+        borderRadius: radius.slab,
         paddingHorizontal: 16,
         paddingVertical: 12,
         flexDirection: "row",
