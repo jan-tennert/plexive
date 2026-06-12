@@ -131,21 +131,34 @@ frontend/
       CastSection.tsx           stories: array of character cards (name/role/one_line/lifespan)
       HistoricalContextSection.tsx stories: broader historical setting
 
-mobile/                         React Native app (Expo SDK 56, TypeScript, expo-router, NativeWind 4 + tailwindcss 3.4); phase 1 = For You feed only
-  package.json                  main: expo-router/entry; deps incl. reanimated 4, gesture-handler, react-native-svg, expo-image, async-storage, @expo-google-fonts/{newsreader,source-sans-3,geist-mono}
+mobile/                         React Native app (Expo SDK 56, TypeScript, expo-router, NativeWind 4 + tailwindcss 3.4); phase 2 = auth + onboarding + 9-tab feed navigation
+  package.json                  main: expo-router/entry; deps incl. reanimated 4, gesture-handler, react-native-svg, expo-image, async-storage, expo-secure-store, react-native-pager-view, @expo-google-fonts/{newsreader,source-sans-3,geist-mono}
   babel.config.js               babel-preset-expo (jsxImportSource nativewind) + nativewind/babel
   metro.config.js               expo/metro-config wrapped in withNativeWind (input global.css)
   tailwind.config.js            NativeWind preset; colors/radii/fontFamily generated from src/theme/tokens.ts so web class vocabulary (bg-surface-1, text-ink-dim, rounded-card) works
   src/config.ts                 BASE_URL/WS_URL from EXPO_PUBLIC_API_URL; dev default http://10.0.2.2:8000 (emulator-to-host); comments document emulator / device-on-WLAN / HTTPS cases
   src/theme/tokens.ts           Circuit tokens (surfaces, edges, ink, lamp/like/save/good/bad, fmt-*) + radii px + expo-font family names; mirrors frontend globals.css @theme
-  src/lib/api.ts                apiFetch port; module-level cachedToken filled from AsyncStorage by initAuthToken() at startup so apiFetch reads it synchronously; setAuthToken keeps cache+storage in sync; skips Content-Type for FormData
+  src/lib/api.ts                apiFetch port; module-level cachedToken filled from expo-secure-store (Keystore/Keychain) by initAuthToken() at startup so apiFetch reads it synchronously; setAuthToken keeps cache+storage in sync; getAuthToken() sync read for AuthProvider; skips Content-Type for FormData
+  src/lib/auth.tsx              AuthContext port of frontend lib/auth.tsx: JWT via setAuthToken (SecureStore), session restore via /api/auth/me on mount, user/loading/login/register/logout/updateUser, detailToMessage error normalization
+  src/lib/interests.ts          getInterestSlugs/setInterestSlugs; AsyncStorage key "deepscroll_interests" (same meaning as web localStorage); null = onboarding not done
+  src/lib/likedPosts.ts         async AsyncStorage port of web likedPosts.ts (keys deepscroll_liked/like_counts/like_sent, migrateSentKey dropped); not yet wired to UI (no action rail this phase)
+  src/lib/savedPosts.ts         async AsyncStorage port of web savedPosts.ts (key deepscroll_saved); not yet wired to UI
+  src/lib/feedTabs.ts           TABS: For You + Following + 7 format tabs (FeedTabDef {id,label,format,accent,rgb}), ported from web page.tsx
   src/lib/formats.ts            FORMAT_IDS/FORMAT_STYLES/formatStyle/LEGACY_SVG_ACCENT_MAP port (web Tailwind class strings dropped, accent hex kept)
   src/lib/relativeTime.ts       relativeTime(iso) port, unchanged
   src/types/post.ts             Post/Section/SectionType/feed-card types + fcStr/fcNum, identical to frontend/src/types/post.ts
-  src/app/_layout.tsx           root layout: loads Newsreader/Source Sans 3/Geist Mono via useFonts, awaits initAuthToken, holds splash until ready, dark Stack on surface-0, GestureHandlerRootView
-  src/app/index.tsx             For You feed: GET /api/feed -> FlatList of full-screen PostCards; pagingEnabled + decelerationRate fast + getItemLayout (item height = measured container height) + windowSize 5 / maxToRenderPerBatch 2 / removeClippedSubviews; loading spinner + retry error state
+  src/app/_layout.tsx           root layout: loads Newsreader/Source Sans 3/Geist Mono via useFonts, awaits initAuthToken, holds splash until ready, wraps Stack in AuthProvider, dark Stack on surface-0, GestureHandlerRootView
+  src/app/index.tsx             home: 9-tab feed container; interests gate (AsyncStorage -> redirect /onboarding), FeedTabBar + PagerView (9 FeedTab pages, collapsable=false, lazy activation set) + BottomNav + Toast; measured pager height drives card height
+  src/app/login.tsx             port of web login page: centered card, email+password fields, inline error in bad color, PrimaryButton, link to /register; redirects to / when logged in
+  src/app/register.tsx          port of web register page: email+username+password, otherwise same pattern as login.tsx
+  src/app/onboarding.tsx        InterestPicker port: CATEGORIES map copied verbatim, GET /api/interests, pill grid in 10 sections + Other, min 1 selection, saves slugs via setInterestSlugs, router.replace("/")
   src/components/PostCard.tsx   memoized full-screen card; per-format layouts (books/people/facts/concepts/questions/stories/academy + fallback) mirroring web PostCard core elements; expo-linear-gradient card surface, accent left border, badge glow via textShadow/boxShadow, interest tags, author initial; no actions/navigation this phase
   src/components/SafeSvg.tsx    SvgBlock counterpart: seed -> inline SvgXml with legacy-hex re-palette; user content -> expo-image with svg+xml data URI (no script execution)
+  src/components/PrimaryButton.tsx  web .btn-primary recipe (lamp gradient pill) as Pressable+LinearGradient; label/onPress/disabled
+  src/components/FeedTab.tsx    one pager page: lazy fetch on first activation (GET /api/feed?interests&format; Following -> /api/feed/following with login/empty states); posts reset on user change; vertical paging FlatList from phase 1
+  src/components/FeedTabBar.tsx tab strip + sliding 16x4 indicator; reanimated progress from PagerView onPageScroll, translateX over measured tab centers + interpolateColor over tab accents; auto-centers active tab (clamped); inert search icon
+  src/components/BottomNav.tsx  web BottomNav port (5 svg icons verbatim); Feed active with lamp glow; Chat/Stats/Create -> "Coming soon" toast; Profile -> /login or toast when logged in; safe-area bottom padding
+  src/components/Toast.tsx      useToast hook + pill component above BottomNav; 1800ms auto-hide, reanimated FadeIn/FadeOut
 
 docs/REVIEW.md                  full-pass audit (June 2026): categorized findings + design direction and token set
 docs/DESIGN.md                  "Lamplight" design identity (June 2026 redesign): rationale, full token set, format ink palette, type system, component vocabulary
@@ -450,6 +463,7 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 - "Lamplight" visual redesign (June 2026, see docs/DESIGN.md): warm dark token system in globals.css drives every screen; Newsreader serif + Source Sans 3 + Geist Mono type system; muted book-spine format inks; per-post --accent CSS variable replaces hardcoded section colors; seed SVGs re-paletted at render time in SvgBlock (content JSON untouched); shared component vocabulary (.card/.btn/.field/.chip/.label-caps)
 
 - Mobile app phase 1 (mobile/): Expo/React Native For You feed with TikTok-style vertical paging, Circuit tokens + web fonts, all 7 format card layouts
+- Mobile app phase 2 (mobile/): JWT auth (SecureStore) with login/register screens + session restore, onboarding interest picker (AsyncStorage gate), 9-tab feed via PagerView with animated tab indicator, BottomNav + toast for unbuilt destinations
 
 **Next**
 - Content for academy format
