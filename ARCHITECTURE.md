@@ -157,7 +157,7 @@ mobile/                         React Native app (Expo SDK 56, TypeScript, expo-
   src/lib/accent.tsx            AccentContext + useAccent(); RN replacement for the web per-post --accent CSS variable (provider set by post detail screen)
   src/lib/usePostActions.ts     shared like/save hook for PostCard + detail: AsyncStorage state, eventQueue like, web server-count reconciliation formula (GET /likes)
   src/lib/share.ts              sharePost() via RN Share API (system sheet; title + WEB_URL/post/{id}); expo-sharing deliberately not used (files only)
-  src/lib/feedTabs.ts           TABS: For You + Following + 7 format tabs (FeedTabDef {id,label,format,accent,rgb}), ported from web page.tsx
+  src/lib/feedTabs.ts           TABS: Following + For You + 7 format tabs (FeedTabDef {id,label,format,accent,rgb}) + DEFAULT_TAB_INDEX (For You opens first), ported from web page.tsx tab order
   src/lib/formats.ts            FORMAT_IDS/FORMAT_STYLES/formatStyle/LEGACY_SVG_ACCENT_MAP port (web Tailwind class strings dropped, accent hex kept)
   src/lib/relativeTime.ts       relativeTime(iso) port, unchanged
   src/types/post.ts             Post/Section/SectionType/feed-card types + fcStr/fcNum, identical to frontend/src/types/post.ts

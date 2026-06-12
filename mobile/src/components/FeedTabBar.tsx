@@ -45,7 +45,9 @@ const FeedTabBar = forwardRef<FeedTabBarHandle, Props>(function FeedTabBar(
   const boundsRef = useRef<{ x: number; width: number }[]>([])
   const xsSV = useSharedValue<number[]>([])
   const widthsSV = useSharedValue<number[]>([])
-  const progress = useSharedValue(0)
+  // Starts on the initial tab so the indicator instant-aligns on mount
+  // (the pager opens on For You, not index 0, like the web).
+  const progress = useSharedValue(activeIndex)
   const [contentWidth, setContentWidth] = useState(0)
   // Measured capsule width (window minus insets and the search circle).
   const [stripWidth, setStripWidth] = useState(0)

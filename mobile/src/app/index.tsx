@@ -4,7 +4,7 @@ import type { LayoutChangeEvent } from "react-native"
 import { useRouter } from "expo-router"
 import PagerView from "react-native-pager-view"
 import { getInterestSlugs } from "../lib/interests"
-import { TABS } from "../lib/feedTabs"
+import { DEFAULT_TAB_INDEX, TABS } from "../lib/feedTabs"
 import { colors } from "../theme/tokens"
 import { PulsingSlab } from "../components/stage"
 import FeedTab from "../components/FeedTab"
@@ -24,8 +24,8 @@ export default function HomeScreen() {
   const router = useRouter()
   // undefined = still reading storage; string[] = onboarded.
   const [slugs, setSlugs] = useState<string[] | undefined>(undefined)
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [activated, setActivated] = useState<Set<number>>(() => new Set([0]))
+  const [activeIndex, setActiveIndex] = useState(DEFAULT_TAB_INDEX)
+  const [activated, setActivated] = useState<Set<number>>(() => new Set([DEFAULT_TAB_INDEX]))
   // Measured height of the pager area; every feed card is exactly this tall,
   // which keeps the vertical paging exact (see FeedTab getItemLayout).
   const [pageHeight, setPageHeight] = useState(0)
@@ -87,7 +87,7 @@ export default function HomeScreen() {
         <PagerView
           ref={pagerRef}
           style={{ flex: 1 }}
-          initialPage={0}
+          initialPage={DEFAULT_TAB_INDEX}
           onPageScroll={(e) =>
             tabBarRef.current?.onPageScroll(e.nativeEvent.position, e.nativeEvent.offset)
           }
