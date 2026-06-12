@@ -12,6 +12,7 @@ import {
 import { useRouter } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import * as ImagePicker from "expo-image-picker"
+import { File as FsFile } from "expo-file-system"
 import Svg, { Circle, Path } from "react-native-svg"
 import { useAuth } from "../../lib/auth"
 import { apiFetch } from "../../lib/api"
@@ -258,12 +259,10 @@ export default function ProfileSettingsScreen() {
     setAvatarLoading(true)
     try {
       const form = new FormData()
-      // RN FormData file parts are {uri, name, type} objects, not Blobs.
-      form.append("file", {
-        uri: asset.uri,
-        name: asset.fileName ?? "avatar.jpg",
-        type: asset.mimeType ?? "image/jpeg",
-      } as unknown as Blob)
+      // Expo's WinterCG fetch rejects the classic RN {uri, name, type}
+      // FormData part; the expo-file-system File class implements Blob and
+      // is the SDK 56 supported way to put a local file into FormData.
+      form.append("file", new FsFile(asset.uri) as unknown as Blob)
       const r = await apiFetch("/api/auth/me/avatar", { method: "POST", body: form })
       const data = await r.json()
       if (!r.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Failed to upload picture.")
