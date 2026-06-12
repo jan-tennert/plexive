@@ -35,15 +35,15 @@ function DotScale({ value }: { value: 1 | 2 | 3 }) {
 }
 
 // Teaser bullets — a plain list, deliberately not container-shaped so the
-// teasers never read as tappable. The small accent markers are one of the
-// few post-owned accent elements.
+// teasers never read as tappable. The accent markers carry the per-format
+// color; the text sits one ink step below the title, clearly readable.
 function Teasers({ items }: { items: string[] }) {
   return (
     <div className="mt-1 space-y-2">
       {items.map((teaser, i) => (
         <div key={i} className="flex items-start gap-2.5">
-          <span className="w-1 h-1 rounded-full bg-(--accent)/70 mt-[0.45rem] shrink-0" />
-          <span className="text-sm text-ink-dim leading-snug">{teaser}</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-(--accent) mt-[0.4rem] shrink-0" />
+          <span className="text-sm text-ink-body leading-snug">{teaser}</span>
         </div>
       ))}
     </div>
@@ -290,10 +290,11 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          {/* Format marker floating above the slab — the only accent chrome. */}
+          {/* Format marker floating above the slab — dot and label both carry
+              the per-format accent so the format is legible at a glance. */}
           <div className="flex items-center gap-2 mb-3 pl-2">
-            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-(--accent)" />
-            <span className="text-xs font-mono lowercase tracking-widest text-ink-muted">
+            <span className="w-2 h-2 rounded-full shrink-0 bg-(--accent)" />
+            <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
               {style.badge.toLowerCase()}
             </span>
           </div>
@@ -347,7 +348,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
                 )}
                 <div className="flex-1 min-w-0">
                   {fcStr(fc, "role") && (
-                    <p className="label-caps text-ink-muted mb-0.5">
+                    <p className="label-caps text-(--accent) mb-0.5">
                       {fcStr(fc, "role")}
                     </p>
                   )}
@@ -371,7 +372,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           ) : post.format === "facts" && fc ? (
             <div className="card px-6 py-7 flex flex-col gap-4">
               {fcStr(fc, "field") && (
-                <p className="label-caps text-ink-muted">{fcStr(fc, "field")}</p>
+                <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
               <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                 {fc.headline as string}
@@ -386,7 +387,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           ) : post.format === "concepts" && fc ? (
             <div className="card px-6 py-7 flex flex-col gap-4">
               {fcStr(fc, "field") && (
-                <p className="label-caps text-ink-muted">{fcStr(fc, "field")}</p>
+                <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
               <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                 {fcStr(fc, "concept_name")}
@@ -404,7 +405,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           ) : post.format === "questions" && fc ? (
             <div className="card px-6 py-7 flex flex-col gap-4">
               {fcStr(fc, "field") && (
-                <p className="label-caps text-ink-muted">{fcStr(fc, "field")}</p>
+                <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
               <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                 {fcStr(fc, "the_question")}
@@ -423,7 +424,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             <div className="card px-6 py-7 flex flex-col gap-4">
               <div className="flex items-center gap-2 flex-wrap">
                 {fcStr(fc, "era_label") && (
-                  <span className="label-caps text-ink-muted">
+                  <span className="label-caps text-(--accent)">
                     {fcStr(fc, "era_label")}
                   </span>
                 )}
@@ -444,7 +445,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           ) : post.format === "academy" && fc ? (
             <div className="card px-6 py-7 flex flex-col gap-4">
               {fcStr(fc, "field") && (
-                <p className="label-caps text-ink-muted">{fcStr(fc, "field")}</p>
+                <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
               )}
               <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                 {fcStr(fc, "title") || post.title}

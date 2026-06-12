@@ -235,10 +235,10 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               <>
                 {/* Header — frosted slab inset from the edges */}
                 <div className="mx-3 mb-3 card px-5 py-6">
-                  {/* Format marker — the only accent touch */}
+                  {/* Format marker — dot and label carry the accent */}
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-(--accent)" />
-                    <span className="text-xs font-mono lowercase tracking-widest text-ink-muted">
+                    <span className="w-2 h-2 rounded-full shrink-0 bg-(--accent)" />
+                    <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
                       {style.badge.toLowerCase()}
                     </span>
                   </div>
