@@ -11,6 +11,7 @@ import Link from "next/link"
 import { useAuth } from "../lib/auth"
 import { useComments } from "../lib/useComments"
 import CommentRow from "./CommentRow"
+import { SendIcon } from "./icons"
 
 interface Props {
   postId: number
@@ -153,10 +154,7 @@ export default function CommentsBottomSheet({ postId, onClose, onCountChange }: 
                   draft.trim() && !posting ? "text-ink" : "text-ink-muted"
                 }`}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
+                <SendIcon className="w-4 h-4" />
               </button>
             </form>
           ) : (

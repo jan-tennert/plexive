@@ -13,6 +13,7 @@ import { fcNum, fcStr, type Post } from "@/types/post"
 import { formatStyle } from "@/lib/formats"
 import Avatar from "@/components/Avatar"
 import VerifiedBadge from "@/components/VerifiedBadge"
+import { BookmarkIcon, CommentIcon, HeartIcon, SendIcon, SpeakerIcon } from "./icons"
 
 export type { Post }
 
@@ -503,18 +504,11 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             aria-label={liked ? "Unlike" : "Like"}
             className={`w-11 h-11 flex items-center justify-center cursor-pointer transition-all duration-150 active:scale-90 ${liked ? "text-like" : "text-ink-dim"}`}
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill={liked ? "currentColor" : "none"}
-              stroke="currentColor"
-              strokeWidth={liked ? 0 : 2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <HeartIcon
+              filled={liked}
               className={`w-6 h-6 ${animatingLike ? "heart-pop" : ""}`}
               onAnimationEnd={() => setAnimatingLike(false)}
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
+            />
           </button>
           <span className={`text-[11px] font-mono leading-none transition-colors duration-150 ${liked ? "text-like" : "text-ink-dim"} ${likesCount === 0 && !liked ? "invisible" : ""}`}>{likesCount}</span>
         </div>
@@ -526,18 +520,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             aria-label="Comments"
             className="w-11 h-11 flex items-center justify-center cursor-pointer transition-all duration-150 active:scale-90 text-ink-dim"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-6 h-6"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+            <CommentIcon className="w-6 h-6" />
           </button>
           <span className={`text-[11px] font-mono text-ink-dim leading-none ${commentsCount === 0 ? "invisible" : ""}`}>{commentsCount}</span>
         </div>
@@ -549,18 +532,11 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             aria-label={saved ? "Unsave" : "Save"}
             className={`w-11 h-11 flex items-center justify-center cursor-pointer transition-all duration-150 active:scale-90 ${saved ? "text-save" : "text-ink-dim"}`}
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill={saved ? "currentColor" : "none"}
-              stroke="currentColor"
-              strokeWidth={saved ? 0 : 2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <BookmarkIcon
+              filled={saved}
               className={`w-6 h-6 ${animatingSave ? "heart-pop" : ""}`}
               onAnimationEnd={() => setAnimatingSave(false)}
-            >
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-            </svg>
+            />
           </button>
           <span className={`text-[11px] font-mono leading-none transition-colors duration-150 ${saved ? "text-save" : "text-ink-dim"} ${saveCount === 0 && !saved ? "invisible" : ""}`}>{saveCount}</span>
         </div>
@@ -574,19 +550,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             aria-label="Read aloud (coming soon)"
             className="w-11 h-11 flex items-center justify-center text-ink-dim opacity-40 cursor-default"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-6 h-6"
-            >
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-            </svg>
+            <SpeakerIcon className="w-6 h-6" />
           </button>
           <span className="text-[11px] font-mono leading-none invisible">0</span>
         </div>
@@ -598,18 +562,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
             aria-label="Share"
             className="w-11 h-11 flex items-center justify-center cursor-pointer transition-all duration-150 active:scale-90 text-ink-dim"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-6 h-6"
-            >
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
+            <SendIcon className="w-6 h-6" />
           </button>
           <span className="text-[11px] font-mono leading-none invisible">0</span>
         </div>

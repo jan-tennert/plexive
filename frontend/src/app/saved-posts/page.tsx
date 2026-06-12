@@ -6,6 +6,7 @@ import PostCard, { type Post } from "@/app/components/PostCard"
 import { getSavedPostIds } from "@/app/lib/savedPosts"
 import { apiFetch } from "@/app/lib/api"
 import BottomNav from "@/app/components/BottomNav"
+import { BookmarkIcon } from "@/app/components/icons"
 
 export default function SavedPostsPage() {
   const router = useRouter()
@@ -48,17 +49,7 @@ export default function SavedPostsPage() {
         {posts !== null && posts.length === 0 && (
           <div className="h-full flex items-center justify-center px-6 pb-24">
             <div className="card px-8 py-10 text-center max-w-xs flex flex-col items-center gap-4">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-10 h-10 text-ink-faint"
-              >
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-              </svg>
+              <BookmarkIcon strokeWidth={1.5} className="w-10 h-10 text-ink-faint" />
               <p className="text-ink-dim text-sm">
                 No saved posts yet. Tap the bookmark icon on any post to save it.
               </p>
