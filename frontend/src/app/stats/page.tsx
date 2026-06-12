@@ -336,7 +336,7 @@ function NoData() {
 function FormatChip({ format }: { format: string }) {
   return (
     <span
-      className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded capitalize"
+      className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full capitalize"
       style={{ backgroundColor: FORMAT_COLORS[format] + "22", color: FORMAT_COLORS[format] }}
     >
       {format}
@@ -360,10 +360,12 @@ interface ChartOption {
   component: ReactNode
 }
 
+// Each category floats as its own frosted slab; the chart-type selector is a
+// row of neutral pills (active = filled, never accent).
 function CategorySection({ title, charts }: { title: string; charts: ChartOption[] }) {
   const [selected, setSelected] = useState(0)
   return (
-    <div className="px-4 py-4 border-b border-edge">
+    <div className="card mx-3 mb-3 px-4 py-4">
       <div className="label-caps text-ink-dim mb-3">
         {title}
       </div>
@@ -373,7 +375,9 @@ function CategorySection({ title, charts }: { title: string; charts: ChartOption
             <button
               key={c.label}
               onClick={() => setSelected(i)}
-              className={`btn shrink-0 ${selected === i ? "btn-primary" : "btn-quiet"}`}
+              className={`btn shrink-0 px-3.5 py-1.5 text-[0.8125rem] ${
+                selected === i ? "bg-white/[0.12] text-ink" : "btn-quiet"
+              }`}
             >
               {c.label}
             </button>
@@ -770,7 +774,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
       {FORMATS.map(fmt => {
         const fmtData = data.top_creators_per_format[fmt] ?? []
         return (
-          <div key={fmt} className="bg-surface-1 rounded-lg p-2">
+          <div key={fmt} className="bg-white/[0.04] rounded-xl p-2">
             <div className="text-[10px] font-semibold mb-1" style={{ color: FORMAT_COLORS[fmt] }}>
               {fmt}
             </div>
@@ -1239,7 +1243,7 @@ function GlobalTab({ data }: { data: GlobalStats }) {
   return (
     <div>
       {/* 1. Overview */}
-      <div className="px-4 py-4 border-b border-edge">
+      <div className="card mx-3 mb-3 px-4 py-4">
         <div className="label-caps text-ink-dim mb-3">
           Overview
         </div>
@@ -1498,7 +1502,7 @@ function MyStatsTab({
           {eloFormats.map(([fmt, d]) => (
             <div key={fmt} className="flex items-center gap-3">
               <span className="w-20 shrink-0 text-xs text-ink-dim capitalize">{fmt}</span>
-              <div className="flex-1 h-2 bg-surface-1 rounded-full overflow-hidden">
+              <div className="flex-1 h-2 bg-white/[0.08] rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full"
                   style={{
@@ -1894,12 +1898,12 @@ function MyStatsTab({
   const { current_days, best_days } = data.my_streak
   const streakCards = (
     <div className="grid grid-cols-2 gap-4">
-      <div className="bg-surface-1 rounded-xl p-5 text-center">
+      <div className="bg-white/[0.04] rounded-2xl p-5 text-center">
         <div className="text-4xl font-bold text-ink">{current_days}</div>
         <div className="text-ink-dim text-xs mt-1">Current streak</div>
         <div className="text-2xl mt-1">🔥</div>
       </div>
-      <div className="bg-surface-1 rounded-xl p-5 text-center">
+      <div className="bg-white/[0.04] rounded-2xl p-5 text-center">
         <div className="text-4xl font-bold text-ink">{best_days}</div>
         <div className="text-ink-dim text-xs mt-1">Best streak</div>
         <div className="text-2xl mt-1">🔥</div>
@@ -1916,8 +1920,8 @@ function MyStatsTab({
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 transition-all ${
                 m.achieved
-                  ? "border-lamp bg-lamp/20 shadow-[0_0_8px_rgba(167,139,250,0.4)]"
-                  : "border-edge-strong bg-surface-1"
+                  ? "border-lamp bg-lamp/20 shadow-[0_0_8px_rgba(124,111,255,0.4)]"
+                  : "border-transparent bg-white/[0.06]"
               }`}
             >
               {m.achieved ? (
@@ -1948,7 +1952,7 @@ function MyStatsTab({
   return (
     <div>
       {/* 1. Overview */}
-      <div className="px-4 py-4 border-b border-edge">
+      <div className="card mx-3 mb-3 px-4 py-4">
         <div className="label-caps text-ink-dim mb-3">
           Overview
         </div>
@@ -1956,7 +1960,7 @@ function MyStatsTab({
       </div>
 
       {/* 1b. My Knowledge Score */}
-      <div className="px-4 py-4 border-b border-edge">
+      <div className="card mx-3 mb-3 px-4 py-4">
         <div className="label-caps text-ink-dim mb-3">
           My Knowledge Score
         </div>
@@ -2124,7 +2128,7 @@ function MyStatsTab({
       />
 
       {/* 14. My Streak */}
-      <div className="px-4 py-4 border-b border-edge">
+      <div className="card mx-3 mb-3 px-4 py-4">
         <div className="label-caps text-ink-dim mb-3">
           My Streak
         </div>
@@ -2132,7 +2136,7 @@ function MyStatsTab({
       </div>
 
       {/* 15. My Milestones */}
-      <div className="px-4 py-4 border-b border-edge">
+      <div className="card mx-3 mb-3 px-4 py-4">
         <div className="label-caps text-ink-dim mb-3">
           My Milestones
         </div>
@@ -2260,8 +2264,9 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-40 text-ink-dim text-sm">
-        Loading friends...
+      <div className="flex flex-col px-3 gap-3 pt-2">
+        <div className="stage-pulse card h-40 w-full" />
+        <div className="stage-pulse card h-64 w-full" />
       </div>
     )
   }
@@ -2269,7 +2274,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
   if (noFollowing) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 px-8 py-16 text-center">
-        <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-ink-muted">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
@@ -2308,7 +2313,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
           <span className={`w-20 shrink-0 text-xs truncate ${p.username === username ? "text-lamp font-semibold" : "text-ink-dim"}`}>
             {shortName(p.username, username)}
           </span>
-          <div className="flex-1 h-2 bg-surface-1 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-white/[0.08] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full"
               style={{ width: `${Math.min(100, ((p.global_rating ?? 0) / eloMax) * 100)}%`, backgroundColor: p.username === username ? "#7c6fff" : DEFAULT_COLOR }}
@@ -2433,7 +2438,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
         if (inFmt.length === 0) return null
         const top = inFmt[0]
         return (
-          <div key={fmt} className="bg-surface-1 rounded-lg p-3">
+          <div key={fmt} className="bg-white/[0.04] rounded-xl p-3">
             <div className="text-[10px] font-semibold mb-2" style={{ color: FORMAT_COLORS[fmt] }}>{fmt}</div>
             {inFmt.slice(0, 3).map((p, i) => (
               <div key={p.username} className="flex items-center gap-1.5 mb-1">
@@ -2731,7 +2736,7 @@ function FriendsTab({ username, verifiedLevel }: { username: string; verifiedLev
   return (
     <div>
       {/* Overview */}
-      <div className="px-4 py-4 border-b border-edge">
+      <div className="card mx-3 mb-3 px-4 py-4">
         <div className="label-caps text-ink-dim mb-3">Overview</div>
         {overviewCards}
       </div>
@@ -2839,14 +2844,18 @@ export default function StatsPage() {
   return (
     <StatsErrorBoundary>
     <div className="relative max-w-[430px] mx-auto bg-surface-0 h-[100dvh] flex flex-col">
-      {/* Tab bar */}
-      <div className="sticky top-0 z-20 bg-surface-0 border-b border-edge px-4 pt-3 pb-0">
-        <div className="flex gap-1.5">
+      {/* Tab switcher — floating frosted segmented capsule */}
+      <div className="sticky top-0 z-20 px-3 pt-3 pb-2">
+        <div className="h-11 rounded-full backdrop-blur-xl bg-white/[0.06] flex items-center p-1 gap-1">
           {tabs.map(t => (
             <button
               key={t.key}
               onClick={() => setActiveTab(t.key)}
-              className={`btn flex-1 ${activeTab === t.key ? "btn-primary" : "btn-ghost"}`}
+              className={`flex-1 h-9 rounded-full text-sm cursor-pointer transition-colors duration-150 ${
+                activeTab === t.key
+                  ? "bg-white/[0.12] text-ink font-semibold"
+                  : "text-ink-muted font-medium hover:text-ink-dim"
+              }`}
             >
               {t.label}
             </button>
@@ -2855,56 +2864,56 @@ export default function StatsPage() {
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto pt-1 pb-24 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         {activeTab === "global" && (
           globalLoading ? (
-            <div className="flex items-center justify-center h-40 text-ink-dim text-sm">
-              Loading stats...
+            <div className="flex flex-col px-3 gap-3 pt-2">
+              <div className="stage-pulse card h-40 w-full" />
+              <div className="stage-pulse card h-64 w-full" />
             </div>
           ) : globalData ? (
             <GlobalTab data={globalData} />
           ) : (
-            <div className="flex items-center justify-center h-40 text-ink-muted text-sm">
-              Could not load stats.
+            <div className="card mx-3 mt-2 px-8 py-10 text-center">
+              <p className="text-ink-muted text-sm">Could not load stats.</p>
             </div>
           )
         )}
 
         {activeTab === "my" && !user && (
-          <div className="flex flex-col items-center justify-center h-60 gap-4 px-8 text-center">
-            <div className="text-ink-dim text-sm">Log in to see your personal stats</div>
-            <a
-              href="/login"
-              className="btn btn-primary px-5 py-2"
-            >
-              Log in
-            </a>
+          <div className="flex items-center justify-center h-60 px-6">
+            <div className="card px-8 py-10 text-center max-w-xs flex flex-col items-center gap-4">
+              <p className="text-ink-dim text-sm">Log in to see your personal stats</p>
+              <a href="/login" className="btn btn-primary px-5 py-2">
+                Log in
+              </a>
+            </div>
           </div>
         )}
 
         {activeTab === "my" && user && (
           myLoading ? (
-            <div className="flex items-center justify-center h-40 text-ink-dim text-sm">
-              Loading stats...
+            <div className="flex flex-col px-3 gap-3 pt-2">
+              <div className="stage-pulse card h-40 w-full" />
+              <div className="stage-pulse card h-64 w-full" />
             </div>
           ) : myData ? (
             <MyStatsTab data={myData} savedCount={savedCount} />
           ) : (
-            <div className="flex items-center justify-center h-40 text-ink-muted text-sm">
-              Could not load personal stats.
+            <div className="card mx-3 mt-2 px-8 py-10 text-center">
+              <p className="text-ink-muted text-sm">Could not load personal stats.</p>
             </div>
           )
         )}
 
         {activeTab === "friends" && !user && (
-          <div className="flex flex-col items-center justify-center h-60 gap-4 px-8 text-center">
-            <div className="text-ink-dim text-sm">Log in to compare stats with friends</div>
-            <a
-              href="/login"
-              className="btn btn-primary px-5 py-2"
-            >
-              Log in
-            </a>
+          <div className="flex items-center justify-center h-60 px-6">
+            <div className="card px-8 py-10 text-center max-w-xs flex flex-col items-center gap-4">
+              <p className="text-ink-dim text-sm">Log in to compare stats with friends</p>
+              <a href="/login" className="btn btn-primary px-5 py-2">
+                Log in
+              </a>
+            </div>
           </div>
         )}
 
