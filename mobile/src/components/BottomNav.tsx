@@ -8,9 +8,9 @@ import { Frosted } from "./stage"
 
 // Port of frontend/src/app/components/BottomNav.tsx (Stage): a frosted pill
 // dock floating inset from every edge; the active item is a filled neutral
-// circle — functional, never glow. Feed/Stats/Profile/Chat navigate like the
-// web (Profile goes to the own public profile, settings live behind its gear);
-// only Create still reports "coming soon" until that screen exists.
+// circle — functional, never glow. Feed/Stats/Profile/Chat/Create all navigate
+// like the web (Profile goes to the own public profile, settings live behind
+// its gear; Create opens the post-creation wizard at /create).
 
 const ICON_PROPS = {
   width: 20,
@@ -22,7 +22,7 @@ const ICON_PROPS = {
   strokeLinejoin: "round",
 } as const
 
-type ActiveTab = "feed" | "stats" | "profile" | "chat"
+type ActiveTab = "feed" | "stats" | "profile" | "chat" | "create"
 
 function NavButton({
   onPress,
@@ -54,10 +54,11 @@ function NavButton({
 
 export default function BottomNav({
   active,
-  onComingSoon,
 }: {
   active?: ActiveTab
-  onComingSoon: () => void
+  // Still accepted by existing call sites; no longer used here now that Create
+  // navigates to /create instead of reporting "coming soon".
+  onComingSoon?: () => void
 }) {
   const router = useRouter()
   const insets = useSafeAreaInsets()
@@ -118,8 +119,11 @@ export default function BottomNav({
           </NavButton>
 
           {/* Create */}
-          <NavButton onPress={onComingSoon}>
-            <Svg {...ICON_PROPS} stroke={inactive}>
+          <NavButton
+            onPress={active === "create" ? () => {} : () => router.push("/create")}
+            active={active === "create"}
+          >
+            <Svg {...ICON_PROPS} stroke={iconColor("create")}>
               <Circle cx={12} cy={12} r={10} />
               <Line x1={12} y1={8} x2={12} y2={16} />
               <Line x1={8} y1={12} x2={16} y2={12} />
