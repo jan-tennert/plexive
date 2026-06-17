@@ -7,23 +7,23 @@ import useSWR from "swr"
 import PostCard from "@/app/components/PostCard"
 import BottomNav from "@/app/components/BottomNav"
 import FeedHeader, { type FeedTab } from "@/app/components/FeedHeader"
-import EmptyState from "@/components/EmptyState"
+import Marathon from "@/app/components/Marathon"
+import Battle from "@/app/components/Battle"
 import type { Post } from "@/types/post"
-import { FORMAT_IDS, FORMAT_STYLES } from "@/lib/formats"
 import { useAuth } from "@/app/lib/auth"
 import { useSwipeTabs } from "@/app/lib/useSwipeTabs"
 
 const TABS: FeedTab[] = [
-  // Non-format tabs carry no accent dot; the capsule itself stays neutral.
+  // The feed has no format-specific tabs (books, people, etc.); format filtering
+  // lives only in the search view now, matching the mobile tab set. These four
+  // non-format tabs carry no accent dot; the capsule itself stays neutral.
   // Following sits left of For You, but For You stays the default open tab.
+  // Train and Battle sit right of For You (matching the mobile tab order); they
+  // host their own components instead of a card feed (see the pager map below).
   { id: "following", label: "Following", format: null, accent: "#eceeff" },
   { id: "for-you", label: "For You", format: null, accent: "#eceeff" },
-  ...FORMAT_IDS.map((id) => ({
-    id,
-    label: FORMAT_STYLES[id].label,
-    format: id,
-    accent: FORMAT_STYLES[id].accent,
-  })),
+  { id: "train", label: "Train", format: null, accent: "#eceeff" },
+  { id: "battle", label: "Battle", format: null, accent: "#eceeff" },
 ]
 
 const DEFAULT_TAB_INDEX = TABS.findIndex((t) => t.id === "for-you")
@@ -109,12 +109,6 @@ function TabPage({
           <div className="stage-pulse card h-72 w-full" />
           <div className="stage-pulse card h-20 w-3/4" />
         </div>
-      ) : posts.length === 0 && tab.format ? (
-        <div className="h-full flex items-center justify-center bg-surface-0 px-6">
-          <div className="card px-8 py-10 max-w-xs">
-            <EmptyState format={tab.format} accentColor={tab.accent} />
-          </div>
-        </div>
       ) : posts.length === 0 ? (
         <div className="h-full flex items-center justify-center bg-surface-0 px-6">
           <div className="card px-8 py-10 text-center max-w-xs flex flex-col items-center gap-2">
@@ -198,14 +192,34 @@ export default function Home() {
         ref={pagerRef}
         className="h-full flex flex-row overflow-x-scroll overflow-y-hidden snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
       >
-        {TABS.map((tab, i) => (
-          <TabPage
-            key={tab.id}
-            tab={tab}
-            slugs={slugs}
-            isActivated={activatedIndices.has(i)}
-          />
-        ))}
+        {TABS.map((tab, i) => {
+          const isActivated = activatedIndices.has(i)
+          // Train and Battle host their own full-screen component instead of a
+          // card feed. Gate on activation so the marathon does not run and the
+          // battle socket does not connect until the tab is first opened (the
+          // empty page keeps swiping cheap, like TabPage's own placeholder).
+          if (tab.id === "train" || tab.id === "battle") {
+            return (
+              <div key={tab.id} className="w-full shrink-0 snap-start h-[100dvh] bg-surface-0">
+                {!isActivated ? (
+                  <div className="h-full bg-surface-0" />
+                ) : tab.id === "train" ? (
+                  <Marathon onExit={() => selectTab(DEFAULT_TAB_INDEX)} />
+                ) : (
+                  <Battle onExit={() => selectTab(DEFAULT_TAB_INDEX)} />
+                )}
+              </div>
+            )
+          }
+          return (
+            <TabPage
+              key={tab.id}
+              tab={tab}
+              slugs={slugs}
+              isActivated={isActivated}
+            />
+          )
+        })}
       </div>
       <BottomNav activeTab="feed" />
     </PhoneFrame>
