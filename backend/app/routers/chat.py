@@ -1,4 +1,5 @@
 import asyncio
+import ipaddress
 import json
 from typing import List, Optional
 
@@ -302,13 +303,24 @@ manager = ConnectionManager()
 
 def _is_secure_or_local(websocket: WebSocket) -> bool:
     """Require wss outside local development. TLS usually terminates at a
-    reverse proxy, so x-forwarded-proto counts as secure too."""
+    reverse proxy, so x-forwarded-proto counts as secure too. Plain ws is also
+    allowed from loopback and private LAN ranges (RFC1918 / link-local) so dev
+    clients -- the Android emulator or a phone reaching the dev machine by its
+    192.168.x.x address -- can connect; those addresses are never publicly
+    routable, so the "force TLS on the public internet" guarantee stands.
+    Mirrors the same gate in routers/battle.py."""
     if websocket.url.scheme == "wss":
         return True
     if websocket.headers.get("x-forwarded-proto", "").lower() in ("https", "wss"):
         return True
     host = websocket.client.host if websocket.client else ""
-    return host in ("127.0.0.1", "::1", "localhost", "testclient")
+    if host in ("localhost", "testclient"):
+        return True
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return ip.is_loopback or ip.is_private or ip.is_link_local
 
 
 async def _ws_error(websocket: WebSocket, detail: str) -> None:
