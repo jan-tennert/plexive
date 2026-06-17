@@ -1,5 +1,6 @@
 import { memo, useRef } from "react"
 import { Pressable, Text, View, useWindowDimensions } from "react-native"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import { Image } from "expo-image"
 import { useRouter } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -23,7 +24,9 @@ import { HeartIcon, SpeakerIcon } from "./icons"
 // behind it, interest tags as floating pills bottom-left. The like/comment/
 // save/share buttons live on the post detail view, not the feed. Tap opens
 // the post detail; double tap likes (web 300ms double-tap rule) with the
-// heart-boom overlay.
+// heart-boom overlay. Swiping left also opens the post (mirror of the post
+// detail's swipe-right-to-close); the home pager has horizontal tab-swiping
+// disabled so this gesture owns the horizontal axis here.
 // Every card is exactly `height` tall so FlatList paging snaps one card per
 // swipe without measuring.
 
@@ -326,6 +329,16 @@ function PostCard({ post, height }: { post: Post; height: number }) {
     boomOpacity.value = withSequence(withTiming(1, { duration: 300 }), withTiming(0, { duration: 300 }))
   }
 
+  // Open the detail, cancelling any pending tap-driven navigation so a swipe
+  // and a tap can never fire the push twice.
+  function openPost() {
+    if (navTimerRef.current) {
+      clearTimeout(navTimerRef.current)
+      navTimerRef.current = null
+    }
+    router.push(`/post/${post.id}`)
+  }
+
   // Web double-tap rule: a second tap within 300ms likes; otherwise navigate
   // after the window closes.
   function handleCardPress() {
@@ -349,12 +362,25 @@ function PostCard({ post, height }: { post: Post; height: number }) {
     }, 300)
   }
 
+  // Swipe left to open (mirror of the detail's swipe-right-to-close). Only a
+  // clearly leftward drag activates, so vertical FlatList paging and taps are
+  // untouched; the 80px end threshold matches the close gesture's distance.
+  const openSwipe = Gesture.Pan()
+    .activeOffsetX(-40)
+    .failOffsetX(20)
+    .failOffsetY([-30, 30])
+    .runOnJS(true)
+    .onEnd((e) => {
+      if (e.translationX < -80 && Math.abs(e.translationX) > Math.abs(e.translationY)) openPost()
+    })
+
   // The glow box is a square 1.5x the screen width centered on the card,
   // clipped by the card's own overflow so it never reaches neighboring posts
   // or the floating chrome (web SlabGlow placement).
   const glowSize = windowWidth * 1.5
 
   return (
+    <GestureDetector gesture={openSwipe}>
     <Pressable
       onPress={handleCardPress}
       style={{ height, backgroundColor: colors["surface-0"], overflow: "hidden" }}
@@ -438,6 +464,7 @@ function PostCard({ post, height }: { post: Post; height: number }) {
       </Animated.View>
 
     </Pressable>
+    </GestureDetector>
   )
 }
 
