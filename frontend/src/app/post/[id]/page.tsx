@@ -4,8 +4,10 @@ import { use, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { formatStyle } from "@/lib/formats"
-import { fcStr, type Post } from "@/types/post"
+import { fcStr, type Post, type RelatedPostItem, type KeyFigure } from "@/types/post"
 import SectionRenderer from "@/components/SectionRenderer"
+import SectionLabel from "@/components/SectionLabel"
+import RelatedPostsSection from "@/components/sections/RelatedPostsSection"
 import CommentsSection, { type Comment } from "@/app/components/CommentsSection"
 import { SlabAccent, SlabGlow } from "@/app/components/PostCard"
 import VerifiedBadge from "@/components/VerifiedBadge"
@@ -17,6 +19,25 @@ import { apiFetch } from "@/app/lib/api"
 import { queueEvent, hasPendingLike, cancelPendingLike } from "@/app/lib/eventQueue"
 import { likePost, unlikePost, isPostLiked, getCachedLikeCount, setCachedLikeCount, isLikeSent, markLikeSent, unmarkLikeSent } from "@/app/lib/likedPosts"
 import { updatePostInFeedCaches } from "@/app/lib/swr"
+
+// "Read next" is built from the post's featured graph edges: featured key_figures
+// (in the story section) plus featured top-level connections, capped at 3. The old
+// related_posts section is gone. Targets may be latent (post_id empty), which
+// RelatedPostsSection renders as "Coming soon".
+function buildReadNext(post: Post): RelatedPostItem[] {
+  const figures: RelatedPostItem[] = []
+  const story = post.sections.find((s) => s.type === "story")
+  const keyFigures = (story?.content as { key_figures?: KeyFigure[] } | undefined)?.key_figures ?? []
+  for (const f of keyFigures) {
+    if (f.featured) {
+      figures.push({ post_id: "", title: f.name, format: "people", mini_teaser: f.one_line ?? f.role })
+    }
+  }
+  const connections: RelatedPostItem[] = (post.connections ?? [])
+    .filter((c) => c.featured)
+    .map((c) => ({ post_id: "", title: c.ref, format: c.format, mini_teaser: "" }))
+  return [...figures, ...connections].slice(0, 3)
+}
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -373,6 +394,21 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   postId={post.id}
                 />
                 </div>
+
+                {/* Read Next — featured graph edges (key figures + connections).
+                    Outside the readable region so read-aloud never speaks it. */}
+                {(() => {
+                  const readNext = buildReadNext(post)
+                  if (readNext.length === 0) return null
+                  return (
+                    <div data-no-read className="border-t border-edge">
+                      <div className="px-6 pt-6 -mb-4">
+                        <SectionLabel>Read Next</SectionLabel>
+                      </div>
+                      <RelatedPostsSection content={readNext} />
+                    </div>
+                  )
+                })()}
 
                 {/* Comments list */}
                 <div ref={commentsTopRef} className="px-6">
