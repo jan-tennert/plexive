@@ -18,7 +18,7 @@
   ],
   "feed_card": {
     "field": "Food Science",
-    "headline": "Honey can sit for thousands of years without spoiling, and jars of it have been found unspoiled in ancient tombs.",
+    "headline": "Honey can last for thousands of years, and jars of it have been found unspoiled in ancient tombs.",
     "card_visual": {
       "image_url": "",
       "image_attribution": "",
@@ -36,7 +36,7 @@
     {
       "type": "headline",
       "order": 1,
-      "content": "Honey can sit for thousands of years without spoiling, and jars of it have been found unspoiled in ancient tombs."
+      "content": "Honey can last for thousands of years, and jars of it have been found unspoiled in ancient tombs."
     },
     {
       "type": "see_it",
@@ -61,19 +61,19 @@
       "order": 9,
       "content": [
         {
-          "title": "Bees boil the water out of nectar",
+          "title": "Bees drive the water out of nectar",
           "body": "Honey starts as something that would spoil fast. Nectar is roughly 80 percent water, a thin sugary liquid that would ferment within days. The bees concentrate it. A forager swallows the droplet and brings it back up over and over to air it out, then house bees fan their wings in shifts to drive off more water, until the load falls to around 17 percent and they cap the cell with wax. What goes into the comb is a different substance from what came out of the flower, dried, acidified and dosed with enzymes, worked by the hive into something that will keep for centuries.",
           "visual_svg": "<svg viewBox='0 112 400 128' xmlns='http://www.w3.org/2000/svg' fill='none'><text x='200' y='130' fill='currentColor' font-family='var(--font-sans), system-ui, sans-serif' font-size='14' font-weight='600' opacity='0.75' text-anchor='middle'>Water driven out of nectar</text><text x='40' y='152' fill='currentColor' font-family='var(--font-sans), system-ui, sans-serif' font-size='13' opacity='0.8' text-anchor='start'>nectar</text><rect x='40' y='158' width='290' height='28' rx='8' stroke='currentColor' stroke-width='2' opacity='0.55'/><text x='322' y='177' fill='currentColor' font-family='var(--font-mono), ui-monospace, monospace' font-size='14' font-weight='700' opacity='0.8' text-anchor='end'>~80% water</text><text x='40' y='204' fill='var(--accent)' font-family='var(--font-sans), system-ui, sans-serif' font-size='13' font-weight='700' text-anchor='start'>honey</text><rect x='40' y='210' width='62' height='28' rx='8' fill='var(--accent)' fill-opacity='0.16' stroke='var(--accent)' stroke-width='2.5'/><text x='112' y='229' fill='var(--accent)' font-family='var(--font-mono), ui-monospace, monospace' font-size='14' font-weight='700' text-anchor='start'>~17% water</text></svg>"
         },
         {
           "title": "It can still go wrong",
-          "body": "Honey's long life has conditions. Crystallized honey, gone grainy and pale, has not spoiled at all; the sugars have come out of solution, and gentle warming clears it. The real danger is water. Leave a jar open in a humid kitchen and honey, ever thirsty, takes up enough moisture for wild yeasts to wake and ferment it. Raw honey can also carry dormant spores of Clostridium botulinum, harmless to adults but able to take hold in an infant's gut, which is why honey is kept away from children under one."
+          "body": "Honey's long life has conditions. Crystallized honey, gone grainy and pale, has not spoiled at all. The sugars have come out of solution, and gentle warming clears it. The real danger is water. Leave a jar open in a humid kitchen and honey, ever thirsty, takes up enough moisture for wild yeasts to wake and ferment it. Raw honey can also carry dormant spores of Clostridium botulinum, harmless to adults but able to take hold in an infant's gut, which is why honey is kept away from children under one."
         },
         {
           "title": "The same chemistry that preserves it heals wounds",
           "body": "Long before anyone knew what a microbe was, healers reached for honey. Egyptian and Sumerian physicians packed wounds with it thousands of years ago, and they were onto something real. The dryness, acidity and peroxide that keep honey from spoiling also kill the bacteria in an infected cut and draw fluid out of it, starving the germs the same way. Hospitals now use sterilized medical-grade honey, often from the manuka plant, on burns and stubborn wounds, an old folk remedy carried by the chemistry underneath it.",
           "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Western_Honey_Bees_and_Honeycomb.JPG",
-          "image_caption": "Honey bees on the comb, where nectar is dried and stored; the low water and acidity that keep honey from spoiling also fight bacteria in a wound.",
+          "image_caption": "Honey bees on the comb, where nectar is dried and stored. The low water and acidity that keep honey from spoiling also fight bacteria in a wound.",
           "image_attribution": "Healthnutlady, \"Western Honey Bees and Honeycomb\", CC BY 3.0 (Wikimedia Commons)"
         }
       ]
@@ -118,7 +118,7 @@
             "Water has leaked into the jar"
           ],
           "answer_index": 1,
-          "explanation": "Crystallization is the sugars settling out of the liquid. It is a change in texture, and the honey is unspoiled; gentle warming dissolves the crystals again."
+          "explanation": "Crystallization is the sugars settling out of the liquid. It is a change in texture, and the honey is unspoiled. Gentle warming dissolves the crystals again."
         },
         {
           "question": "Why is honey kept away from infants under one year old?",
