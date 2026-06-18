@@ -33,13 +33,13 @@ export const colors = {
   // Format inks — mobile source of truth for format colors. src/lib/formats.ts
   // derives each format's accent + rgb from these. Keep in sync by hand with
   // --color-fmt-* in frontend/src/app/globals.css.
-  "fmt-books": "#dfc186",
-  "fmt-facts": "#6e9cd8",
-  "fmt-people": "#dd7eca",
-  "fmt-concepts": "#9e7edd",
-  "fmt-questions": "#8ae0e0",
-  "fmt-stories": "#db8076",
-  "fmt-academy": "#7edd9e",
+  "fmt-books": "#cfa857",
+  "fmt-facts": "#7eb1f3",
+  "fmt-people": "#d993ca",
+  "fmt-concepts": "#b69feb",
+  "fmt-questions": "#43c3c4",
+  "fmt-stories": "#eb9288",
+  "fmt-academy": "#73c28d",
   "fmt-neutral": "#7e8699",
 } as const
 
