@@ -49,7 +49,7 @@ export default function StorySection({ content, isUserContent }: Props) {
                 </div>
                 <span className="text-xs text-(--accent)/70">{fig.role}</span>
                 {fig.one_line && (
-                  <p className="text-xs text-ink-dim leading-relaxed mt-1">{fig.one_line}</p>
+                  <p className="text-sm text-ink-body leading-relaxed mt-1">{fig.one_line}</p>
                 )}
                 {fig.image_url && fig.image_attribution && (
                   <p className="text-[10px] text-ink-faint leading-snug mt-1">{fig.image_attribution}</p>
