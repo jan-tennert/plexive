@@ -1,6 +1,7 @@
 import SectionLabel from "../SectionLabel"
 import type { StoryContent } from "../../types/post"
 import SvgBlock from "../SvgBlock"
+import ContentImage from "./ContentImage"
 
 interface Props {
   content: StoryContent
@@ -19,9 +20,11 @@ export default function StorySection({ content, isUserContent }: Props) {
         </div>
       )}
       {content.image_url && !content.visual_svg && (
-        <div className="w-full max-w-[360px] mx-auto">
-          <img src={content.image_url} alt="" loading="lazy" decoding="async" className="w-full rounded-lg object-cover" />
-        </div>
+        <ContentImage
+          url={content.image_url}
+          caption={content.image_caption}
+          attribution={content.image_attribution}
+        />
       )}
 
       {content.key_figures && content.key_figures.length > 0 && (
@@ -47,6 +50,9 @@ export default function StorySection({ content, isUserContent }: Props) {
                 <span className="text-xs text-(--accent)/70">{fig.role}</span>
                 {fig.one_line && (
                   <p className="text-xs text-ink-dim leading-relaxed mt-1">{fig.one_line}</p>
+                )}
+                {fig.image_url && fig.image_attribution && (
+                  <p className="text-[10px] text-ink-faint leading-snug mt-1">{fig.image_attribution}</p>
                 )}
               </div>
             </div>

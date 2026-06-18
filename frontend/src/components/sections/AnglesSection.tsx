@@ -1,6 +1,7 @@
 import SectionLabel from "../SectionLabel"
 import type { AngleItem } from "../../types/post"
 import SvgBlock from "../SvgBlock"
+import ContentImage from "./ContentImage"
 
 interface Props {
   content: AngleItem[]
@@ -21,9 +22,12 @@ export default function AnglesSection({ content, isUserContent }: Props) {
             </div>
           )}
           {angle.image_url && !angle.visual_svg && (
-            <div className="w-full max-w-[360px] mx-auto mt-2">
-              <img src={angle.image_url} alt="" loading="lazy" decoding="async" className="w-full rounded-lg object-cover" />
-            </div>
+            <ContentImage
+              url={angle.image_url}
+              caption={angle.image_caption}
+              attribution={angle.image_attribution}
+              className="w-full max-w-[360px] mx-auto mt-2"
+            />
           )}
         </div>
       ))}

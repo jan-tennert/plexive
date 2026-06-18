@@ -1,6 +1,7 @@
 import SectionLabel from "../SectionLabel"
 import type { SeeItContent } from "../../types/post"
 import SvgBlock from "../SvgBlock"
+import ContentImage from "./ContentImage"
 
 interface Props {
   content: SeeItContent
@@ -17,15 +18,11 @@ export default function SeeItSection({ content, isUserContent }: Props) {
         </div>
       )}
       {content.image_url && !content.visual_svg && (
-        <div className="w-full max-w-[360px] mx-auto">
-          <img src={content.image_url} alt="" loading="lazy" decoding="async" className="w-full rounded-lg object-cover" />
-        </div>
-      )}
-      {content.image_caption && (
-        <p className="text-xs text-ink-muted text-center leading-relaxed">{content.image_caption}</p>
-      )}
-      {content.image_attribution && (
-        <p className="text-[10px] text-ink-faint text-center">{content.image_attribution}</p>
+        <ContentImage
+          url={content.image_url}
+          caption={content.image_caption}
+          attribution={content.image_attribution}
+        />
       )}
     </div>
   )
