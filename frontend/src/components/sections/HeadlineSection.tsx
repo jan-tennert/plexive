@@ -19,7 +19,7 @@ function WithCyanNumbers({ text }: { text: string }) {
 export default function HeadlineSection({ content }: { content: string }) {
   return (
     <div className="px-6 pt-3 pb-5">
-      <p className="text-[2rem] font-bold text-ink leading-tight">
+      <p className="font-serif text-[2rem] font-medium tracking-tight text-ink leading-snug max-w-[24ch]">
         <WithCyanNumbers text={content} />
       </p>
     </div>
