@@ -363,26 +363,30 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                         card footer, so the two always match. */}
                     <div
                       data-no-read
-                      className="px-6 pb-6 flex items-center justify-start gap-3 text-xs text-ink-muted"
+                      className="px-6 pb-6 flex items-center gap-2 min-w-0 text-xs"
                     >
                       {post.author_username && (
                         <Link
                           href={`/profile/${post.author_username}`}
-                          className="flex items-center gap-1.5 hover:text-ink-body transition-colors"
+                          className="flex items-center gap-1.5 min-w-0 hover:text-ink-body transition-colors"
                         >
                           <Avatar username={post.author_username} avatarUrl={post.author_avatar_url} size={24} />
-                          <span className="text-ink-dim">@{post.author_username}</span>
+                          <span className="text-ink-dim truncate">@{post.author_username}</span>
                           {(post.author_is_verified ?? 0) > 0 && (
                             <VerifiedBadge size={12} level={post.author_is_verified ?? 1} />
                           )}
                         </Link>
                       )}
-                      {fcNum(post.feed_card, "post_reading_time_min") > 0 && (
-                        <span className="font-mono">{fcNum(post.feed_card, "post_reading_time_min")} min</span>
-                      )}
-                      {fcNum(post.feed_card, "post_difficulty") > 0 && (
-                        <DotScale value={fcNum(post.feed_card, "post_difficulty") as 1 | 2 | 3} />
-                      )}
+                      <span className="ml-auto flex items-center gap-2 shrink-0">
+                        {fcNum(post.feed_card, "post_difficulty") > 0 && (
+                          <DotScale value={fcNum(post.feed_card, "post_difficulty") as 1 | 2 | 3} />
+                        )}
+                        {fcNum(post.feed_card, "post_reading_time_min") > 0 && (
+                          <span className="text-[11px] font-mono text-ink-muted leading-none">
+                            {fcNum(post.feed_card, "post_reading_time_min")} min
+                          </span>
+                        )}
+                      </span>
                     </div>
                   </div>
                 ) : (
