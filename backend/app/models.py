@@ -29,6 +29,10 @@ class Post(Base):
     title      = Column(String, nullable=False)
     feed_card  = Column(JSON, nullable=False)
     sections   = Column(JSON, nullable=False)
+    # Graph fields: top-level taxonomy slugs and cross-post links. JSON parallels
+    # feed_card/sections. Added to the live DB by scripts/add_graph_columns.py.
+    tags        = Column(JSON, nullable=False, default=list)
+    connections = Column(JSON, nullable=False, default=list)
     author_id  = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     status     = Column(String, nullable=False, default="published", index=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)

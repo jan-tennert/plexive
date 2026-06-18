@@ -153,6 +153,8 @@ for filename in sorted(os.listdir(examples_dir)):
 
     feed_card = example["feed_card"]
     sections = example["sections"]
+    tags = example.get("tags", [])
+    connections = example.get("connections", [])
     title = _post_title(feed_card)
 
     existing = db.query(Post).filter_by(author_id=marlo.id, format=post_format).first()
@@ -161,6 +163,8 @@ for filename in sorted(os.listdir(examples_dir)):
         existing.title = title
         existing.feed_card = feed_card
         existing.sections = sections
+        existing.tags = tags
+        existing.connections = connections
         existing.status = "published"
         db.commit()
         print(f"Updated existing {post_format.title()} post: {title}.")
@@ -179,6 +183,8 @@ for filename in sorted(os.listdir(examples_dir)):
             title=title,
             feed_card=feed_card,
             sections=sections,
+            tags=tags,
+            connections=connections,
             author_id=marlo.id,
             status="published",
             is_user_content=False,

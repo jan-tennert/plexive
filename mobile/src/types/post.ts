@@ -93,6 +93,11 @@ export interface KeyNumberItem {
   unit?: string
 }
 
+export interface TangibleContent {
+  items: string[]
+  visual_svg?: string
+}
+
 export interface AngleItem {
   title: string
   body: string
@@ -105,7 +110,17 @@ export interface KeyFigure {
   role: string
   one_line?: string
   lifespan?: string
+  birth_year?: number
+  featured?: boolean
   image_url?: string
+}
+
+// Graph edge to another post (top-level on Post). The target may not exist yet
+// (latent edge), so it is identified by natural identity in `ref`, not an id.
+export interface ConnectionItem {
+  format: string
+  ref: string
+  featured: boolean
 }
 
 export interface StoryContent {
@@ -401,6 +416,8 @@ export interface Post {
   title: string
   feed_card: Record<string, unknown>
   sections: Section[]
+  tags?: string[]
+  connections?: ConnectionItem[]
   author_id: number | null
   author_username: string | null
   author_is_verified: number | null

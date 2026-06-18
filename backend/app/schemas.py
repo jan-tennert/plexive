@@ -394,6 +394,8 @@ class PostOut(BaseModel):
     title: str
     feed_card: dict
     sections: list[dict]
+    tags: List[str] = []
+    connections: List[dict] = []
     author_id: int | None = None
     author_username: str | None = None
     author_is_verified: int | None = None
