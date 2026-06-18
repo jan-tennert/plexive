@@ -41,7 +41,7 @@ export function Seed() {
 export function Tinted() {
   return (
     <Stage>
-      <SvgBlock svg={DIAGRAM} isUserContent={false} className="max-w-[280px] mx-auto" color="#dfc186" />
+      <SvgBlock svg={DIAGRAM} isUserContent={false} className="max-w-[280px] mx-auto" color="#cfa857" />
     </Stage>
   )
 }

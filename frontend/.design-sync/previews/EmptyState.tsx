@@ -25,7 +25,7 @@ function Stage({ children }: { children: React.ReactNode }) {
 export function Books() {
   return (
     <Stage>
-      <EmptyState format="books" accentColor="#dfc186" />
+      <EmptyState format="books" accentColor="#cfa857" />
     </Stage>
   )
 }
@@ -33,7 +33,7 @@ export function Books() {
 export function Questions() {
   return (
     <Stage>
-      <EmptyState format="questions" accentColor="#8ae0e0" />
+      <EmptyState format="questions" accentColor="#43c3c4" />
     </Stage>
   )
 }
@@ -41,7 +41,7 @@ export function Questions() {
 export function People() {
   return (
     <Stage>
-      <EmptyState format="people" accentColor="#dd7eca" />
+      <EmptyState format="people" accentColor="#d993ca" />
     </Stage>
   )
 }

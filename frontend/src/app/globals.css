@@ -49,14 +49,16 @@
 
   /* Format inks — web source of truth for format colors. Hexes are mirrored by
      hand in src/lib/formats.ts (accent + rgb) and in mobile/src/theme/tokens.ts;
-     update all together. */
-  --color-fmt-books: #dfc186;
-  --color-fmt-facts: #6e9cd8;
-  --color-fmt-people: #dd7eca;
-  --color-fmt-concepts: #9e7edd;
-  --color-fmt-questions: #8ae0e0;
-  --color-fmt-stories: #db8076;
-  --color-fmt-academy: #7edd9e;
+     update all together. Equalized in OKLCH for uniform perceived brightness:
+     L=0.75, chroma 0.11 (clamped to sRGB gamut), hue per format; neutral kept
+     desaturated. New format: pick a hue, keep the same L and chroma. */
+  --color-fmt-books: #cfa857;
+  --color-fmt-facts: #7eb1f3;
+  --color-fmt-people: #d993ca;
+  --color-fmt-concepts: #b69feb;
+  --color-fmt-questions: #43c3c4;
+  --color-fmt-stories: #eb9288;
+  --color-fmt-academy: #73c28d;
   --color-fmt-neutral: #7e8699;
 
   /* Radii (in-content blocks; chrome surfaces use rounded-2xl/3xl/full) */

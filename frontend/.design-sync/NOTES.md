@@ -57,7 +57,7 @@ live in the gitignored `.design-sync/build/`.
 - `cfg.dtsPropsFor` is hand-written for the 20 authored components. If a
   component's real props change in `src`, the contract here goes stale silently —
   re-check against source on any meaningful re-sync.
-- Authored previews import format-ink hexes inline (e.g. `#6b9eff`). The source of
+- Authored previews import format-ink hexes inline (e.g. `#cfa857`). The source of
   truth is `src/lib/formats.ts`; if those inks change, update the previews.
 - The white-card / dark-Stage workaround depends on `emit.mjs` keeping the white
   body default. If a future converter changes the card canvas, revisit the Stage
