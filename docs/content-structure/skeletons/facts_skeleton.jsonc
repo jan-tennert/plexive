@@ -144,8 +144,11 @@
       "type": "see_it",   // See It (REQUIRED)
       "order": 3,
       // JOB: make the fact tangible at first glance. The visual is the proof,
-      //      not an illustration. A reader who stops here has seen the fact,
-      //      not just read it.
+      //      not an illustration, and it should reveal the fact's shape or
+      //      mechanism, not just re-display the headline number. A reader who
+      //      stops here has seen the fact, not merely read the figure again.
+      //      (The heartbeat example shows many species landing on one number,
+      //      which says more than the number alone.)
       // HARD: at least one of visual_svg or image_url present.
       "content": {
         "visual_svg": "",         // string | omit. Per SVG_STANDARD.md (accent

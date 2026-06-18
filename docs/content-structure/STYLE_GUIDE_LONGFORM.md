@@ -110,10 +110,19 @@ if a word shows up more in model output than in good human writing, cut it.
   budget," "beats, not years." It is the quiet cousin of the contrast frame. A
   fact that is itself a symmetry may justify one; reaching for the balance in
   paragraph after paragraph is the tell.
+- The empty intensifier: "simply," "actually," "really," "essentially,"
+  "fundamentally," "of course," "clearly." They pose as emphasis but add
+  nothing and read as machine throat-clearing. Cut them. If the emphasis is
+  real, let the sentence carry it.
 
 **Punctuation:**
 - Zero em-dashes. They are the single most reliable AI tell. Use a comma, a
   colon, parentheses, or two sentences.
+- Semicolons sparingly, and never as a stand-in for the banned em-dash. Where
+  two full clauses meet, prefer two sentences, or join them with "and." A run
+  of semicolons reads as machine-paced, the same tell the em-dash is. One in
+  its proper place is fine, but if you are reaching for one where you wanted a
+  dramatic pause, write two sentences instead.
 - En-dash only inside a tight number range in metadata; in flowing prose write
   "5 to 10," not "5–10."
 - No colon-reveal "ta-da" rhythm on every other sentence.
@@ -332,6 +341,7 @@ Run this check on every generated post. Any hit is a rewrite, not a maybe.
 - [ ] Every concrete claim (number, date, name, quote, source, image URL) is
       real and verifiable; nothing invented, estimated, or embellished.
 - [ ] Zero em-dashes anywhere in user-facing text.
+- [ ] Semicolons sparse, none standing in for an em-dash.
 - [ ] No banned vocabulary; no contrast frames ("not X, it's Y"); no sweeping
       openers; no summarizing sign-off.
 - [ ] Sentence length varies; no flat run of same-length sentences.
