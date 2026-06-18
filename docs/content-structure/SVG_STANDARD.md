@@ -259,30 +259,37 @@ at low opacity, numeric labels in `var(--font-mono)`.
 
 ---
 
-## 6. The card visual (small square emblem)
+## 6. The card visual (full-width banner emblem)
 
-The feed card always carries a small anchor, about 64 to 72 px square, sitting
-top-right beside the headline. It is filled by a real licensed image when one
-fits the fact (preferred), or by an emblem SVG when none does. This section
-covers the emblem SVG; the image path is governed by `IMAGE_STANDARD.md`
+The feed card always carries a visual anchor at the top. On the formats that use
+a top banner (facts, concepts, questions, stories, academy) it is a **full-width
+strip across the top of the card, above the field label**, with the headline
+running full width below it. It is filled by a real licensed image when one fits
+the subject and survives a wide flat crop (preferred), or by an emblem SVG when
+none does. Books and people do not use a banner; their card shows a hochkant side
+cover (the book cover, the portrait) beside the headline, unchanged. This section
+covers the banner emblem SVG; the image path is governed by `IMAGE_STANDARD.md`
 (licensing, attribution, display).
 
-A card emblem is **not a shrunk diagram**. At this size, fine labels and data
-encoding are unreadable. It is a symbol, read in one glance.
+A card emblem is **not a shrunk diagram**. At a glance across a flat strip, fine
+labels and data encoding are unreadable. It is a symbol, read in one glance, that
+spans the width.
 
-- **viewBox `0 0 100 100`** (square), not the body's `0 0 400 300`. No width or
-  height, transparent, `fill="none"` by default.
-- **One idea, a few strokes.** Reduce the fact to a single mark: a pulse line, a
-  spiral, an orbit, a seed, a wave. No more than a handful of paths.
+- **viewBox `0 0 400 100`** (a flat, roughly 4:1 banner), not the body's
+  `0 0 400 300` and not a square. No width or height, transparent, `fill="none"`
+  by default.
+- **One idea, drawn wide.** Reduce the fact to a single motif that reads across
+  the full width: a pulse line with several beats, a wave, an orbit track, a
+  spreading path. A few paths, no clutter.
 - **No text labels.** If it needs words to read, it is the wrong mark.
-- **Bolder strokes:** `stroke-width` 3 to 5; at 64 px a 2 px line vanishes.
+- **Bolder strokes:** `stroke-width` 3 to 5; a thin line is lost on a wide strip.
 - **Color:** the mark in `var(--accent)`, any secondary geometry in
   `currentColor` at low opacity. Same flat rules as the body (no gradients,
   shadows, filters).
 - Round caps and joins, matching the Stage softness.
 
-It should still read, and stay on-brand, as a tiny accent-colored glyph in the
-corner of the card.
+It should read as a calm, accent-colored motif banding the top of the card, not
+as a busy illustration competing with the headline below it.
 
 ---
 

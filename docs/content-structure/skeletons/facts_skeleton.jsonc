@@ -48,9 +48,10 @@
 // The mid-post run of surprises, tangible, how_we_know must not be visual-
 // free; tangible carries the visual there.
 //
-// The feed card is separate and ALWAYS carries a small square anchor
-// (card_visual: a licensed image if one fits, else an emblem SVG). See the
-// feed_card field and SVG_STANDARD.md card rules.
+// The feed card is separate and ALWAYS carries a visual anchor (card_visual:
+// a licensed image if one fits, else an emblem SVG). On Facts the anchor is a
+// full-width banner across the top of the card, above the field label; the
+// headline runs full width below it. See SVG_STANDARD.md card rules.
 //
 // How a drawn visual looks: SVG_STANDARD.md. How a sourced image is licensed,
 // attributed, and shown: IMAGE_STANDARD.md. Caption and label wording:
@@ -96,17 +97,18 @@
     "headline": "",           // string. Guideline: 8-16 words, the fact stated
                               // cleanly, the key number positioned for emphasis.
                               // Avoid: "Did you know", preamble, question marks.
-    "card_visual": {          // REQUIRED. The card always carries a small
-                              // square anchor (~64-72px, top-right). Fill
-                              // exactly one of the two below; never leave both
-                              // empty. Prefer a real anchored image; fall back
-                              // to an emblem SVG when no licensed image fits.
+    "card_visual": {          // REQUIRED. A full-width banner across the top of
+                              // the card (above the field label), flat, about
+                              // 4:1. Fill exactly one of the two below; never
+                              // leave both empty. Prefer a wide anchored image;
+                              // fall back to a wide emblem SVG when none fits.
       "image_url": "",        // string | omit. A real, licensed, attributed
                               // image that is ABOUT this fact, per
                               // IMAGE_STANDARD.md. Never stock, never invented.
+                              // Use only a motif that survives a wide flat crop.
       "image_attribution": "",// string. HARD if image_url present.
-      "svg": ""               // string | omit. A small SQUARE emblem, viewBox
-                              // 0 0 100 100, per SVG_STANDARD.md card rules.
+      "svg": ""               // string | omit. A wide banner emblem, viewBox
+                              // 0 0 400 100, per SVG_STANDARD.md card rules.
                               // Used when no fitting licensed image exists.
     },
     "teasers": ["", "", ""],  // HARD: exactly 3. Guideline: 5-10 words each,

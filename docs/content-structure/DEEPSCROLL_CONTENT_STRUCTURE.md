@@ -170,7 +170,7 @@ Every section that may contain a visual element uses the same four field names. 
 
 **Not part of Visual Conventions:**
 - `formalism` section in Academy uses `equations` (array of LaTeX strings) — that's a separate primitive, not a visual
-- `card_visual` (Facts feed card) — the pre-click square anchor `{image_url?, image_attribution?, svg?}`, set exactly one of image_url or svg; different context from in-post visuals, kept as its own field (see IMAGE_STANDARD.md)
+- `card_visual` (Facts feed card) — the pre-click full-width banner across the top of the card (~4:1) `{image_url?, image_attribution?, svg?}`, set exactly one of image_url or svg; different context from in-post visuals, kept as its own field (see IMAGE_STANDARD.md, LAYOUT_STANDARD.md, SVG_STANDARD.md card rules)
 
 ---
 
@@ -372,9 +372,9 @@ SOURCE MATERIAL:
 
 | Element | Description |
 |---|---|
-| `field` | Topic field shown small above headline ("Astronomy", "History", "Biology"…) |
-| `headline` | The fact statement, large, with key number in accent color |
-| `mini_visual` | Optional small SVG if it makes the fact instantly graspable |
+| `card_visual` | Full-width banner across the top of the card (~4:1): a wide licensed image, else a banner emblem SVG (see LAYOUT_STANDARD.md, SVG_STANDARD.md card rules) |
+| `field` | Topic field shown small in the accent color, below the banner and above the headline ("Astronomy", "History", "Biology"…) |
+| `headline` | The fact statement, full width, large, with key number in accent color |
 | `teasers` | 3 teaser bullets ("How we measured it", "Why intuition fails here", "What it changed") |
 | `meta` | `post_reading_time_min` · `post_difficulty (1–3)` |
 
@@ -498,7 +498,7 @@ FEED CARD
 {
   "field": string ("Astronomy", "History", "Biology", "Mathematics", etc.),
   "headline": string (the fact stated cleanly),
-  "card_visual": { image_url?, image_attribution?, svg? } (the square card anchor beside the headline; set exactly one of image_url or svg. See IMAGE_STANDARD.md),
+  "card_visual": { image_url?, image_attribution?, svg? } (full-width banner across the top of the card, ~4:1, above the field label; set exactly one of image_url or svg. See IMAGE_STANDARD.md, LAYOUT_STANDARD.md),
   "teasers": [string, string, string] (e.g. "How we measured it", "Why intuition fails", "What it changed"),
   "post_reading_time_min": integer,
   "post_difficulty": 1 | 2 | 3
