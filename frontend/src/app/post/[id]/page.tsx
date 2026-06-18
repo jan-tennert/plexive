@@ -4,12 +4,16 @@ import { use, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { formatStyle } from "@/lib/formats"
-import { fcStr, type Post, type RelatedPostItem, type KeyFigure } from "@/types/post"
+import { fcNum, fcStr, type CardVisual, type Post, type RelatedPostItem, type KeyFigure } from "@/types/post"
 import SectionRenderer from "@/components/SectionRenderer"
 import SectionLabel from "@/components/SectionLabel"
+import HeadlineSection from "@/components/sections/HeadlineSection"
 import RelatedPostsSection from "@/components/sections/RelatedPostsSection"
 import CommentsSection, { type Comment } from "@/app/components/CommentsSection"
 import { SlabAccent, SlabGlow } from "@/app/components/PostCard"
+import Avatar from "@/components/Avatar"
+import DotScale from "@/components/DotScale"
+import SvgBlock from "@/components/SvgBlock"
 import VerifiedBadge from "@/components/VerifiedBadge"
 import { ArrowUpIcon, HeartIcon, PauseIcon, SpeakerIcon, StopIcon } from "@/app/components/icons"
 import { useReadAloud } from "@/lib/readAloud/useReadAloud"
@@ -37,6 +41,35 @@ function buildReadNext(post: Post): RelatedPostItem[] {
     .filter((c) => c.featured)
     .map((c) => ({ post_id: "", title: c.ref, format: c.format, mini_teaser: "" }))
   return [...figures, ...connections].slice(0, 3)
+}
+
+// Full-width banner across the top of the facts detail header: the sourced
+// image (wide crop) when present, else the emblem SVG (viewBox 0 0 400 100,
+// naturally 4:1 from SvgBlock's width:100%). Mirrors the feed card banner so the
+// two carry continuity. The top bar's pt-16 keeps it clear of the floating
+// back/audio/format chrome above.
+function FactsBanner({ cv, isUserContent }: { cv: CardVisual | undefined; isUserContent: boolean }) {
+  if (!cv) return null
+  if (cv.image_url) {
+    return (
+      <div data-no-read className="bg-white/[0.06]">
+        <img
+          src={cv.image_url}
+          alt=""
+          className="w-full aspect-[4/1] object-cover"
+          onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = "none" }}
+        />
+      </div>
+    )
+  }
+  if (cv.svg) {
+    return (
+      <div data-no-read>
+        <SvgBlock svg={cv.svg} isUserContent={isUserContent} className="w-full" />
+      </div>
+    )
+  }
+  return null
 }
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -298,6 +331,18 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           )}
 
+          {/* Format label in the app top bar — the format with its accent dot,
+              centered between the back and audio controls. Facts uses the banner
+              header, where the format lives here rather than in a slab. */}
+          {post && style && post.format === "facts" && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-(--accent)" />
+              <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
+                {style.badge.toLowerCase()}
+              </span>
+            </div>
+          )}
+
           {/* Scrollable content */}
           <div
             ref={scrollContainerRef}
@@ -305,95 +350,158 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           >
             {post && style ? (
               <>
-                {/* Readable region for read-aloud: header slab + sections.
+                {/* Readable region for read-aloud: header + sections.
                     Comments stay outside so they are never spoken. */}
                 <div ref={readableRef}>
-                {/* Header — frosted slab inset from the edges, with the same
-                    format glow as the feed card behind it. The glow box stays
-                    at container width (a wider box would make the vertical
-                    scroller horizontally scrollable) and bleeds only a little
-                    vertically, so the floating back circle keeps a near-black
-                    backdrop. */}
-                <div className="relative">
-                  <SlabGlow className="absolute inset-x-0 -inset-y-14" />
-                  <div className="mx-3 mb-3 card relative overflow-hidden px-5 py-6">
-                    <SlabAccent />
-                    {/* Format marker — dot and label carry the accent.
-                        data-no-read: chrome, not spoken by read-aloud. */}
-                    <div data-no-read className="flex items-center gap-2 mb-4">
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-(--accent)" />
-                      <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
-                        {style.badge.toLowerCase()}
-                      </span>
-                    </div>
-
-                    {/* Books cover */}
-                    {post.format === "books" && fcStr(post.feed_card, "cover_url") && (
-                      <div className="flex justify-center mb-5">
-                        <div className="rounded-xl overflow-hidden w-32 h-48 bg-white/[0.06]">
-                          <img
-                            src={fcStr(post.feed_card, "cover_url")}
-                            alt=""
-                            className="w-full h-full object-cover"
-                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Title */}
-                    <h1 className="font-serif text-3xl font-medium text-ink leading-snug mb-1">
-                      {post.title}
-                    </h1>
-
-                    {/* Author (Books) */}
-                    {post.format === "books" && fcStr(post.feed_card, "author") && (
-                      <p className="text-ink-dim text-sm font-medium mb-3">
-                        {fcStr(post.feed_card, "author")}
+                {post.format === "facts" ? (
+                  /* Facts header per LAYOUT_STANDARD: full-width banner, field
+                     label, the serif headline once, then the meta row. The
+                     format label lives in the top bar; the headline section is
+                     filtered out of the body below so it never doubles. */
+                  <div className="relative">
+                    <FactsBanner
+                      cv={(post.feed_card as { card_visual?: CardVisual }).card_visual}
+                      isUserContent={post.is_user_content}
+                    />
+                    {fcStr(post.feed_card, "field") && (
+                      <p className="px-6 pt-5 label-caps text-(--accent) text-center">
+                        {fcStr(post.feed_card, "field")}
                       </p>
                     )}
-
-                    {/* Attribution — chrome, not spoken by read-aloud */}
-                    <div data-no-read className="flex items-center gap-1 mb-4">
-                      {post.is_user_content && post.author_username ? (
-                        <span className="flex items-center gap-1 text-ink-muted text-xs">
-                          Submitted by{" "}
-                          <Link href={`/profile/${post.author_username}`} className="hover:text-ink-body transition-colors">
-                            @{post.author_username}
-                          </Link>
-                          {post.author_is_verified != null && post.author_is_verified > 0 && <VerifiedBadge size={16} level={post.author_is_verified} />}
-                        </span>
-                      ) : !post.is_user_content ? (
-                        <>
-                          <span className="text-ink-muted text-xs">Deepscroll</span>
-                          <VerifiedBadge size={12} variant="official" />
-                        </>
-                      ) : null}
+                    <HeadlineSection content={post.title} />
+                    {/* Meta row — round avatar + creator, reading time,
+                        difficulty. Reads the same author fields as the feed
+                        card footer, so the two always match. */}
+                    <div
+                      data-no-read
+                      className="px-6 -mt-4 pb-6 flex items-center justify-center gap-3 text-xs text-ink-muted"
+                    >
+                      {post.author_username && (
+                        <Link
+                          href={`/profile/${post.author_username}`}
+                          className="flex items-center gap-1.5 hover:text-ink-body transition-colors"
+                        >
+                          <Avatar username={post.author_username} avatarUrl={post.author_avatar_url} size={24} />
+                          <span className="text-ink-dim">@{post.author_username}</span>
+                          {(post.author_is_verified ?? 0) > 0 && (
+                            <VerifiedBadge size={12} level={post.author_is_verified ?? 1} />
+                          )}
+                        </Link>
+                      )}
+                      {fcNum(post.feed_card, "post_reading_time_min") > 0 && (
+                        <span className="font-mono">{fcNum(post.feed_card, "post_reading_time_min")} min</span>
+                      )}
+                      {fcNum(post.feed_card, "post_difficulty") > 0 && (
+                        <DotScale value={fcNum(post.feed_card, "post_difficulty") as 1 | 2 | 3} />
+                      )}
                     </div>
-
-                    {/* Interest tags as floating pills — not spoken */}
-                    {post.interests.length > 0 && (
-                      <div data-no-read className="flex flex-wrap gap-2">
-                        {post.interests.map((name) => (
-                          <span
-                            key={name}
-                            className="px-3 py-1 rounded-full text-xs bg-white/[0.06] text-ink-dim"
-                          >
-                            {name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                </div>
+                ) : (
+                  /* Other formats keep the inset slab header. The glow box stays
+                     at container width (a wider box would make the vertical
+                     scroller horizontally scrollable) and bleeds only a little
+                     vertically, so the floating back circle keeps a near-black
+                     backdrop. */
+                  <div className="relative">
+                    <SlabGlow className="absolute inset-x-0 -inset-y-14" />
+                    <div className="mx-3 mb-3 card relative overflow-hidden px-5 py-6">
+                      <SlabAccent />
+                      {/* Format marker — dot and label carry the accent. */}
+                      <div data-no-read className="flex items-center gap-2 mb-4">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-(--accent)" />
+                        <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
+                          {style.badge.toLowerCase()}
+                        </span>
+                      </div>
 
-                {/* Sections */}
+                      {/* Books cover */}
+                      {post.format === "books" && fcStr(post.feed_card, "cover_url") && (
+                        <div className="flex justify-center mb-5">
+                          <div className="rounded-xl overflow-hidden w-32 h-48 bg-white/[0.06]">
+                            <img
+                              src={fcStr(post.feed_card, "cover_url")}
+                              alt=""
+                              className="w-full h-full object-cover"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Title */}
+                      <h1 className="font-serif text-3xl font-medium text-ink leading-snug mb-1">
+                        {post.title}
+                      </h1>
+
+                      {/* Author (Books) */}
+                      {post.format === "books" && fcStr(post.feed_card, "author") && (
+                        <p className="text-ink-dim text-sm font-medium mb-3">
+                          {fcStr(post.feed_card, "author")}
+                        </p>
+                      )}
+
+                      {/* Creator — round avatar + handle, read from the same
+                          author fields as the feed card so the two always match.
+                          data-no-read: chrome, not spoken by read-aloud. */}
+                      {post.author_username && (
+                        <div data-no-read className="flex items-center gap-1.5 mb-4">
+                          <Link
+                            href={`/profile/${post.author_username}`}
+                            className="flex items-center gap-1.5 text-ink-muted text-xs hover:text-ink-body transition-colors"
+                          >
+                            <Avatar username={post.author_username} avatarUrl={post.author_avatar_url} size={20} />
+                            <span>@{post.author_username}</span>
+                          </Link>
+                          {(post.author_is_verified ?? 0) > 0 && (
+                            <VerifiedBadge size={14} level={post.author_is_verified ?? 1} />
+                          )}
+                        </div>
+                      )}
+
+                      {/* Interest tags as floating pills — not spoken */}
+                      {post.interests.length > 0 && (
+                        <div data-no-read className="flex flex-wrap gap-2">
+                          {post.interests.map((name) => (
+                            <span
+                              key={name}
+                              className="px-3 py-1 rounded-full text-xs bg-white/[0.06] text-ink-dim"
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sections — for facts the headline now lives in the header
+                    above, so drop the headline section to avoid doubling it. */}
                 <SectionRenderer
-                  sections={post.sections}
+                  sections={
+                    post.format === "facts"
+                      ? post.sections.filter((s) => s.type !== "headline")
+                      : post.sections
+                  }
                   isUserContent={post.is_user_content}
                   postId={post.id}
                 />
                 </div>
+
+                {/* Tags at the end (facts) — small chips near the sources
+                    section, the network/filter layer at the foot of the post. */}
+                {post.format === "facts" && post.interests.length > 0 && (
+                  <div data-no-read className="px-6 pt-2 pb-6 flex flex-wrap gap-2">
+                    {post.interests.map((name) => (
+                      <span
+                        key={name}
+                        className="px-3 py-1 rounded-full text-xs bg-white/[0.06] text-ink-dim"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 {/* Read Next — featured graph edges (key figures + connections).
                     Outside the readable region so read-aloud never speaks it. */}
