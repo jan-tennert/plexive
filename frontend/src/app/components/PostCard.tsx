@@ -566,7 +566,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           level with the send button even if the tags wrap. */}
       {post.interests.length > 0 && (
         <div className="absolute left-4 right-20 bottom-[calc(env(safe-area-inset-bottom)+72px)] flex flex-wrap-reverse gap-2 z-10">
-          {post.interests.slice(0, 2).map((name) => (
+          {post.interests.map((name) => (
             <span
               key={name}
               className="rounded-full bg-white/[0.05] backdrop-blur-md text-ink-dim text-xs px-3 py-1.5"
