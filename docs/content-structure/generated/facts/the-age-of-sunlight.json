@@ -69,7 +69,7 @@
     {
       "type": "how_we_know",
       "order": 6,
-      "content": "Nobody clocked a photon. The number comes from knowing how far light travels inside the Sun before it strikes something, and how many of those steps it takes to work outward. Deep in the radiative zone, the inner seventy percent of the Sun's radius, the plasma is so dense that a packet of light moves on the order of a millimeter before it is absorbed and thrown back out in a random direction. Follow that drunkard's walk through a real model of the Sun's density and opacity and the climb comes to roughly 170,000 years, the figure Mitalas and Sills settled in 1992 after showing the usual quick estimate ran far too short. Older textbooks still say a million years, which is why the honest answer is a wide one, tens of thousands to a few hundred thousand depending on the assumptions."
+      "content": "Nobody clocked a photon. The number comes from knowing how far light travels inside the Sun before it strikes something, and how many of those steps it takes to work outward. Deep in the radiative zone, the inner seventy percent of the Sun's radius, the plasma is so dense that a packet of light moves on the order of a millimeter before it is absorbed and thrown back out in a random direction. Follow that drunkard's walk through a real model of the Sun's density and opacity and the climb comes to roughly 170,000 years, the figure Mitalas and Sills calculated in 1992 after showing the usual quick estimate ran far too short. Older textbooks still say a million years, which is why the honest answer is a wide one, tens of thousands to a few hundred thousand depending on the assumptions."
     },
     {
       "type": "story",
@@ -101,7 +101,7 @@
           "visual_svg": "<svg viewBox='0 80 400 160' xmlns='http://www.w3.org/2000/svg' fill='none'><text x='200' y='106' fill='currentColor' font-family='var(--font-sans), system-ui, sans-serif' font-size='14' font-weight='600' opacity='0.75' text-anchor='middle'>Two messengers, one core</text><text x='18' y='150' fill='var(--accent)' font-family='var(--font-sans), system-ui, sans-serif' font-size='13' font-weight='700' text-anchor='start'>neutrino</text><line x1='120' y1='150' x2='342' y2='150' stroke='var(--accent)' stroke-width='2.5' stroke-linecap='round'/><path d='M342 150 l-12 -6 m12 6 l-12 6' stroke='var(--accent)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><text x='330' y='141' fill='var(--accent)' font-family='var(--font-mono), ui-monospace, monospace' font-size='13' font-weight='700' text-anchor='end'>8 min</text><text x='170' y='169' fill='var(--accent)' font-family='var(--font-mono), ui-monospace, monospace' font-size='13' text-anchor='middle'>~2 s in the Sun</text><text x='18' y='195' fill='currentColor' font-family='var(--font-sans), system-ui, sans-serif' font-size='13' opacity='0.8' text-anchor='start'>light's energy</text><path d='M120 195 L132 188 L144 202 L156 188 L168 202 L180 188 L192 202 L204 188 L216 202 L228 188 L240 202 L252 188 L264 202 L276 188 L288 202 L300 188 L312 202 L324 188 L336 202 L350 195' stroke='currentColor' stroke-width='2' opacity='0.55' stroke-linecap='round' stroke-linejoin='round'/><text x='300' y='187' fill='currentColor' font-family='var(--font-mono), ui-monospace, monospace' font-size='13' opacity='0.7' text-anchor='end'>~170,000 yr</text></svg>"
         },
         {
-          "title": "The outer third does not glow through, it boils",
+          "title": "The outer third boils the heat to the surface",
           "body": "The long crawl is only the radiative zone. Above about seventy percent of the way out, the gas can no longer pass the heat along by radiation quickly enough, so it starts to churn, columns of hot plasma rising and cooler plasma sinking back down. Through that convective layer the energy rides the moving gas and crosses the last stretch in weeks rather than millennia. The grainy cells that mottle the Sun's surface in a close photograph are the tops of those churning columns."
         }
       ]
@@ -109,7 +109,7 @@
     {
       "type": "bigger_picture",
       "order": 10,
-      "content": "A star turns out to be a kind of slow memory. Energy made in the core does not arrive as news. It arrives as something closer to sediment, laid down over thousands of years and only now surfacing as light. That lag is also a cushion. At any moment the Sun holds a vast reserve of energy in transit, part of why its output stays so steady from one century to the next, with no flicker as the core shifts. The light reaching you is old almost by design, a fire wrapped in so much insulation that the burning and the shining are separated by the whole length of human prehistory."
+      "content": "A star turns out to be a kind of slow memory. The energy in its light was laid down over thousands of years like sediment, and only now reaches the surface. That lag is also a cushion. At any moment the Sun holds a vast reserve of energy in transit, part of why its output stays so steady from one century to the next, with no flicker as the core shifts. The light reaching you is old almost by design, a fire wrapped in so much insulation that the burning and the shining are separated by the whole length of human prehistory."
     },
     {
       "type": "quiz",
