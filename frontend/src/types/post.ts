@@ -87,6 +87,14 @@ export interface SeeItContent {
   image_attribution?: string
 }
 
+// Feed-card visual anchor: a small square shown top-right beside the headline.
+// Exactly one of image_url or svg is set (image preferred, svg emblem fallback).
+export interface CardVisual {
+  image_url?: string
+  image_attribution?: string
+  svg?: string
+}
+
 export interface KeyNumberItem {
   label: string
   value: string
@@ -103,6 +111,8 @@ export interface AngleItem {
   body: string
   visual_svg?: string
   image_url?: string
+  image_caption?: string
+  image_attribution?: string
 }
 
 export interface KeyFigure {
@@ -113,6 +123,7 @@ export interface KeyFigure {
   birth_year?: number
   featured?: boolean
   image_url?: string
+  image_attribution?: string
 }
 
 // Graph edge to another post (top-level on Post). The target may not exist yet
@@ -128,6 +139,8 @@ export interface StoryContent {
   key_figures?: KeyFigure[]
   visual_svg?: string
   image_url?: string
+  image_caption?: string
+  image_attribution?: string
 }
 
 export interface MisconceptionItem {
@@ -391,7 +404,7 @@ export interface BooksFeedCard {
 export interface FactsFeedCard {
   field: string
   headline: string
-  mini_visual_svg: string | null
+  card_visual?: CardVisual
   teasers: [string, string, string]
   post_reading_time_min: number
   post_difficulty: 1 | 2 | 3
