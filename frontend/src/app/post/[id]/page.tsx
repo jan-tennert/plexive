@@ -363,7 +363,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                         card footer, so the two always match. */}
                     <div
                       data-no-read
-                      className="px-6 -mt-4 pb-6 flex items-center justify-center gap-3 text-xs text-ink-muted"
+                      className="px-6 pb-6 flex items-center justify-start gap-3 text-xs text-ink-muted"
                     >
                       {post.author_username && (
                         <Link

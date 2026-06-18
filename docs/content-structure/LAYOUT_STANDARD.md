@@ -38,13 +38,26 @@ is where real images give the eye a rest.
    long it wraps to two lines and the glyph stays at the right. Accent bar runs
    down the left edge of the card.
 2. **Headline**, full width, large serif, the key number emphasized. The star.
-3. **Teasers**, exactly three.
-4. **Footer**: creator (round avatar + name), reading time, difficulty (the
+3. **Context line** (format-dependent), small and muted, directly under the
+   headline: the author (books), the lifespan (people), the source citation
+   (academy), a year or era (stories). Facts uses none. A format that has nothing
+   to put here omits the line.
+4. **Dek** (optional), a one-line italic gloss of what the post is about. It is
+   present when the headline is a short title that needs a plain-language line to
+   land (concepts, questions, academy, people, books), and absent when the
+   headline is already a full statement (facts) or a narrative opening (stories).
+5. **Teasers**, exactly three.
+6. **Footer**: creator (round avatar + name), reading time, difficulty (the
    three-dot scale).
 
-The footer carries only creator, reading time, and difficulty. Per-format
+The footer carries only creator, reading time, and difficulty. Other per-format
 metadata is deliberately not shown on the card; it varies between formats and
 looks inconsistent across the feed.
+
+The dek and the context line are the controlled places where formats differ. The
+rule is the same across the feed: a short-title headline earns a dek; a
+full-statement headline stands alone. Keeping that consistent is what makes the
+feed read as one product rather than seven.
 
 The glyph belongs to the **field**, not the post, and is meant to come from a
 fixed field-to-glyph set (see `ROADMAP.md`). Until that set exists, an example may
@@ -94,8 +107,11 @@ not only mask the bar.
 
 ---
 
-## 6. Headline alignment (open taste call)
+## 6. Headline alignment
 
-Centered reads like a title page; left-aligned matches the card more seamlessly.
-Both are acceptable. Decide at the rendered look, not in the abstract. This is the
-one part of the header that is taste, not rule.
+Left-aligned, on both the card and the detail header. It keeps the card and the
+detail page on one axis, sits on the same left edge as the field line, meta row,
+and body, and stays readable for the long multi-line headlines that facts and
+stories carry (the eye finds every line at the same starting edge). Centered can
+read like a title page for a short headline, but the mixed long and short
+headlines across formats make left the consistent choice.

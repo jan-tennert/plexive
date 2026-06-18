@@ -16,8 +16,8 @@ function WithCyanNumbers({ text }: { text: string }) {
 
 export default function HeadlineSection({ content }: { content: string }) {
   return (
-    <div className="px-5 py-10 flex items-center justify-center min-h-[120px]">
-      <p className="text-[2rem] font-bold text-ink leading-tight text-center max-w-xs">
+    <div className="px-6 pt-3 pb-5">
+      <p className="text-[2rem] font-bold text-ink leading-tight">
         <WithCyanNumbers text={content} />
       </p>
     </div>

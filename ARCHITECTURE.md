@@ -486,7 +486,7 @@ attributes. Never use `dangerouslySetInnerHTML` to render comment text.
 | sections/AuthorContextSection.tsx | portrait + text + Wikipedia external link |
 | sections/CritiqueSection.tsx | secondary text with heading |
 | sections/SourcesSection.tsx | type badge (W/P/B/A/D) + label + external link icon |
-| sections/HeadlineSection.tsx | large centered headline; digit runs + optional scale words highlighted in cyan-400 via regex |
+| sections/HeadlineSection.tsx | large left-aligned headline (LAYOUT_STANDARD s.6, shares left axis with field line/meta/body); digit runs + optional scale words highlighted in cyan-400 via regex |
 | sections/SeeItSection.tsx | "See It" label; SVG (dangerouslySetInnerHTML/base64 per isUserContent) or image (ContentImage with caption + credit) |
 | sections/KeyNumbersSection.tsx | 2-column grid; value in cyan-400, optional unit in cyan-700, label in zinc-400 |
 | sections/TangibleSection.tsx | "Make It Tangible" label; content {items, visual_svg?}; bullet list with cyan dots + optional inline SVG (SvgBlock, isUserContent) |
