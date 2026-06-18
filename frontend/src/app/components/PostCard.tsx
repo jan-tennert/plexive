@@ -13,6 +13,7 @@ import { updatePostInFeedCaches } from "@/app/lib/swr"
 import { fcNum, fcStr, type CardVisual, type Post } from "@/types/post"
 import { formatStyle } from "@/lib/formats"
 import Avatar from "@/components/Avatar"
+import DotScale from "@/components/DotScale"
 import SvgBlock from "@/components/SvgBlock"
 import VerifiedBadge from "@/components/VerifiedBadge"
 import { BookmarkIcon, CommentIcon, HeartIcon, SendIcon, SpeakerIcon } from "./icons"
@@ -20,21 +21,6 @@ import { BookmarkIcon, CommentIcon, HeartIcon, SendIcon, SpeakerIcon } from "./i
 export type { Post }
 
 const MIN_DWELL_MS = 500
-
-// Difficulty as three neutral dots; the per-format accent stays on the
-// format marker and the teaser bullets only.
-function DotScale({ value }: { value: 1 | 2 | 3 }) {
-  return (
-    <span className="flex gap-1" aria-hidden="true">
-      {[1, 2, 3].map((i) => (
-        <span
-          key={i}
-          className={`inline-block w-1 h-1 rounded-full ${i <= value ? "bg-ink-dim" : "bg-white/15"}`}
-        />
-      ))}
-    </span>
-  )
-}
 
 // Teaser bullets — prominence comes from typography alone: reading-size
 // text (17px, matching prose-post) in full ink, sitting directly on the
@@ -55,27 +41,30 @@ function Teasers({ items }: { items: string[] }) {
   )
 }
 
-// Feed-card visual anchor: a small square top-right beside the headline. Shows
-// the sourced image (square crop) when present, otherwise the emblem SVG. The
-// emblem's var(--accent) resolves from the card's --accent; the SVG security
-// split (user vs official) is handled by SvgBlock.
-function CardVisualAnchor({ cv, isUserContent }: { cv: CardVisual | undefined; isUserContent: boolean }) {
+// Feed-card visual anchor: a full-width banner across the top of the card
+// (banner formats), flat at about 4:1, above the field label and headline.
+// Shows the sourced image (wide crop) when present, otherwise the emblem SVG
+// (viewBox 0 0 400 100, naturally 4:1 from SvgBlock's width:100%). The emblem's
+// var(--accent) resolves from the card's --accent; the SVG security split (user
+// vs official) is handled by SvgBlock. The host slab is overflow-hidden, so the
+// negative margins let the banner reach the slab's rounded top edge full-width.
+function CardBanner({ cv, isUserContent }: { cv: CardVisual | undefined; isUserContent: boolean }) {
   if (!cv) return null
   if (cv.image_url) {
     return (
-      <div className="shrink-0 w-[68px] h-[68px] rounded-2xl overflow-hidden bg-white/[0.06]">
+      <div className="-mx-6 -mt-7 mb-3 bg-white/[0.06]">
         <img
           src={cv.image_url}
           alt=""
           loading="lazy"
-          className="w-full h-full object-cover"
+          className="w-full aspect-[4/1] object-cover"
           onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = "none" }}
         />
       </div>
     )
   }
   if (cv.svg) {
-    return <SvgBlock svg={cv.svg} isUserContent={isUserContent} className="shrink-0 w-[68px] h-[68px]" />
+    return <SvgBlock svg={cv.svg} isUserContent={isUserContent} className="-mx-6 -mt-7 mb-3 w-[calc(100%+3rem)]" />
   }
   return null
 }
@@ -460,16 +449,16 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           ) : post.format === "facts" && fc ? (
             <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
               <SlabAccent />
-              <div className="flex gap-4 items-start">
-                <div className="flex-1 min-w-0 flex flex-col gap-1">
-                  {fcStr(fc, "field") && (
-                    <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
-                  )}
-                  <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
-                    {fc.headline as string}
-                  </h2>
-                </div>
-                <CardVisualAnchor cv={fc.card_visual as CardVisual | undefined} isUserContent={post.is_user_content} />
+              {/* Full-width banner across the top, then field label and the
+                  full-width headline below it (no corner anchor). */}
+              <CardBanner cv={fc.card_visual as CardVisual | undefined} isUserContent={post.is_user_content} />
+              <div className="flex flex-col gap-1">
+                {fcStr(fc, "field") && (
+                  <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
+                )}
+                <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
+                  {fc.headline as string}
+                </h2>
               </div>
 
               {Array.isArray(fc.teasers) && (fc.teasers as string[]).length > 0 && (
