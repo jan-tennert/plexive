@@ -103,7 +103,9 @@ export default function SectionRenderer({ sections, isUserContent, postId }: Pro
   return (
     // Serif is the reading voice; labels (.label-caps) and data (font-mono)
     // opt back out locally. --accent is set by the post page container.
-    <div className="flex flex-col divide-y divide-edge font-serif">
+    // No line dividers: per LAYOUT_STANDARD section 7 whitespace is the single
+    // divider system, so sections are separated by their uniform px-6 py-8 rhythm.
+    <div className="flex flex-col font-serif">
       {sorted.map((section, i) => {
         const c = section.content
         const rendered = (() => {
