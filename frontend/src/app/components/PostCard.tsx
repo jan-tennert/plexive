@@ -41,32 +41,22 @@ function Teasers({ items }: { items: string[] }) {
   )
 }
 
-// Feed-card visual anchor: a full-width banner across the top of the card
-// (banner formats), flat at about 4:1, above the field label and headline.
-// Shows the sourced image (wide crop) when present, otherwise the emblem SVG
-// (viewBox 0 0 400 100, naturally 4:1 from SvgBlock's width:100%). The emblem's
-// var(--accent) resolves from the card's --accent; the SVG security split (user
-// vs official) is handled by SvgBlock. The host slab is overflow-hidden, so the
-// negative margins let the banner reach the slab's rounded top edge full-width.
-function CardBanner({ cv, isUserContent }: { cv: CardVisual | undefined; isUserContent: boolean }) {
-  if (!cv) return null
-  if (cv.image_url) {
-    return (
-      <div className="-mx-6 -mt-7 mb-3 bg-white/[0.06]">
-        <img
-          src={cv.image_url}
-          alt=""
-          loading="lazy"
-          className="w-full aspect-[4/1] object-cover"
-          onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = "none" }}
-        />
-      </div>
-    )
-  }
-  if (cv.svg) {
-    return <SvgBlock svg={cv.svg} isUserContent={isUserContent} className="-mx-6 -mt-7 mb-3 w-[calc(100%+3rem)]" />
-  }
-  return null
+// Small field glyph for the typographic formats: a quiet category mark (~28px
+// tall) that sits at the right end of the field line, not a card image. The
+// glyph belongs to the field, not the post (a future field-to-glyph set, see
+// ROADMAP.md); for now it renders the inline card_visual.svg (compact viewBox,
+// e.g. 0 0 56 32). var(--accent) resolves from the card's --accent; the SVG
+// security split (user vs official) is handled by SvgBlock. h-7/w-auto forces a
+// small fixed height regardless of the svg's own sizing, aspect preserved.
+function FieldGlyph({ cv, isUserContent }: { cv: CardVisual | undefined; isUserContent: boolean }) {
+  if (!cv?.svg) return null
+  return (
+    <SvgBlock
+      svg={cv.svg}
+      isUserContent={isUserContent}
+      className="shrink-0 [&_svg]:h-7 [&_svg]:w-auto [&_img]:h-7 [&_img]:w-auto"
+    />
+  )
 }
 
 // Format-colored glow behind a slab — a faint radial wash of the post's
@@ -449,13 +439,15 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
           ) : post.format === "facts" && fc ? (
             <div className="card relative overflow-hidden px-6 py-7 flex flex-col gap-4">
               <SlabAccent />
-              {/* Full-width banner across the top, then field label and the
-                  full-width headline below it (no corner anchor). */}
-              <CardBanner cv={fc.card_visual as CardVisual | undefined} isUserContent={post.is_user_content} />
+              {/* Typographic card: a field line (field label left, small glyph at
+                  its right end) then the full-width serif headline below. */}
               <div className="flex flex-col gap-1">
-                {fcStr(fc, "field") && (
-                  <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
-                )}
+                <div className="flex items-start justify-between gap-3">
+                  {fcStr(fc, "field") && (
+                    <p className="label-caps text-(--accent)">{fcStr(fc, "field")}</p>
+                  )}
+                  <FieldGlyph cv={fc.card_visual as CardVisual | undefined} isUserContent={post.is_user_content} />
+                </div>
                 <h2 className="font-serif text-[1.75rem] font-medium tracking-tight text-ink leading-snug">
                   {fc.headline as string}
                 </h2>
