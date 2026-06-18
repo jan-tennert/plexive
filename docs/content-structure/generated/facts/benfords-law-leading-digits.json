@@ -75,7 +75,7 @@
           {
             "name": "Frank Benford",
             "role": "Showed how far it reaches",
-            "one_line": "His 1938 paper counted leading digits across twenty unrelated datasets and established that the bias holds across nature, not in one stray table.",
+            "one_line": "His 1938 paper counted leading digits across twenty unrelated datasets and showed the bias runs through nature at large, well beyond any single table.",
             "lifespan": "1883-1948",
             "birth_year": 1883,
             "featured": true
@@ -101,7 +101,7 @@
     {
       "type": "bigger_picture",
       "order": 10,
-      "content": "What the law exposes is the shape of how quantities come to be. Things in the world rarely add up in even steps. They multiply, compound and decay, and growth of that kind lays its values down along a logarithmic grain. Our base-ten notation then reads that grain off as a steady surplus of leading 1s. So a column of figures quietly records whether it grew from some real process or was assembled by a hand reaching for plausible digits. That a directory of street numbers, the masses of the planets and a corporation's expense report all bend toward the same curve points to the bend coming from arithmetic itself, not from rivers or galaxies or ledgers having anything in common."
+      "content": "What the law exposes is the shape of how quantities come to be. Things in the world rarely add up in even steps. They multiply, compound and decay, and growth of that kind lays its values down along a logarithmic grain. Our base-ten notation then reads that grain off as a steady surplus of leading 1s. So a column of figures quietly records whether it grew from some real process or was assembled by a hand reaching for plausible digits. That a directory of street numbers, the masses of the planets and a corporation's expense report all bend toward the same curve points to arithmetic itself producing the bend, while rivers and galaxies and ledgers share nothing else between them."
     },
     {
       "type": "quiz",
@@ -138,7 +138,7 @@
             "The accountant must have made rounding errors"
           ],
           "answer_index": 1,
-          "explanation": "A departure from the curve is a flag, not a verdict. Legitimate data can deviate for ordinary reasons, so the test points investigators toward the columns worth examining and proves nothing on its own."
+          "explanation": "A departure from the curve only marks data for a closer look. Legitimate data can deviate for ordinary reasons, so the test points investigators toward the columns worth examining and proves nothing by itself."
         },
         {
           "question": "Why does converting a dataset from dollars to euros leave its Benford pattern intact?",
