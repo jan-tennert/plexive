@@ -254,3 +254,106 @@ def resolved_read_next(db, post):
                 {"target_post_id": None, "format": fmt, "title": fallback, "latent": True}
             )
     return items
+
+
+def _report_refs(post):
+    """Yield (target_format, target_identity_key, ref_repr) for a post's authoring
+    entries, reusing the edge key assembly so the report's keys never drift from the
+    edge table's. ref_repr is the raw authoring fragment that produced the key (a
+    connection ref dict, or a person's name + birth_year), so the report can show
+    WHAT produced an unmatched key -- a typo is obvious in the raw ref, invisible in
+    the derived key. Read-only diagnostic helper; mirrors _edge_specs' walk.
+    """
+    connections = post.connections if isinstance(post.connections, list) else []
+    for conn in connections:
+        if not isinstance(conn, dict):
+            continue
+        fmt = conn.get("format")
+        ref = conn.get("ref")
+        key = _connection_key(fmt, ref)
+        if key is None:
+            continue
+        yield fmt, key, ref
+    for person in _iter_person_entries(post.sections):
+        key = _key_from_parts(
+            "people", name=person.get("name"), birth_year=person.get("birth_year")
+        )
+        if key is None:
+            continue
+        yield "people", key, {"name": person.get("name"), "birth_year": person.get("birth_year")}
+
+
+def unmatched_latent_edges(db):
+    """Read-only report: latent edges whose target identity matches no post.
+
+    A latent edge (target_post_id NULL) is ambiguous: either (a) the target post
+    genuinely does not exist yet, or (b) the ref's key drifted (transliteration,
+    alternate name, typo) so it no longer matches the post it meant. Both look
+    identical in the table and cannot be split mechanically. This surfaces both by
+    listing every latent edge whose (target_format, target_identity_key) matches NO
+    post at all -- of any status -- and, for each, the source post's title and the
+    raw ref string that produced the key, so a human can tell drift (b) from a real
+    future post (a) at a glance.
+
+    A latent edge whose pair DOES match an existing post (e.g. a target that exists
+    but is still pending, so not a live node) is correctly latent and excluded: the
+    target exists, the key is fine. Matching is within a format because the pair
+    carries the format (node identity = (format, identity_key)).
+
+    Returns a list of (target_format, target_identity_key, sources), sorted by edge
+    count (len of sources) descending, where sources is a list of (source_post_id,
+    source_title, ref_repr) -- one entry per latent edge. A human reads it to spot
+    keys that should have matched and fix them (or, later, add an alias -- see
+    graph_identity.py). Pure read: mutates nothing.
+    """
+    # EXISTS a post with the same (format, identity_key) as this edge's target.
+    # Correlated against the outer PostEdge query, dialect-neutral (no group_concat
+    # / array_agg), one round trip; grouping + counting is done in Python below.
+    matching_post = (
+        db.query(Post)
+        .filter(
+            Post.format == PostEdge.target_format,
+            Post.identity_key == PostEdge.target_identity_key,
+        )
+        .exists()
+    )
+    rows = (
+        db.query(
+            PostEdge.target_format,
+            PostEdge.target_identity_key,
+            PostEdge.source_post_id,
+        )
+        .filter(PostEdge.target_post_id.is_(None))
+        .filter(~matching_post)
+        .order_by(PostEdge.source_post_id, PostEdge.id)
+        .all()
+    )
+    if not rows:
+        return []
+
+    # Load each source post once, then map its (format, key) -> queue of raw refs so
+    # the diagnostic can show what produced each unmatched edge (all of a post's
+    # entries for one pair share that pair's matched/unmatched fate, so the queue
+    # has exactly one ref per latent edge of that pair).
+    source_ids = {sid for _, _, sid in rows}
+    posts = {p.id: p for p in db.query(Post).filter(Post.id.in_(source_ids)).all()}
+    refs_by_post: dict[int, dict[tuple[str, str], list]] = {}
+    for sid, post in posts.items():
+        per_pair: dict[tuple[str, str], list] = {}
+        for fmt, key, ref in _report_refs(post):
+            per_pair.setdefault((fmt, key), []).append(ref)
+        refs_by_post[sid] = per_pair
+
+    groups: dict[tuple[str, str], list] = {}
+    for fmt, key, sid in rows:
+        post = posts.get(sid)
+        title = post.title if post else None
+        queue = refs_by_post.get(sid, {}).get((fmt, key))
+        ref = queue.pop(0) if queue else None
+        groups.setdefault((fmt, key), []).append((sid, title, ref))
+
+    return sorted(
+        [(fmt, key, sources) for (fmt, key), sources in groups.items()],
+        key=lambda row: len(row[2]),
+        reverse=True,
+    )
