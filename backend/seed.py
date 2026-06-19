@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from app.auth import hash_password
 from app.database import Base, SessionLocal, engine
+from app.graph_edges import on_post_written
 from app.graph_identity import post_identity_key
 from app.models import Interest, Post, User
 
@@ -158,6 +159,8 @@ def upsert_post(db, marlo, post_format, data, slug, allow_legacy_adopt):
         existing.interests = interests
         existing.status = "published"
         db.commit()
+        # Rebuild this post's edges and activate any latent edges pointing at it.
+        on_post_written(db, existing)
         print(f"Updated existing {post_format.title()} post: {title}.")
         return
 
@@ -177,6 +180,8 @@ def upsert_post(db, marlo, post_format, data, slug, allow_legacy_adopt):
     post.interests = interests
     db.add(post)
     db.commit()
+    # Rebuild this post's edges and activate any latent edges pointing at it.
+    on_post_written(db, post)
     print(f"Seeded {post_format.title()} post: {title}.")
 
 
