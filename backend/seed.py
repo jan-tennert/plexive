@@ -28,6 +28,7 @@ SLUGS = [
     "psychology", "cognitive-biases", "habits", "productivity", "focus",
     "motivation", "decision-making", "emotional-intelligence", "mental-health",
     "mindfulness", "happiness", "relationships", "communication", "learning",
+    "creativity",
     "discipline", "confidence", "stoicism-practice", "philosophy", "ethics",
     "stoicism", "existentialism", "eastern-philosophy", "logic", "epistemology",
     "consciousness", "free-will", "political-philosophy", "philosophy-of-mind",
