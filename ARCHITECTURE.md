@@ -243,6 +243,7 @@ mobile/                         React Native app (Expo SDK 56, TypeScript, expo-
 docs/REVIEW.md                  full-pass audit (June 2026): categorized findings + design direction and token set
 docs/DESIGN.md                  "Stage" design identity (June 2026, post-exploration consolidation): content floating in dark space, frosted slab + pill chrome rules, accent policy, motion, component vocabulary
 docs/SERVER.md                  Raspberry Pi deployment reference: systemd units, env vars, Tailscale IPs, update routine, debugging playbook, known pitfalls
+docs/content-structure/DEEPSCROLL_CONTENT_STRUCTURE.md  slimmed to its canonical spine: the home for the post DB schema, the shared section-type shapes, and the forward-compatibility rationale (per-format structure lives in the .jsonc skeletons)
 .claude/skills/commit.md        conventional commit format rules for this project
 ```
 
