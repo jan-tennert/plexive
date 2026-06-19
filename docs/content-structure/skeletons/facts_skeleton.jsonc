@@ -87,9 +87,12 @@
                       // key_figures, not here. Never invent a target.
     {
       "format": "",       // books|facts|people|concepts|questions|stories|academy
-      "ref": "",          // target natural identity, stated from known facts:
-                          // people "Name (birth_year)", books "Title by Author",
-                          // else the title/concept name. Latent until matched.
+      "ref": {            // target natural identity as a structured object, shaped
+                          // by the target format: people { "name", "birth_year" },
+                          // books { "title", "author" }, any other { "title" }.
+                          // Latent until a matching post exists.
+        "title": ""       // example shown for a non-person, non-book target.
+      },
       "featured": false   // true = show in "read next" (cap 3, shared with
                           // featured key_figures).
     }
