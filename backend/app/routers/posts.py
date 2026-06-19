@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session, selectinload
 
 from ..auth import get_current_user, get_optional_user
 from ..database import get_db
+from ..graph_edges import on_post_written, resolved_read_next
+from ..graph_identity import post_identity_key
 from ..models import Interest, Post
 from ..post_counts import attach_counts, attach_counts_one
 from ..rate_limit import check_rate_limit
@@ -86,6 +88,7 @@ def create_post(
     post = Post(
         format=data.format,
         title=data.title,
+        identity_key=post_identity_key(data.format, data.feed_card),
         feed_card=data.feed_card,
         sections=sections_list,
         author_id=current_user.id,
@@ -97,6 +100,10 @@ def create_post(
     db.commit()
     db.refresh(post)
     post_id = post.id
+
+    # Derive this post's graph edges and activate any latent edges pointing at it
+    # (only when it is published; a pending submission casts none).
+    on_post_written(db, post)
 
     post = (
         db.query(Post)
@@ -126,4 +133,6 @@ def get_post(
         if current_user is None or post.author_id != current_user.id:
             raise HTTPException(status_code=404, detail="Post not found")
 
+    # Resolved "read next" set so the frontend resolves nothing itself.
+    post.read_next = resolved_read_next(db, post)
     return attach_counts_one(post, db)

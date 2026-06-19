@@ -43,6 +43,14 @@ class Post(Base):
     # DB by scripts/add_slug_column.py.
     slug = Column(String, nullable=True, unique=True, index=True)
 
+    # Normalized graph identity for this post (see app/graph_identity.py),
+    # computed on write from the format-specific feed_card parts. NULL when those
+    # parts are missing (e.g. a people post without birth_year) -- the post is
+    # then not resolvable as a connection target yet. Indexed, not unique:
+    # within-format collisions are flagged for a human, not enforced. Added to the
+    # live DB by scripts/add_identity_and_edges.py.
+    identity_key = Column(String, nullable=True, index=True)
+
     # False for official/seed content; True for user submissions.
     # Cannot be derived from author_id because seed posts also have an author.
     is_user_content = Column(Boolean, nullable=False, default=False)
@@ -61,6 +69,29 @@ class Post(Base):
     @property
     def author_avatar_url(self):
         return self.author.avatar_url if self.author else None
+
+
+class PostEdge(Base):
+    __tablename__ = "post_edges"
+    # A directed link one post declares to another. target_post_id is NULL until
+    # the target identity_key resolves to a real post (Block 2). PostgreSQL does
+    # not auto-index FK columns, so the source/target lookups need explicit
+    # indexes (same pattern as Event/Follow). Created on the live DB by
+    # scripts/add_identity_and_edges.py.
+    __table_args__ = (
+        Index("ix_post_edges_source_post_id", "source_post_id"),
+        Index("ix_post_edges_target_format_identity", "target_format", "target_identity_key"),
+        Index("ix_post_edges_target_post_id", "target_post_id"),
+    )
+
+    id                  = Column(Integer, primary_key=True)
+    source_post_id      = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    target_format       = Column(String, nullable=False)
+    target_identity_key = Column(String, nullable=False)
+    target_post_id      = Column(Integer, ForeignKey("posts.id"), nullable=True)
+    featured            = Column(Boolean, nullable=False, default=False)
+    kind                = Column(String, nullable=False, default="related")
+    created_at          = Column(DateTime, default=datetime.utcnow)
 
 
 class Event(Base):

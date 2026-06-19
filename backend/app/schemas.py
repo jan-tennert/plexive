@@ -106,13 +106,6 @@ class QuizItem(BaseModel):
         return v
 
 
-class RelatedPostItem(BaseModel):
-    post_id: str
-    title: str
-    format: str
-    mini_teaser: str
-
-
 class SourceItem(BaseModel):
     label: str
     url: str
@@ -209,19 +202,6 @@ class QuizSection(BaseModel):
         return v
 
 
-class RelatedPostsSection(BaseModel):
-    type: Literal["related_posts"]
-    order: int = Field(ge=1)
-    content: list[RelatedPostItem]
-
-    @field_validator("content")
-    @classmethod
-    def validate_related(cls, v: list[RelatedPostItem]) -> list[RelatedPostItem]:
-        if len(v) != 3:
-            raise ValueError("related_posts must have exactly 3 items")
-        return v
-
-
 class WorldContextSection(BaseModel):
     type: Literal["world_context"]
     order: int = Field(ge=1)
@@ -264,7 +244,6 @@ AnySection = Annotated[
         CoreIdeasSection,
         TakeawaySection,
         QuizSection,
-        RelatedPostsSection,
         WorldContextSection,
         AuthorContextSection,
         CritiqueSection,
@@ -379,6 +358,16 @@ def _check_image_urls(data: dict) -> None:
                     _check_image_urls(item)
 
 
+class ReadNextItem(BaseModel):
+    # One resolved "read next" edge for the post-detail page (see
+    # graph_edges.resolved_read_next). target_post_id is the live target's id, or
+    # None when the edge is latent (target does not exist / is not published yet).
+    target_post_id: int | None = None
+    format: str
+    title: str
+    latent: bool
+
+
 class PostOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -389,6 +378,10 @@ class PostOut(BaseModel):
     sections: list[dict]
     tags: List[str] = []
     connections: List[dict] = []
+    # Server-resolved featured edges for the detail page. Raw connections stay
+    # above as-is; this is the resolved projection so the frontend resolves
+    # nothing. Empty on list endpoints (only GET /posts/{id} populates it).
+    read_next: List[ReadNextItem] = []
     author_id: int | None = None
     author_username: str | None = None
     author_is_verified: int | None = None
