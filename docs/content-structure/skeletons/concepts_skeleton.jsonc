@@ -1,51 +1,90 @@
 // concepts_skeleton.jsonc
-// Deepscroll — Concepts format skeleton.
-//
-// Every REQUIRED section must be present. OPTIONAL sections: include only
-// when they add genuine depth for this specific concept, never as padding.
+// Deepscroll: Concepts format skeleton.
+// Thesis: the concept is taught for use, not consumption, and the central diagram is
+// constitutive, not decorative. A reader who finds the idea interesting should move
+// from intuition to how_to_apply without friction, pulled by recognition. Accent:
+// the concepts format color (var(--accent) at runtime; values live in SVG_STANDARD.md).
 //
 // Three principles distinguish the Concepts format:
-//   1. The goal is understanding the reader can APPLY, not information they
-//      passively consume. The whole post is engineered toward the moment
-//      the reader recognises the concept somewhere in their own life.
-//   2. The central diagram (visual_explanation) is CONSTITUTIVE, not
-//      decorative. Without the mechanism diagram the concept stays abstract.
-//      It is not an illustration of the idea; it is part of how the idea
-//      is taught. Treat it as load-bearing as the prose.
-//   3. Concrete before abstract. The spine runs intuition → explanation →
-//      concrete example → how to apply. The plain-language definition lives
-//      on the feed card (the dek); the body opens on an intuition pump,
-//      before any technical mechanism, and shows the idea live in the world
-//      (real_world_examples) before telling the reader how to wield it
-//      (how_to_apply).
+//   1. Teach for application, not consumption. Choose examples, framings, and a
+//      takeaway the reader can reuse and recognise in their own life, never
+//      information to memorise and discard.
+//   2. The central diagram (visual_explanation) is CONSTITUTIVE, not decorative.
+//      Without the mechanism diagram the concept stays abstract. It is not an
+//      illustration of the idea; it is part of how the idea is taught. Treat it
+//      as load-bearing as the prose.
+//   3. Concrete before abstract. The spine runs intuition, explanation, concrete
+//      example, how to apply. The plain-language definition lives on the feed card
+//      (the dek); the body opens on an intuition pump, before any technical
+//      mechanism, and shows the idea live in the world (real_world_examples) before
+//      telling the reader how to wield it (how_to_apply).
 //
-// Section order follows the spec exactly:
-//   Part 1 (Opening): intuition → visual_explanation
-//   Part 2 (Mechanism): how_it_works → formal_definition?
-//   Part 3 (Core): real_world_examples → how_to_apply → where_it_breaks
-//   Part 4 (Takeaway): mental_takeaway
-//   Part 5 (Test): quiz
-//   Part 6 (Context): origin? → nearby_concepts? → sources
+// ─── OUTPUT CONTRACT ─────────────────────────────────────────────────
+// Output valid JSON only. Strip every // comment and use no trailing commas.
+// Fill or omit each placeholder; never emit an empty string. Drop every unused
+// OPTIONAL section object entirely, do not leave it in with blank fields. Optional
+// content fields are omitted entirely (the key is removed when unused).
 //
-// ━━━ LENGTH RULE (applies to every length range below) ━━━━━━━━━━━━━━━
-// All sentence counts, word counts, step counts, and example counts in
-// this file are GUIDELINES, not hard limits. Exceed or undershoot them
-// when the concept demands it. A mechanism with five genuine steps gets
-// five; a concept that lands in two gets two. Prefer clarity and depth
-// over hitting a number. The only HARD constraints are structural, fixed
-// by the UI and the scoring system: quiz length 5–10, quiz options length
-// exactly 4 per question. The 3–6 ranges on how_it_works and
-// real_world_examples are
-// strong guidelines, not caps: prefer staying inside them, but a mechanism
-// with two genuine moves gets two, and a concept that shows up across
-// seven domains can list seven.
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ─── ORDER CONTRACT ──────────────────────────────────────────────────
+// Keep each section's `type` and `order` exactly as given. The renderer sorts by
+// `order`, so the gaps left by dropped OPTIONAL sections are expected. Do not
+// renumber to close them.
 //
-// See DEEPSCROLL_CONTENT_STRUCTURE.md (Concepts section) for the full spec,
-// STYLE_GUIDE_LONGFORM.md for prose rules (em-dashes banned in user-facing
-// text; vocabulary blacklist applies; default voice is third-person
-// assertive). SVG_STANDARD.md governs all diagrams. Accent: violet-400
-// #a78bfa.
+// ─── POST SHAPE ──────────────────────────────────────────────────────
+// Always present (the spine): intuition, visual_explanation, how_it_works,
+// real_world_examples, how_to_apply, where_it_breaks, mental_takeaway, quiz,
+// sources. Beyond the spine, include an OPTIONAL section (formal_definition,
+// origin, nearby_concepts) only where this specific concept passes that section's
+// own Include test. Do not include every optional every time; that is the main way
+// these posts bloat. Guideline: 9 to 12 sections. A rich concept that earns it can
+// run 5 to 17 reading minutes; a simple bias that fills only the spine is a valid
+// shorter post, never padded to hit a number.
+//
+// ─── VISUAL PLAN ─────────────────────────────────────────────────────
+// The mechanism diagram in visual_explanation is the backbone and always present
+// (HARD). Beyond it, add a visual only where it genuinely teaches: a per-step SVG
+// in how_it_works, an image or SVG on a real_world_examples item, a decision flow
+// in how_to_apply, a mnemonic in mental_takeaway. Distribute them: never two
+// visuals back-to-back with no prose between, and every visual must show something
+// new, never repeat a shape an earlier visual carried. Do not place one just to
+// fill a rhythm. Beyond the one required mechanism diagram there is no fixed count;
+// add a visual only where it teaches, so a lean concept may carry just the one.
+//
+// Three kinds of anchor, all legitimate:
+//   1. Mechanism diagram (SVG). Shows how the concept works. visual_explanation
+//      always carries one (HARD). Per SVG_STANDARD.md.
+//   2. Illustrative image. A real, licensed, attributed photo that is ABOUT a
+//      real_world_examples case, giving the eye a rest. Per IMAGE_STANDARD.md.
+//   3. Portrait. A key thinker's face in origin, same licensing rule.
+// Kinds 2 and 3 depend on a fitting licensed image existing; when none does, use
+// none and lean on the diagrams. Never invent an image URL.
+//
+// The feed card is a typographic card: an accent bar left, a field line (label
+// plus a small glyph at its right end), the serif concept name, a one-line dek,
+// teasers, footer. The glyph belongs to the field, not the post; later it comes
+// from a fixed field-to-glyph set (ROADMAP.md), so a generator never invents one.
+// See SVG_STANDARD.md card rules and LAYOUT_STANDARD.md.
+//
+// How a drawn visual looks: SVG_STANDARD.md. How a sourced image is licensed,
+// attributed, and shown: IMAGE_STANDARD.md. Caption and label wording:
+// STYLE_GUIDE_LONGFORM.md.
+//
+// ─── LENGTH RULE ─────────────────────────────────────────────────────
+// All sentence, word, step, and example counts below are GUIDELINES, not hard
+// limits. Exceed or undershoot them when the concept demands it. A mechanism with
+// five genuine steps gets five; a concept that lands in two gets two. Prefer
+// clarity and depth over hitting a number. The only HARD constraints are
+// structural, fixed by the UI and scoring: quiz length 5 to 10, exactly 4 options
+// per question, exactly 3 teasers. The 3 to 6 ranges on how_it_works and
+// real_world_examples are strong guidelines, not caps: prefer staying inside them,
+// but a mechanism with two genuine moves gets two, and a concept that shows up
+// across seven domains can list seven.
+//
+// ─── PROSE ───────────────────────────────────────────────────────────
+// Zero em-dashes in user-facing text. Default voice is third-person assertive;
+// "you" is reserved for how_to_apply. Full prose rules: STYLE_GUIDE_LONGFORM.md.
+// Schema and rationale: DEEPSCROLL_CONTENT_STRUCTURE.md. Diagrams: SVG_STANDARD.md.
+// Sourced images (photos, portraits, card images): IMAGE_STANDARD.md.
 
 {
   // ─── GRAPH FIELDS ───────────────────────────────────────────────────
@@ -62,10 +101,9 @@
       "ref": {            // target natural identity as a structured object, shaped
                           // by the target format: people { "name", "birth_year" },
                           // books { "title", "author" }, any other { "title" }.
-                          // Person refs may be latent (written before their
-                          // post). A non-person ref forms an edge only if
-                          // the target post already exists, else it is
-                          // dropped.
+                          // Person refs may be latent (written before their post).
+                          // A non-person ref forms an edge only if the target post
+                          // already exists, else it is dropped.
         "title": ""       // example shown for a non-person, non-book target.
       },
       "featured": false   // true = show in "read next" (cap 3, shared with
@@ -74,417 +112,411 @@
   ],
 
   // ─── FEED CARD ──────────────────────────────────────────────────────
-  // What the user sees before tapping. Field label + concept name + a
-  // one-line definition + three teasers that promise UNDERSTANDING, not
-  // information. The reader should think "I'd actually use this", not
-  // "that's a thing I could read about". No "the surprising idea that…"
-  // framing; no rhetorical questions.
+  // JOB: make the concept feel usable before any tap. Field label, the concept
+  //      name, a one-line plain-language dek, three teasers that promise
+  //      UNDERSTANDING not information. No "the surprising idea that" framing, no
+  //      rhetorical questions.
   "feed_card": {
-    "field": "",                // string — small label above the name:
-                                // "Behavioral Economics", "Statistics",
-                                // "Philosophy", "Biology". The discipline the
-                                // concept lives in, not an evaluative tag.
-    "concept_name": "",         // string — the concept itself, rendered large.
-                                // "Survivorship Bias", "Compound Interest",
-                                // "Game Theory". The common name, not a
-                                // reworded gloss.
-    "one_line": "",             // string — plain-language definition in
-                                // everyday words. What it IS, no jargon, no
-                                // hedge. This is the card's dek and the
-                                // post's only definition; the body opens on
-                                // intuition, not a restatement of it.
+    "field": "",                // string. Guideline: one or two words, the
+                                // discipline the concept lives in ("Behavioral
+                                // Economics", "Statistics", "Philosophy",
+                                // "Biology"). Not an evaluative tag.
+    "concept_name": "",         // string. The concept itself, rendered large
+                                // ("Survivorship Bias", "Compound Interest", "Game
+                                // Theory"). The common name, not a reworded gloss.
+    "one_line": "",             // string. The card dek: a plain-language definition
+                                // in everyday words, what it IS, no jargon, no
+                                // hedge. This is the post's only definition; the
+                                // body opens on intuition, not a restatement of it.
                                 // No em-dashes; the renderer does not transform
                                 // feed-card text.
-    "teaser_visual_svg": null,  // string | null — a small SVG hinting at the
-                                // mechanism. Often the single most compelling
-                                // pre-click element, so prefer one when the
-                                // mechanism has a recognisable shape. Per
-                                // SVG_STANDARD.md, violet-400 #a78bfa accent,
-                                // viewBox "0 0 400 300". Set to null (not "")
-                                // when no honest teaser shape exists.
-    "teasers": ["", "", ""],    // array[3], ~6 words each. What the reader will
-                                // UNDERSTAND after reading, not the concept
-                                // name reworded. Sub-insights, not synonyms.
-                                // Example for Survivorship Bias: "Why hospitals
-                                // seem dangerous", "The pattern in WWII
-                                // bombers", "How to spot it daily". Vary
-                                // structure across the three.
-    "post_reading_time_min": 0, // integer — honest estimate; 5–17 min range
-                                // for Concepts posts. Match the real read
-                                // length; do not undersell.
-    "post_difficulty": 1        // 1=accessible, 2=moderate, 3=demanding.
-                                // A purely intuitive bias lands at 1; a
-                                // formal game-theoretic equilibrium at 3.
+    "card_visual": {            // REQUIRED. Concepts is a typographic card: a small
+                                // glyph sits at the right end of the field line.
+                                // Fill "svg" with the field glyph; omit image_url
+                                // and image_attribution for concepts (books and
+                                // people use them for a cover or portrait). The
+                                // glyph belongs to the field, not the post; later it
+                                // comes from a fixed field-to-glyph set (ROADMAP.md),
+                                // so a generator never invents one.
+      "image_url": "",          // string | omit. Not used on Concepts cards.
+      "image_attribution": "",  // string | omit. With image_url only.
+      "svg": ""                 // string. The small field glyph, compact viewBox
+                                // (e.g. 0 0 56 32), per SVG_STANDARD.md card rules.
+    },
+    "teasers": ["", "", ""],    // HARD: exactly 3. Guideline: about 6 words each.
+                                // What the reader will UNDERSTAND after reading, not
+                                // the concept name reworded. Sub-insights, not
+                                // synonyms. Example for Survivorship Bias: "Why
+                                // hospitals seem dangerous", "The pattern in WWII
+                                // bombers", "How to spot it daily". Vary structure
+                                // across the three.
+    "post_reading_time_min": 0, // integer. Guideline: honest estimate, match the
+                                // real read length, do not undersell.
+    "post_difficulty": 1        // HARD: 1, 2, or 3 (1=accessible, 2=moderate,
+                                // 3=demanding). A purely intuitive bias lands at 1;
+                                // a formal game-theoretic equilibrium at 3.
   },
 
   // ─── SECTIONS ───────────────────────────────────────────────────────
   "sections": [
 
-    // ── PART 1 — THE OPENING (~60 sec read) ──────────────────────────
-    // Hook and orientation. The plain definition is already on the feed
-    // card (the dek); the body opens on an intuition pump and the
-    // constitutive diagram, before any technical load. Each section here
-    // works as a standalone micro-experience: a reader who stops after the
-    // visual still leaves with the core idea.
+    // ── PART 1: THE OPENING (~60 sec read) ───────────────────────────
+    // Hook and orientation. The plain definition is already on the feed card (the
+    // dek); the body opens on an intuition pump and the constitutive diagram,
+    // before any technical load. Each section here works as a standalone micro-
+    // experience: a reader who stops after the visual still leaves with the idea.
 
     {
-      "type": "intuition",  // REQUIRED — the analogy or thought experiment
-      "order": 1,           // that lands the core idea BEFORE any technical
-                            // explanation. This is the concrete-before-abstract
-                            // rule in action: it lowers the cognitive barrier
-                            // so the mechanism that follows feels obvious in
-                            // hindsight.
-      "content": ""         // string — an analogy, vignette, or thought
-                            // experiment. "Imagine you only see the planes
-                            // that come back from a mission…" Make the reader
-                            // feel the idea before they can name it. Do not
-                            // open by restating the card's dek. Do not use
-                            // banned ta-da framings ("Picture this:",
-                            // "Imagine this:"). Lead straight into the scene.
-                            // Length guideline: 50–120 words. Guideline only.
+      "type": "intuition",  // REQUIRED: the analogy or thought experiment that
+      "order": 1,           // lands the core idea BEFORE any technical explanation.
+                            // JOB: lower the cognitive barrier so the mechanism that
+                            //      follows feels obvious in hindsight. A reader who
+                            //      stops here already has the gist.
+      "content": ""         // string. Guideline: 50-120 words. An analogy, vignette,
+                            // or thought experiment. "The only bombers you can inspect
+                            // are the ones that made it home." Make the reader feel the
+                            // idea before they can name it. Do not open by restating
+                            // the card's dek. Avoid: ta-da framings ("Picture this",
+                            // "Imagine this"); lead straight into the scene.
     },
 
     {
-      "type": "visual_explanation",  // REQUIRED — the main diagram showing the
+      "type": "visual_explanation",  // REQUIRED: the main diagram showing the
       "order": 2,                     // concept's mechanism. CONSTITUTIVE, not
-                                      // decorative: this is the section that
-                                      // turns an abstract idea into something
-                                      // the reader can see. Treat it as one of
-                                      // the most important fields in the whole
-                                      // post, not an afterthought.
-      // At least one of visual_svg or image_url MUST be present. Strongly
-      // prefer visual_svg: a purpose-built mechanism diagram beats a found
-      // image for showing how the concept works. Use image_url only when a
-      // real-world photograph genuinely teaches the mechanism better than a
-      // diagram could (rare for concepts).
+                                      // decorative. JOB: turn an abstract idea into
+                                      // something the reader can see, so a reader who
+                                      // stops here can already picture how the concept
+                                      // works. Show the mechanism itself, the moving
+                                      // parts and how they relate, not a captioned
+                                      // restatement of the concept's name or definition.
+      // Owns: the mechanism diagram. Not here: the prose walk-through (belongs to
+      //   how_it_works).
+      // HARD: at least one of visual_svg or image_url present. Strongly prefer
+      // visual_svg: a purpose-built mechanism diagram beats a found image for
+      // showing how the concept works. Use image_url only when a real-world
+      // photograph genuinely teaches the mechanism better than a diagram could
+      // (rare for concepts).
       "content": {
-        "visual_svg": "",          // string | omit — SVG per SVG_STANDARD.md.
-                                   // viewBox "0 0 400 300", no width/height,
-                                   // transparent background, currentColor for
-                                   // neutral/structural elements, violet-400
-                                   // #a78bfa for the one highlighted element.
-                                   // Pick the diagram type that fits the
-                                   // mechanism: cycle, flow, comparison,
-                                   // matrix, scale, or pyramid. A free-form
-                                   // SVG is allowed when none of the six fit,
-                                   // as long as it follows every rule in
-                                   // sections 1–3 of SVG_STANDARD.md.
-        "image_url": "",           // string | omit — only if a photo teaches
-                                   // the mechanism better than a diagram.
-        "image_caption": "",       // string | omit — one sentence. Required
-                                   // when image_url is set. For an SVG, a
-                                   // caption is optional but can name what the
+        "visual_svg": "",          // string | omit. SVG per SVG_STANDARD.md (accent is
+                                   // var(--accent)). Pick the type that fits the
+                                   // mechanism: cycle, flow, comparison, matrix, scale,
+                                   // or pyramid. A free-form SVG is allowed when none of
+                                   // the six fit, as long as it follows SVG_STANDARD.md.
+        "image_url": "",           // string | omit. Only if a photo teaches the
+                                   // mechanism better than a diagram.
+        "image_caption": "",       // string | omit. One sentence. HARD if image_url
+                                   // present. For an SVG, optional, can name what the
                                    // diagram shows.
-        "image_attribution": ""    // string | omit — required when image_url
-                                   // is set. Licence + source.
+        "image_attribution": ""    // string | omit. HARD if image_url present.
+                                   // Licence plus source, per IMAGE_STANDARD.md.
       }
     },
 
-    // ── PART 2 — THE MECHANISM (~2 min read) ──────────────────────────
-    // How the concept actually works, kept concrete. The diagram showed
-    // the shape; this part walks the steps. formal_definition is an
-    // OPTIONAL layer for concepts that have a precise technical form.
+    // ── PART 2: THE MECHANISM (~2 min read) ──────────────────────────
+    // How the concept actually works, kept concrete. The diagram showed the shape;
+    // this part walks the steps. formal_definition is an OPTIONAL layer for
+    // concepts that have a precise technical form.
 
     {
-      "type": "how_it_works",  // REQUIRED — step-by-step mechanism
+      "type": "how_it_works",  // REQUIRED: step-by-step mechanism
       "order": 3,
-      // array, 3–6 steps as a strong guideline (not a hard cap; see the
-      // header LENGTH RULE). Each step is one move in the
-      // mechanism, a short paragraph or single dense sentence. Keep it
-      // concrete: name what happens, not what category of thing happens.
-      // The steps should read in sequence as a working explanation, not as
-      // a glossary. Default voice is third-person assertive (see style
-      // guide); "you" is reserved for how_to_apply below.
+      // JOB: walk the mechanism the diagram showed, kept concrete, so a reader who
+      //      stops here can already follow how the concept works. Each step is one
+      //      move; name what happens, not what category of thing happens. The steps
+      //      read in sequence as a working explanation, not a glossary.
+      // Owns: the mechanism walked in prose. Not here: the mechanism diagram (belongs
+      //   to visual_explanation).
       "content": [
         {
-          "step_number": 1,    // integer — 1-indexed, sequential.
-          "title": "",         // string — 2–5 words naming the step. Active
-                               // and concrete: "Only survivors are counted",
+          "step_number": 1,    // integer. 1-indexed, sequential.
+          "title": "",         // string. Guideline: 2-5 words naming the step.
+                               // Active and concrete: "Only survivors are counted",
                                // not "Step one of the process".
-          "body": "",          // string — the step explained. Length guideline:
-                               // 1–3 sentences, ~20–70 words. Guideline only;
-                               // a step carrying the crux of the mechanism may
-                               // warrant more. Open with the action, not with
-                               // "In this step we…".
-          "visual_svg": ""     // string | omit — a small inline SVG for THIS
-                               // step only, when one move benefits from its own
-                               // diagram. Per SVG_STANDARD.md, violet-400
-                               // accent. Use sparingly: the main diagram lives
-                               // in visual_explanation; per-step SVGs are the
-                               // exception, not the norm.
+          "body": "",          // string. Guideline: 1-3 sentences, about 20-70 words.
+                               // A step carrying the crux may warrant more. Open with
+                               // the action, not "In this step we".
+          "visual_svg": ""     // string | omit. A small inline SVG for THIS step
+                               // only, when one move benefits from its own diagram.
+                               // Per SVG_STANDARD.md, accent is var(--accent). Use
+                               // sparingly: the main diagram lives in
+                               // visual_explanation; per-step SVGs are the exception.
         }
-        // Repeat object per step. 3–6 is the target range; prefer 4 clear
-        // steps over 6 thin ones. Go below 3 only when the mechanism
-        // genuinely has fewer moves, never to save effort.
+        // Guideline: 3-6 steps. Prefer 4 clear steps over 6 thin ones. Go below 3
+        // only when the mechanism genuinely has fewer moves, never to save effort.
       ]
     },
 
     {
-      "type": "formal_definition",  // OPTIONAL — the precise technical statement
+      "type": "formal_definition",  // OPTIONAL: the precise technical statement
       "order": 4,
-      // Include for concepts that HAVE a precise technical or mathematical
-      // definition: Bayes' Theorem, compound interest, Nash equilibrium,
-      // Shannon entropy. The formula or formal language earns its place by
-      // being exact where the prose was intuitive.
-      // Skip for concepts with no formal definition: Survivorship Bias,
-      // Hindsight Bias, most cognitive biases and soft frameworks. Do not
-      // manufacture a fake formalism to fill the slot; an invented equation
-      // is worse than none.
+      // JOB: give the concept its exact technical or mathematical form, so a reader
+      //      who wants precision gets it where the prose was only intuitive.
+      // Include when: the concept HAS a precise technical or mathematical definition
+      //   (Bayes' Theorem, compound interest, Nash equilibrium, Shannon entropy).
+      //   The formula or formal language earns its place by being exact where the
+      //   prose was intuitive.
+      // Skip when: the concept has no formal definition (Survivorship Bias, Hindsight
+      //   Bias, most cognitive biases and soft frameworks). Do not manufacture a fake
+      //   formalism; an invented equation is worse than none.
       "content": {
-        "body": "",              // string — the formal definition in precise
-                                 // language, and a sentence connecting it back
-                                 // to the intuition so the formalism does not
-                                 // float free. Length guideline: 40–120 words.
-        "formula": "",           // string | omit — KaTeX. The equation or
-                                 // formal expression, e.g.
+        "body": "",              // string. Guideline: 40-120 words. The formal
+                                 // definition in precise language, plus a sentence
+                                 // connecting it back to the intuition so the
+                                 // formalism does not float free.
+        "formula": "",           // string | omit. KaTeX. The equation or formal
+                                 // expression, e.g.
                                  // "P(A \\mid B) = \\frac{P(B \\mid A)\\,P(A)}{P(B)}".
                                  // Omit when the definition is formal but not
                                  // mathematical.
-        "notation_legend": [     // array | omit — gloss each symbol so a reader
-                                 // who skipped the math can still follow.
-                                 // Include whenever a formula is present.
+        "notation_legend": [     // array | omit. Gloss each symbol so a reader who
+                                 // skipped the math can still follow. Include
+                                 // whenever a formula is present.
           {
-            "symbol": "",        // string — the symbol as it appears, e.g.
+            "symbol": "",        // string. The symbol as it appears, e.g.
                                  // "P(A \\mid B)".
-            "meaning": ""        // string — plain-language meaning, e.g.
-                                 // "probability of A given that B is true".
+            "meaning": ""        // string. Plain-language meaning, e.g. "probability
+                                 // of A given that B is true".
           }
         ]
       }
     },
 
-    // ── PART 3 — THE CORE (~3–6 min read) ─────────────────────────────
-    // Where the concept earns its keep. The reader sees it live in the
-    // world (real_world_examples), learns to wield it (how_to_apply), and
-    // is warned where it fails (where_it_breaks). This part is the reason
-    // the post claims to deliver applicable understanding.
+    // ── PART 3: THE CORE (~3 to 6 min read) ──────────────────────────
+    // Where the concept earns its keep. The reader sees it live in the world
+    // (real_world_examples), learns to wield it (how_to_apply), and is warned where
+    // it fails (where_it_breaks). This part is why the post claims to deliver
+    // applicable understanding.
 
     {
-      "type": "real_world_examples",  // REQUIRED — where you see it
+      "type": "real_world_examples",  // REQUIRED: where you see it
       "order": 5,
-      // array, 3–6 examples as a strong guideline (not a hard cap; see the
-      // header LENGTH RULE). Concrete examples from DIFFERENT
-      // domains. Spread is the point: the same concept showing up in
-      // finance, medicine, sport, and history is what makes it transferable.
-      // The richer and more varied this section, the more the reader will
-      // recognise the pattern in their own life. Each example is a short
-      // narrative, not a label.
+      // JOB: show the concept live across DIFFERENT domains, so a reader who stops here
+      //      has seen it operate in several places. Spread is the point: the same
+      //      concept in finance, medicine, sport, and history is what makes it
+      //      transferable. Each example is a short narrative, not a label; let the
+      //      reader notice the pattern rather than announcing it.
+      // Owns: the concept shown operating. Not here: instructions for using it (belongs
+      //   to how_to_apply).
       "content": [
         {
-          "title": "",        // string — 2–6 words naming the example.
-                              // Concrete: "WWII bomber armour", "Mutual fund
-                              // track records". Not "Example in finance".
-          "domain": "",       // string — the field this example sits in:
-                              // "Military history", "Finance", "Medicine",
-                              // "Sport". Used to show the spread across the set.
-          "body": "",         // string — the example as a short narrative.
-                              // Show the concept operating; let the reader
-                              // notice it rather than announcing "this is
-                              // survivorship bias". Length guideline: 40–100
-                              // words. Guideline only.
-          "image_url": "",    // string | omit — Wikimedia or royalty-free
-                              // image for this example. Omit if none genuinely
-                              // fits; do not reuse the main diagram here.
-          "visual_svg": ""    // string | omit — a small SVG if this example is
-                              // clearer as a diagram. Per SVG_STANDARD.md,
-                              // violet-400 accent. Rare; most examples are prose.
+          "title": "",        // string. Guideline: 2-6 words naming the example.
+                              // Concrete: "WWII bomber armour", "Mutual fund track
+                              // records". Not "Example in finance".
+          "domain": "",       // string. The field this example sits in: "Military
+                              // history", "Finance", "Medicine", "Sport". Shows the
+                              // spread across the set.
+          "body": "",         // string. Guideline: 40-100 words. The example as a
+                              // short narrative. Show the concept operating; let the
+                              // reader notice it rather than announcing "this is
+                              // survivorship bias".
+          "image_url": "",    // string | omit. Wikimedia or royalty-free image for
+                              // this example, per IMAGE_STANDARD.md. Omit if none
+                              // genuinely fits; do not reuse the main diagram here.
+          "image_caption": "",  // string | omit. One sentence on what the photo
+                                // shows. HARD if image_url present.
+          "image_attribution": "",  // string | omit. HARD if image_url present.
+                                    // Licence plus source, per IMAGE_STANDARD.md.
+          "visual_svg": ""    // string | omit. A small SVG if this example is clearer
+                              // as a diagram. Per SVG_STANDARD.md, accent is
+                              // var(--accent). Rare; most examples are prose.
         }
-        // Repeat object per example. 3–6 is the target; prefer 4 vivid
-        // examples across 4 domains over 6 that cluster in one field.
-        // More than 6 is acceptable when each adds a genuinely new domain.
+        // Guideline: 3-6 examples. Prefer 4 vivid examples across 4 domains over 6
+        // that cluster in one field. More than 6 is fine when each adds a genuinely
+        // new domain.
       ]
     },
 
     {
-      "type": "how_to_apply",  // REQUIRED — how to use it
+      "type": "how_to_apply",  // REQUIRED: how to use it
       "order": 6,
-      // The practical payoff. For thinking tools: when to reach for it and
-      // what questions to ask. For frameworks: how to run it step by step.
-      // THIS IS THE ONE SECTION where the "you" voice is fully appropriate:
-      // the style guide loosens on direct address here because the section
-      // is literally instructions to the reader. "You can apply this when
-      // negotiating a salary" belongs here. Keep "you" tied to specific,
-      // concrete application, never as filler warmth ("you'll discover…").
+      // JOB: the practical payoff, so a reader who stops here knows when and how to
+      //      use the concept. For thinking tools, when to reach for it and what
+      //      questions to ask; for frameworks, how to run it step by step. This is
+      //      the one section where the "you" voice is fully appropriate: the style
+      //      guide loosens on direct address here because the section is literally
+      //      instructions to the reader. Keep "you" tied to concrete application,
+      //      never as filler warmth ("you'll discover").
+      // Owns: how to use the concept. Not here: showing it operate in the world
+      //   (belongs to real_world_examples), and where it fails or is over-applied
+      //   (belongs to where_it_breaks).
       "content": {
-        "body": "",          // string — practical, actionable guidance in the
-                             // second person. When does the reader invoke this
-                             // concept? What does it change about a decision
-                             // they actually make? Length guideline: 60–140
-                             // words. Guideline only.
-        "checklist": [       // array | omit — a short list of trigger questions
-                             // or steps the reader can run in the moment.
-                             // Include when the application reduces cleanly to
-                             // a few prompts ("Ask: who is missing from this
-                             // data?"). Omit when the application is better as
-                             // prose; do not force a list. Each item one line.
+        "body": "",          // string. Guideline: 60-140 words. Practical, actionable
+                             // guidance in the second person. When does the reader
+                             // invoke this concept? What does it change about a
+                             // decision they actually make?
+        "checklist": [       // array | omit. A short list of trigger questions or
+                             // steps the reader can run in the moment. Include when
+                             // the application reduces cleanly to a few prompts
+                             // ("Ask: who is missing from this data?"). Omit when the
+                             // application is better as prose. Each item one line.
           ""
         ],
-        "visual_svg": ""     // string | omit — a small SVG if the application
-                             // procedure has a useful shape (e.g. a decision
-                             // flow). Per SVG_STANDARD.md, violet-400 accent.
-                             // Optional and uncommon.
+        "visual_svg": ""     // string | omit. A small SVG if the application has a
+                             // useful shape (e.g. a decision flow). Per
+                             // SVG_STANDARD.md, accent is var(--accent). Uncommon.
       }
     },
 
     {
-      "type": "where_it_breaks",  // REQUIRED — limits and misapplications
+      "type": "where_it_breaks",  // REQUIRED: limits and misapplications
       "order": 7,
-      "content": ""               // string — where the concept fails, its edge
-                                  // cases, and the ways people over-apply it.
-                                  // This section is epistemic hygiene: it stops
-                                  // a useful idea from becoming a hammer that
-                                  // sees only nails. Be specific about the
-                                  // conditions under which the concept stops
-                                  // holding. Do not soften into "but it's still
-                                  // usually right". Length guideline: 60–140
-                                  // words. Guideline only.
+      // JOB: name where the concept fails, its edge cases, and how people over-apply
+      //      it, so a reader who stops here knows the concept's limits, not only its
+      //      uses. Epistemic hygiene: it stops a useful idea from becoming a hammer
+      //      that sees only nails.
+      // Owns: limits and misapplication. Not here: how to use the concept (belongs to
+      //   how_to_apply).
+      "content": ""               // string. Guideline: 60-140 words. Be specific
+                                  // about the conditions under which the concept
+                                  // stops holding. Avoid: softening into "but it's
+                                  // still usually right".
     },
 
-    // ── PART 4 — WHAT STAYS WITH YOU ─────────────────────────────────
-    // The kernel. After the mechanism and examples fade, this is the one
-    // line the reader keeps. A reader who got this far has the full
-    // experience; this seals it.
+    // ── PART 4: WHAT STAYS WITH YOU ──────────────────────────────────
+    // The kernel. After the mechanism and examples fade, this is the one line the
+    // reader keeps. A reader who got this far has the full experience; this seals it.
 
     {
-      "type": "mental_takeaway",  // REQUIRED — what stays with you
+      "type": "mental_takeaway",  // REQUIRED: what stays with you
       "order": 8,
+      // JOB: the single sentence the reader keeps, the compressed form of the whole
+      //      post, so a reader who stops here leaves with the one line worth keeping.
+      //      Make it portable: the reader should be able to say it to someone else.
+      // Owns: the one portable kernel. Not here: the card dek's definition, the
+      //   intuition's scene, or the how_to_apply instruction. Compress the post, do
+      //   not restate any of them.
       "content": {
-        "body": "",          // string — the single sentence to remember, plus
-                             // at most one more framing it. The compressed
-                             // form of the whole post. Make it portable: the
-                             // reader should be able to say it to someone else.
-                             // "we" is acceptable here for genuine shared
-                             // reflection ("We all reason from the survivors").
-                             // Length guideline: 1–2 sentences. Guideline only.
-        "visual_svg": ""     // string | omit — a visual mnemonic: the simplest
-                             // possible shape that recalls the concept. Per
-                             // SVG_STANDARD.md, violet-400 accent. Include when
-                             // a single icon-like diagram aids recall; omit
-                             // when the sentence carries it alone.
+        "body": "",          // string. Guideline: 1-2 sentences. The single sentence
+                             // to remember, plus at most one more framing it. "we" is
+                             // acceptable here for genuine shared reflection ("We all
+                             // reason from the survivors").
+        "visual_svg": ""     // string | omit. A visual mnemonic: the simplest shape
+                             // that recalls the concept. Per SVG_STANDARD.md, accent
+                             // is var(--accent). Include when a single icon-like
+                             // diagram aids recall; omit when the sentence carries it
+                             // alone.
       }
     },
 
-    // ── PART 5 — TEST YOURSELF ────────────────────────────────────────
+    // ── PART 5: TEST YOURSELF ────────────────────────────────────────
 
     {
-      "type": "quiz",  // REQUIRED — affects Elo score
+      "type": "quiz",  // REQUIRED: affects Elo score
       "order": 9,
-      // array[5–10] (HARD constraint), exactly 4 options per question
-      // (HARD constraint). Test APPLICATION TO A NEW EXAMPLE, not recall of
-      // the post's own examples. A good question describes a fresh situation
-      // and asks whether the concept applies, or which response the concept
-      // recommends. A reader who only memorised the post's WWII-bomber case
-      // should not be able to pass. Distractors should be plausible
-      // misconceptions a careful reader would genuinely weigh, including the
-      // classic over-application of the concept.
+      // JOB: test APPLICATION TO A NEW EXAMPLE, not recall of the post's own
+      //      examples. A good question describes a fresh situation and asks whether
+      //      the concept applies, or which response it recommends. A reader who only
+      //      memorised the WWII-bomber case should not pass.
+      // HARD: 5-10 questions. HARD: exactly 4 options each. HARD: answer_index 0-3
+      //   and varied across questions, never always 0.
+      // Distractors are plausible misconceptions a careful reader would weigh,
+      // including the classic over-application of the concept.
       "content": [
         {
           "question": "",
-          "options": ["", "", "", ""],  // exactly 4
-          "answer_index": 0,            // 0–3
-          "explanation": ""             // string — one or two sentences that
-                                        // TEACH the reasoning, not just declare
-                                        // the answer. Do not begin with "The
-                                        // correct answer is…". Explain why the
-                                        // tempting distractor is wrong when it
-                                        // sharpens the concept.
+          "options": ["", "", "", ""],
+          "answer_index": 0,
+          "explanation": ""  // string. One or two sentences that TEACH the reasoning.
+                             // Avoid: "the correct answer is" openings. Explain why
+                             // the tempting distractor is wrong when it sharpens the
+                             // concept.
         }
-        // Repeat object per question. 5 minimum, 10 maximum.
       ]
     },
 
-    // NOTE: "Read next" is driven by featured connections and featured
-    // key_thinkers (the top-level connections field and key_thinkers.featured).
-    // See SKELETON_COMMENT_STANDARD.md s.10.
+    // NOTE: "Read next" is driven by featured connections and featured key_thinkers
+    // (the top-level connections field and key_thinkers.featured). See
+    // SKELETON_COMMENT_STANDARD.md s.10.
 
-    // ── PART 6 — CONTEXT (smaller typography, secondary) ─────────────
-    // These sit below the natural end-point. A reader who stopped at the
-    // quiz got the full experience; these reward those who want the
-    // intellectual history (origin), sharper boundaries (nearby_concepts),
-    // or the references (sources).
+    // ── PART 6: CONTEXT (smaller typography, secondary) ──────────────
+    // These sit below the natural end-point. A reader who stopped at the quiz got
+    // the full experience; these reward those who want the intellectual history
+    // (origin), sharper boundaries (nearby_concepts), or the references (sources).
 
     {
-      "type": "origin",  // OPTIONAL — "Where It Comes From"
+      "type": "origin",  // OPTIONAL: "Where It Comes From"
       "order": 10,
-      // Include when the concept has a clear intellectual origin: who coined
-      // or developed it, when, in what discipline. A brief history that
-      // grounds the idea in real people and a real moment.
-      // Skip for concepts with no clear origin: folk wisdom, ancient or
-      // anonymous ideas, notions that emerged gradually across a field. Do
-      // not fabricate a single inventor for a diffuse idea.
+      // JOB: ground the concept in the real people and moment it came from, so the
+      //      idea has a history the reader can place.
+      // Include when: the concept has a clear intellectual origin, who coined or
+      //   developed it, when, in what discipline. A brief history that grounds the
+      //   idea in real people and a real moment.
+      // Skip when: the concept has no clear origin (folk wisdom, ancient or anonymous
+      //   ideas, notions that emerged gradually across a field). Do not fabricate a
+      //   single inventor for a diffuse idea.
       "content": {
-        "body": "",            // string — brief intellectual history. Who,
-                               // when, in what discipline, and what problem
-                               // they were trying to solve. Length guideline:
-                               // 60–140 words. Guideline only.
-        "key_thinkers": [      // array | omit — the people behind the concept.
-                               // Uses the shared person-list base shape; do
-                               // not invent field names. Omit if the body
-                               // already names them sufficiently.
+        "body": "",            // string. Guideline: 60-140 words. Who, when, in what
+                               // discipline, and what problem they were solving.
+        "key_thinkers": [      // array | omit. The people behind the concept. Uses
+                               // the shared person-list base shape; do not invent
+                               // field names. Omit if the body already names them
+                               // sufficiently.
           {
-            "name": "",        // string — full name as commonly known.
-            "role": "",        // string — their function relative to the
-                               // concept: "Coined the term", "Formalised it",
-                               // "Popularised it".
-            "one_line": "",    // string | omit — brief description of the
-                               // contribution.
-            "lifespan": "",    // string | omit — "1934–present" or "1903–1995".
-            "birth_year": 0,   // integer | omit. The graph match key for the
-                               // people edge. Omit if genuinely unknown; never guess.
-            "featured": false, // OPTIONAL. true = surface this person in "read
-                               // next" (cap 3, shared with featured connections).
-            "image_url": ""    // string | omit — Wikimedia portrait.
+            "name": "",        // string. Full name as commonly known.
+            "role": "",        // string. Their function relative to the concept:
+                               // "Coined the term", "Formalised it", "Popularised
+                               // it".
+            "one_line": "",    // string | omit. Brief description of the contribution.
+            "lifespan": "",    // string | omit. Display form "1934-present" or
+                               // "1903-1995".
+            "birth_year": 0,   // integer | omit. The graph match key for the people
+                               // edge. Omit if genuinely unknown; never guess.
+            "featured": false, // OPTIONAL. true = surface this person in "read next"
+                               // (cap 3, shared with featured connections).
+            "image_url": "",   // string | omit. Wikimedia portrait, per
+                               // IMAGE_STANDARD.md.
+            "image_attribution": ""  // string | omit. HARD if image_url present.
+                                     // Licence plus source, per IMAGE_STANDARD.md.
           }
         ],
-        "image_url": ""        // string | omit — an image for the origin
-                               // (a historical document, the original paper).
+        "image_url": "",         // string | omit. An image for the origin (a historical
+                                 // document, the original paper), per IMAGE_STANDARD.md.
+        "image_caption": "",     // string | omit. One sentence on what the image
+                                 // shows. HARD if image_url present.
+        "image_attribution": ""  // string | omit. HARD if image_url present.
+                                 // Licence plus source, per IMAGE_STANDARD.md.
       }
     },
 
     {
-      "type": "nearby_concepts",  // OPTIONAL — "Don't Confuse With"
+      "type": "nearby_concepts",  // OPTIONAL: "Don't Confuse With"
       "order": 11,
-      // Include when there are concepts that SOUND similar but are distinct,
-      // and the confusion is common enough to be worth pre-empting:
-      // Survivorship Bias vs. Selection Bias, Correlation vs. Causation,
-      // Sunk Cost vs. Opportunity Cost. Defining by contrast sharpens the
-      // concept the reader just learned.
-      // Skip when no genuinely confusable neighbour exists, or when the
-      // distinction is so obvious it would patronise the reader.
+      // JOB: separate the concept from the neighbours it gets confused with, so the
+      //      reader holds the exact idea, not a blurred one.
+      // Include when: concepts that SOUND similar but are distinct, and the confusion
+      //   is common enough to pre-empt (Survivorship Bias vs Selection Bias,
+      //   Correlation vs Causation, Sunk Cost vs Opportunity Cost). Defining by
+      //   contrast sharpens the concept just learned.
+      // Skip when: no genuinely confusable neighbour exists, or the distinction is so
+      //   obvious it would patronise the reader.
       "content": [
         {
-          "concept": "",      // string — the confusable neighbour's name.
-          "distinction": ""   // string — one or two sentences on what actually
-                              // separates them. Name the dividing line, not
-                              // just "they are different". Length guideline:
-                              // ~20–50 words per item. Guideline only.
+          "concept": "",      // string. The confusable neighbour's name.
+          "distinction": ""   // string. Guideline: about 20-50 words. One or two
+                              // sentences on what actually separates them. Name the
+                              // dividing line, not just "they are different".
         }
-        // Repeat object per neighbour. Typically 1–3; include only the
-        // confusions that genuinely arise.
+        // Guideline: typically 1-3; include only the confusions that genuinely arise.
       ]
     },
 
     {
-      "type": "sources",  // REQUIRED — "Sources & Further Reading". Exists
-      "order": 12,         // so every claim in the post is checkable. A post
-                           // that asserts without sourcing erodes the trust
-                           // the whole feed depends on; this section is that
-                           // trust made visible.
-      // array[1–10]. Prefer the original paper or book that introduced the
-      // concept, plus an accessible explainer. Wikipedia is acceptable as one
-      // entry for accessibility but should not be the only source. Every URL
-      // must resolve.
+      "type": "sources",  // REQUIRED: "Sources & Further Reading"
+      "order": 12,
+      // JOB: let the reader verify and go deeper, so every claim is checkable. Prefer
+      //      the original paper or book that introduced the concept, plus an
+      //      accessible explainer. Wikipedia is acceptable as one entry but should
+      //      not be the only source. Every URL must resolve.
+      // Guideline: 1-10 sources. At least 2 recommended; 1 only when a single
+      //   authoritative source genuinely dominates.
       "content": [
         {
-          "label": "",   // string — human-readable reference. Full citation
-                         // or site name: "Daniel Kahneman, Thinking, Fast and
-                         // Slow (2011)" or "Stanford Encyclopedia of
-                         // Philosophy: Game Theory".
-          "url": "",     // string — full URL.
-          "type": ""     // "wikipedia"|"paper"|"book"|"article"|"database"
+          "label": "",   // string. Human-readable reference. Full citation or site
+                         // name: "Daniel Kahneman, Thinking, Fast and Slow (2011)" or
+                         // "Stanford Encyclopedia of Philosophy: Game Theory".
+          "url": "",     // string. Full, reachable URL.
+          "type": ""     // HARD: one of wikipedia|paper|book|article|database.
         }
-        // Repeat object per source. At least 2 recommended; 1 is the minimum
-        // only when a single authoritative source genuinely dominates.
       ]
     }
 
