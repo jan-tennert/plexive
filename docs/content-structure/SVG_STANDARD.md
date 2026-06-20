@@ -27,7 +27,12 @@ Two uses:
   scales up into a visible gap between sections. Spacing between a graphic and the
   next section is the layout's job (the uniform section rhythm), never empty space
   baked into the viewBox. If the art naturally occupies less height, tighten the
-  viewBox to its bounding box rather than leaving dead space.
+  viewBox to its bounding box rather than leaving dead space. This tighten rule
+  wins over the `0 0 400 300` default whenever the art's natural shape is a short
+  band: a horizontal `flow` chain, for example, uses a shorter viewBox height so
+  its boxes meet the top and bottom edges instead of floating in an empty 300-tall
+  canvas. The `0 0 400 300` diagrams in section 5 show each type's layout, not a
+  rule to keep that height when the content is shorter.
 - **No `width`/`height` on `<svg>`.** Only the viewBox. The frontend controls
   size with CSS.
 - **Background always transparent.** No `<rect>` behind the drawing. The
@@ -177,6 +182,8 @@ down, Rebuild).
   </g>
 </svg>
 ```
+In use, tighten the viewBox vertically to the box band (a shorter height) so the
+chain fills its frame instead of sitting in an empty 300-tall canvas, per section 1.
 
 ### 5.3 `comparison` — two sides
 For contrast concepts (e.g. Fixed vs Growth Mindset).
