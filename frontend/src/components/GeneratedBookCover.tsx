@@ -250,6 +250,80 @@ function Pattern({ params, pal }: { params: CoverParams; pal: Palette }) {
   }
 }
 
+// Approximate width of one capital in the cover serif, as a fraction of the font
+// size; used only to shrink the text so a long line never overflows the cover.
+const CAP_W = 0.72
+
+// Greatest font size (capped) at which the longest line fits the text column.
+function fitSize(lines: string[], cap: number, perChar: number): number {
+  const longest = Math.max(1, ...lines.map((l) => l.length))
+  return Math.max(13, Math.min(cap, (W - 2 * PAD) / (longest * perChar)))
+}
+
+// The "real cover" layout: text only, nothing else. Used when a book borrows a
+// background from its real cover, so the generated cover evokes it the way the
+// real one is set, centered title in the upper third and author below, with no
+// pattern and no rules. Title and author are in the borrowed (similar) typeface;
+// font-family goes through style so the CSS var resolves in the browser.
+function CoverText({
+  title,
+  author,
+  pal,
+  fontFamily,
+}: {
+  title: string
+  author: string
+  pal: Palette
+  fontFamily: string
+}) {
+  const titleLines = wrapText(title, 13, 3)
+  const titleSize = fitSize(titleLines, 30, CAP_W)
+  const titleLead = titleSize * 1.18
+  // Vertically center the title block on ~32% of the height.
+  const titleBase = H * 0.32 - ((titleLines.length - 1) * titleLead) / 2 + titleSize * 0.34
+
+  const authorLines = wrapText(author, 18, 2)
+  const authorSize = fitSize(authorLines, 16, CAP_W * 0.92)
+  const authorLead = authorSize * 1.2
+  const authorBase = H * 0.72
+
+  const fam = `${fontFamily}, Georgia, serif`
+  return (
+    <>
+      <text
+        x={W / 2}
+        y={titleBase}
+        textAnchor="middle"
+        style={{ fontFamily: fam, letterSpacing: "0.06em" }}
+        fontSize={titleSize}
+        fontWeight={500}
+        fill={pal.ink}
+      >
+        {titleLines.map((line, i) => (
+          <tspan key={i} x={W / 2} dy={i === 0 ? 0 : titleLead}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+      <text
+        x={W / 2}
+        y={authorBase}
+        textAnchor="middle"
+        style={{ fontFamily: fam, letterSpacing: "0.12em" }}
+        fontSize={authorSize}
+        fontWeight={500}
+        fill={pal.ink}
+      >
+        {authorLines.map((line, i) => (
+          <tspan key={i} x={W / 2} dy={i === 0 ? 0 : authorLead}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    </>
+  )
+}
+
 interface Props {
   title: string
   author: string
@@ -268,19 +342,13 @@ export default function GeneratedBookCover({
   ink,
   titleFont,
 }: Props) {
-  const params = coverParams(title, author)
   const pal = buildPalette(background, ink)
-  const titleLines = wrapText(title, 16, 4)
-  const authorLines = wrapText(author, 22, 2)
   const titleFontFamily =
     (titleFont && (FONT_MAP[titleFont] ?? titleFont)) || "var(--font-serif)"
-
-  // Title block grows upward from a fixed baseline so longer titles stay anchored
-  // above the author line rather than colliding with the pattern.
-  const titleSize = 26
-  const titleLead = 30
-  const titleBottom = 372
-  const titleTop = titleBottom - (titleLines.length - 1) * titleLead
+  // A borrowed background means the book evokes a real cover: render text only,
+  // placed like the real cover, no pattern or rules. Otherwise draw the original
+  // generative Stage cover.
+  const coverText = !!background
 
   return (
     <svg
@@ -292,6 +360,38 @@ export default function GeneratedBookCover({
     >
       <rect x={0} y={0} width={W} height={H} fill={pal.base} />
 
+      {coverText ? (
+        <CoverText title={title} author={author} pal={pal} fontFamily={titleFontFamily} />
+      ) : (
+        <StageArt title={title} author={author} pal={pal} fontFamily={titleFontFamily} />
+      )}
+    </svg>
+  )
+}
+
+// The original generative Stage cover: a flat abstract pattern plus a left-aligned
+// title and author. Used for books that do not borrow a real cover's look.
+function StageArt({
+  title,
+  author,
+  pal,
+  fontFamily,
+}: {
+  title: string
+  author: string
+  pal: Palette
+  fontFamily: string
+}) {
+  const params = coverParams(title, author)
+  const titleLines = wrapText(title, 16, 4)
+  const authorLines = wrapText(author, 22, 2)
+  const titleSize = 26
+  const titleLead = 30
+  const titleBottom = 372
+  const titleTop = titleBottom - (titleLines.length - 1) * titleLead
+
+  return (
+    <>
       <Pattern params={params} pal={pal} />
 
       {/* Amber rule dividing the pattern band from the title block. */}
@@ -303,7 +403,7 @@ export default function GeneratedBookCover({
         // font-family is set via style (CSS), not the SVG presentation attribute,
         // because browsers do not resolve var() inside SVG attributes; the var
         // would silently fall back to the generic serif otherwise.
-        style={{ fontFamily: `${titleFontFamily}, Georgia, serif` }}
+        style={{ fontFamily: `${fontFamily}, Georgia, serif` }}
         fontSize={titleSize}
         fontWeight={500}
         fill={pal.ink}
@@ -329,6 +429,6 @@ export default function GeneratedBookCover({
           </tspan>
         ))}
       </text>
-    </svg>
+    </>
   )
 }

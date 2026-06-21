@@ -155,6 +155,12 @@ dark only, but a cover stands in for a real, physical book, so a light cover
 background is allowed; the title and author ink are derived from that background
 so they always read.
 
+When a `background` is borrowed, the generated cover switches to a text-only
+layout that echoes how a real cover is set: the title centered in the upper third
+and the author centered below, in the borrowed typeface, with no pattern and no
+rules. Books without a borrowed background keep the default dark Stage cover with
+its abstract pattern.
+
 Carry the hint per book in `feed_card.cover.generated_style` (tier-2 only; omit
 it to keep the default dark Stage cover):
 
