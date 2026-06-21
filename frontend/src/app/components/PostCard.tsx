@@ -428,7 +428,11 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
                 </div>
               </div>
 
-              <p className="font-serif italic text-base text-ink-body leading-relaxed">{fc.essence as string}</p>
+              {/* Dek: People's card gloss is one_line (the feed_card has no
+                  essence field, unlike Books). LAYOUT_STANDARD s4. */}
+              {fcStr(fc, "one_line") && (
+                <p className="font-serif italic text-base text-ink-body leading-relaxed">{fcStr(fc, "one_line")}</p>
+              )}
 
               {Array.isArray(fc.teasers) && (fc.teasers as string[]).length > 0 && (
                 <Teasers items={fc.teasers as string[]} />
