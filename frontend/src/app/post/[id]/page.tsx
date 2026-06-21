@@ -39,6 +39,52 @@ function FieldGlyph({ cv, isUserContent }: { cv: CardVisual | undefined; isUserC
   )
 }
 
+// Shared flat-header meta row: avatar + creator, then the derived quiz-question
+// count, difficulty and reading time. Used by every flat header (facts,
+// concepts, people) so the row is identical across formats.
+function HeaderMeta({ post }: { post: Post }) {
+  return (
+    <div
+      data-no-read
+      className="px-6 pb-6 flex items-center gap-2 min-w-0 text-xs"
+    >
+      {post.author_username && (
+        <Link
+          href={`/profile/${post.author_username}`}
+          className="flex items-center gap-1.5 min-w-0 hover:text-ink-body transition-colors"
+        >
+          <Avatar username={post.author_username} avatarUrl={post.author_avatar_url} size={24} />
+          <span className="text-ink-dim truncate">@{post.author_username}</span>
+          {(post.author_is_verified ?? 0) > 0 && (
+            <VerifiedBadge size={12} level={post.author_is_verified ?? 1} />
+          )}
+        </Link>
+      )}
+      <span className="ml-auto flex items-center gap-2 shrink-0">
+        {/* Quiz teaser — derived from the quiz array length, not
+            stored in content. Signals a graded quiz waits at the end. */}
+        {(() => {
+          const q = post.sections.find((s) => s.type === "quiz")
+          const n = Array.isArray(q?.content) ? q.content.length : 0
+          return n > 0 ? (
+            <span className="text-[11px] font-mono text-(--accent) leading-none">
+              {n} questions
+            </span>
+          ) : null
+        })()}
+        {fcNum(post.feed_card, "post_difficulty") > 0 && (
+          <DotScale value={fcNum(post.feed_card, "post_difficulty") as 1 | 2 | 3} />
+        )}
+        {fcNum(post.feed_card, "post_reading_time_min") > 0 && (
+          <span className="text-[11px] font-mono text-ink-muted leading-none">
+            {fcNum(post.feed_card, "post_reading_time_min")} min
+          </span>
+        )}
+      </span>
+    </div>
+  )
+}
+
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
@@ -216,6 +262,13 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   // Typographic formats (LAYOUT_STANDARD s1) use the banner header: field line +
   // glyph + serif headline + dek, no slab. Facts and concepts share it.
   const typographic = !!post && (post.format === "facts" || post.format === "concepts")
+  // Cover formats that still use the flat (no-slab) header: people opens straight
+  // into the page like facts/concepts, with a portrait + context fields instead of
+  // a glyph field line (LAYOUT_STANDARD s1/s3). Books keeps the slab header.
+  const coverFlat = !!post && post.format === "people"
+  // Every flat header (typographic + cover-flat) shares the top-bar format label,
+  // the end-of-post tags, and the headline-section filter.
+  const flatHeader = typographic || coverFlat
 
   return (
     <div className="h-[100dvh] bg-surface-0 flex justify-center">
@@ -304,7 +357,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           {/* Format label in the app top bar — the format with its accent dot,
               centered between the back and audio controls. Typographic formats use
               the banner header, where the format lives here rather than in a slab. */}
-          {post && style && typographic && (
+          {post && style && flatHeader && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-(--accent)" />
               <span className="text-xs font-mono lowercase tracking-widest text-(--accent)">
@@ -354,44 +407,47 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     {/* Meta row — round avatar + creator, reading time,
                         difficulty. Reads the same author fields as the feed
                         card footer, so the two always match. */}
-                    <div
-                      data-no-read
-                      className="px-6 pb-6 flex items-center gap-2 min-w-0 text-xs"
-                    >
-                      {post.author_username && (
-                        <Link
-                          href={`/profile/${post.author_username}`}
-                          className="flex items-center gap-1.5 min-w-0 hover:text-ink-body transition-colors"
-                        >
-                          <Avatar username={post.author_username} avatarUrl={post.author_avatar_url} size={24} />
-                          <span className="text-ink-dim truncate">@{post.author_username}</span>
-                          {(post.author_is_verified ?? 0) > 0 && (
-                            <VerifiedBadge size={12} level={post.author_is_verified ?? 1} />
-                          )}
-                        </Link>
+                    <HeaderMeta post={post} />
+                  </div>
+                ) : coverFlat ? (
+                  /* People cover header (LAYOUT_STANDARD s1/s3): the same flat
+                     structure as facts/concepts, opening straight into the page
+                     with no slab. The portrait takes the glyph's slot at the right
+                     end of the field line; the role kicker is the field label; the
+                     name is the single headline; lifespan is the context line and
+                     one_line the dek. */
+                  <div className="relative">
+                    <div className="px-6 pt-4 flex items-start justify-between gap-3">
+                      {fcStr(post.feed_card, "role") && (
+                        <p className="label-caps text-(--accent)">
+                          {fcStr(post.feed_card, "role")}
+                        </p>
                       )}
-                      <span className="ml-auto flex items-center gap-2 shrink-0">
-                        {/* Quiz teaser — derived from the quiz array length, not
-                            stored in content. Signals a graded quiz waits at the end. */}
-                        {(() => {
-                          const q = post.sections.find((s) => s.type === "quiz")
-                          const n = Array.isArray(q?.content) ? q.content.length : 0
-                          return n > 0 ? (
-                            <span className="text-[11px] font-mono text-(--accent) leading-none">
-                              {n} questions
-                            </span>
-                          ) : null
-                        })()}
-                        {fcNum(post.feed_card, "post_difficulty") > 0 && (
-                          <DotScale value={fcNum(post.feed_card, "post_difficulty") as 1 | 2 | 3} />
-                        )}
-                        {fcNum(post.feed_card, "post_reading_time_min") > 0 && (
-                          <span className="text-[11px] font-mono text-ink-muted leading-none">
-                            {fcNum(post.feed_card, "post_reading_time_min")} min
-                          </span>
-                        )}
-                      </span>
+                      {(post.feed_card as { portrait?: { image_url?: string } }).portrait?.image_url && (
+                        <div className="shrink-0 w-16 h-16 rounded-full overflow-hidden bg-white/[0.06]">
+                          <img
+                            src={(post.feed_card as { portrait: { image_url: string } }).portrait.image_url}
+                            alt=""
+                            className="w-full h-full object-cover object-top"
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
+                          />
+                        </div>
+                      )}
                     </div>
+                    {/* Name — the single headline, same treatment as facts/concepts. */}
+                    <HeadlineSection content={post.title} />
+                    {/* Lifespan context line then one_line dek (LAYOUT_STANDARD s3). */}
+                    {fcStr(post.feed_card, "lifespan") && (
+                      <p className="px-6 -mt-3 mb-1.5 text-ink-muted text-xs font-mono">
+                        {fcStr(post.feed_card, "lifespan")}
+                      </p>
+                    )}
+                    {fcStr(post.feed_card, "one_line") && (
+                      <p className="px-6 mb-5 font-serif italic text-base text-ink-body leading-relaxed">
+                        {fcStr(post.feed_card, "one_line")}
+                      </p>
+                    )}
+                    <HeaderMeta post={post} />
                   </div>
                 ) : (
                   /* Other formats keep the inset slab header. The glow box stays
@@ -425,37 +481,10 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                         </div>
                       )}
 
-                      {/* People portrait — cover-format header anchor (LAYOUT_STANDARD s3). */}
-                      {post.format === "people" && (post.feed_card as { portrait?: { image_url?: string } }).portrait?.image_url && (
-                        <div className="flex justify-center mb-5">
-                          <div className="rounded-full overflow-hidden w-28 h-28 bg-white/[0.06]">
-                            <img
-                              src={(post.feed_card as { portrait: { image_url: string } }).portrait.image_url}
-                              alt=""
-                              className="w-full h-full object-cover object-top"
-                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* People role kicker — accent label above the name, mirrors the card. */}
-                      {post.format === "people" && fcStr(post.feed_card, "role") && (
-                        <p className="label-caps text-(--accent) mb-1">{fcStr(post.feed_card, "role")}</p>
-                      )}
-
                       {/* Title */}
                       <h1 className="font-serif text-3xl font-medium text-ink leading-snug mb-1">
                         {post.title}
                       </h1>
-
-                      {/* People lifespan (context line) then one_line dek — LAYOUT_STANDARD s3/s4. */}
-                      {post.format === "people" && fcStr(post.feed_card, "lifespan") && (
-                        <p className="text-ink-muted text-xs font-mono mb-2">{fcStr(post.feed_card, "lifespan")}</p>
-                      )}
-                      {post.format === "people" && fcStr(post.feed_card, "one_line") && (
-                        <p className="font-serif italic text-base text-ink-body leading-relaxed mb-3">{fcStr(post.feed_card, "one_line")}</p>
-                      )}
 
                       {/* Author (Books) */}
                       {post.format === "books" && fcStr(post.feed_card, "author") && (
@@ -504,7 +533,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     it (concepts has none, so this is a no-op there). */}
                 <SectionRenderer
                   sections={
-                    typographic
+                    flatHeader
                       ? post.sections.filter((s) => s.type !== "headline")
                       : post.sections
                   }
@@ -518,7 +547,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     sources section, the network/filter layer at the foot of the
                     post. The slab header carries its own tags, so this is only for
                     the banner-header formats. */}
-                {typographic && post.interests.length > 0 && (
+                {flatHeader && post.interests.length > 0 && (
                   <div data-no-read className="px-6 pt-2 pb-6 flex flex-wrap gap-2">
                     {post.interests.map((name) => (
                       <span
