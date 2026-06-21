@@ -425,10 +425,37 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                         </div>
                       )}
 
+                      {/* People portrait — cover-format header anchor (LAYOUT_STANDARD s3). */}
+                      {post.format === "people" && (post.feed_card as { portrait?: { image_url?: string } }).portrait?.image_url && (
+                        <div className="flex justify-center mb-5">
+                          <div className="rounded-full overflow-hidden w-28 h-28 bg-white/[0.06]">
+                            <img
+                              src={(post.feed_card as { portrait: { image_url: string } }).portrait.image_url}
+                              alt=""
+                              className="w-full h-full object-cover object-top"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* People role kicker — accent label above the name, mirrors the card. */}
+                      {post.format === "people" && fcStr(post.feed_card, "role") && (
+                        <p className="label-caps text-(--accent) mb-1">{fcStr(post.feed_card, "role")}</p>
+                      )}
+
                       {/* Title */}
                       <h1 className="font-serif text-3xl font-medium text-ink leading-snug mb-1">
                         {post.title}
                       </h1>
+
+                      {/* People lifespan (context line) then one_line dek — LAYOUT_STANDARD s3/s4. */}
+                      {post.format === "people" && fcStr(post.feed_card, "lifespan") && (
+                        <p className="text-ink-muted text-xs font-mono mb-2">{fcStr(post.feed_card, "lifespan")}</p>
+                      )}
+                      {post.format === "people" && fcStr(post.feed_card, "one_line") && (
+                        <p className="font-serif italic text-base text-ink-body leading-relaxed mb-3">{fcStr(post.feed_card, "one_line")}</p>
+                      )}
 
                       {/* Author (Books) */}
                       {post.format === "books" && fcStr(post.feed_card, "author") && (
