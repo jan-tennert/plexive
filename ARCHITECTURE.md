@@ -142,9 +142,13 @@ frontend/
     VerifiedBadge.tsx           level-based user check (1=slate-blue, 2=gold, 3+=purple) + variant="official" for Deepscroll seed content; size prop
     Spinner.tsx                 unified loading spinner (sm/md)
     PostRow.tsx                 compact post list slab (format dot + badge + title, hover brightens fill) used by profile tabs
-    SectionRenderer.tsx         maps section.type → component; handles all sections for books/facts/people/concepts/questions/stories formats; threads isUserContent into SVG-bearing sections (incl. concepts how_it_works + real_world_examples); threads format for per-format shared headers (voices → "In Their Own Words" for people, headerless for books); no line dividers (LAYOUT_STANDARD s7: whitespace is the single divider, sections separated by uniform px-6 py-8 rhythm); NO_READ_SECTIONS (at_a_glance/quiz/paper_card/sources) wrapped in data-no-read so read-aloud speaks only prose sections (related_posts case removed — hard cut; a stray one falls to the default warn+skip)
+    SectionRenderer.tsx         maps section.type → component; handles all sections for books/facts/people/concepts/questions/stories formats (incl. books why_read_it + influence); threads isUserContent into SVG-bearing sections (incl. concepts how_it_works + real_world_examples); threads format for per-format shared headers (voices → "In Their Own Words" for people, headerless for books); no line dividers (LAYOUT_STANDARD s7: whitespace is the single divider, sections separated by uniform px-6 py-8 rhythm); NO_READ_SECTIONS (at_a_glance/quiz/paper_card/sources) wrapped in data-no-read so read-aloud speaks only prose sections (related_posts case removed — hard cut; a stray one falls to the default warn+skip)
     sections/
       (books/facts/people/concepts sections — existing)
+      WhyReadItSection.tsx      books: opening lead (REQUIRED), label-less full-ink case for reading the book
+      HeartSection.tsx          books KEY section: central argument, marked with the accent left-border + faint wash + "The Heart of It" label (LAYOUT_STANDARD s7, the one marked section for books)
+      CoreIdeasSection.tsx      books: ideas in depth, each with optional visual_svg (SvgBlock) or sourced image_url + image_caption (ink-dim) + image_attribution (ink-faint, IMAGE_STANDARD s3-s4) + quote + in_practice
+      InfluenceSection.tsx      books: reception and influence (OPTIONAL), muted Part 6 context prose + "Reception & Influence" label (mirrors WorldContextSection)
       WhyTheyMatterSection.tsx  people KEY section: significance up front, marked with the accent left-border + faint wash (LAYOUT_STANDARD s7, mirrors facts SurprisesSection / concepts HowToApplySection)
       OneLinerSection.tsx       concepts: prominent one-sentence summary
       IntuitionSection.tsx      concepts: plain-language intuition paragraph

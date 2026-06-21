@@ -3,8 +3,10 @@ import EssenceSection from "./sections/EssenceSection"
 import VoicesSection from "./sections/VoicesSection"
 import AtAGlanceSection from "./sections/AtAGlanceSection"
 import WhyEnduresSection from "./sections/WhyEnduresSection"
+import WhyReadItSection from "./sections/WhyReadItSection"
 import HeartSection from "./sections/HeartSection"
 import StructureSection from "./sections/StructureSection"
+import InfluenceSection from "./sections/InfluenceSection"
 import CoreIdeasSection from "./sections/CoreIdeasSection"
 import TakeawaySection from "./sections/TakeawaySection"
 import QuizSection from "./sections/QuizSection"
@@ -111,6 +113,10 @@ export default function SectionRenderer({ sections, isUserContent, postId, forma
         switch (section.type) {
           case "essence":
             return <EssenceSection key={i} content={c as string} />
+          case "why_read_it":
+            return <WhyReadItSection key={i} content={c as string} />
+          case "influence":
+            return <InfluenceSection key={i} content={c as string} />
           case "voices":
             return <VoicesSection key={i} content={c as any} label={format === "people" ? "In Their Own Words" : undefined} />
           case "at_a_glance":
