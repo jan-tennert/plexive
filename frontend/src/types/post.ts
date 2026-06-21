@@ -42,6 +42,8 @@ export interface CoreIdeaItem {
   in_practice?: string
   visual_svg?: string
   image_url?: string
+  image_caption?: string
+  image_attribution?: string
   quote?: string
 }
 

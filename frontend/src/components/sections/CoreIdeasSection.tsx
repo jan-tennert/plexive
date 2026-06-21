@@ -27,6 +27,19 @@ export default function CoreIdeasSection({ content, isUserContent }: Props) {
                 decoding="async"
                 className="w-full rounded-lg object-cover"
               />
+              {/* Caption is optional; the credit line is required with every
+                  sourced image and renders independently of it (IMAGE_STANDARD
+                  s3-s4), the same treatment as PortraitSection. */}
+              {(idea.image_caption || idea.image_attribution) && (
+                <div className="pt-2">
+                  {idea.image_caption && (
+                    <p className="text-sm text-ink-dim leading-snug">{idea.image_caption}</p>
+                  )}
+                  {idea.image_attribution && (
+                    <p className="text-xs text-ink-faint mt-1">{idea.image_attribution}</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
