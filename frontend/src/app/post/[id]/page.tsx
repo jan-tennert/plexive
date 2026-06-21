@@ -417,14 +417,21 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                      name is the single headline; lifespan is the context line and
                      one_line the dek. */
                   <div className="relative">
-                    <div className="px-6 pt-4 flex items-start justify-between gap-3">
+                    {/* Field line — role kicker only. A cover format has no glyph,
+                        so the right end of this line stays intentionally empty. */}
+                    <div className="px-6 pt-4">
                       {fcStr(post.feed_card, "role") && (
                         <p className="label-caps text-(--accent)">
                           {fcStr(post.feed_card, "role")}
                         </p>
                       )}
+                    </div>
+                    {/* Person-head row — the portrait on the left with the name and
+                        lifespan stacked to its right, read as one unit and centered
+                        against each other the way a biography page introduces someone. */}
+                    <div className="px-6 pt-3 pb-4 flex items-center gap-4">
                       {(post.feed_card as { portrait?: { image_url?: string } }).portrait?.image_url && (
-                        <div className="shrink-0 w-16 h-16 rounded-full overflow-hidden bg-white/[0.06]">
+                        <div className="shrink-0 w-24 h-24 rounded-full overflow-hidden bg-white/[0.06]">
                           <img
                             src={(post.feed_card as { portrait: { image_url: string } }).portrait.image_url}
                             alt=""
@@ -433,15 +440,21 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                           />
                         </div>
                       )}
+                      <div className="min-w-0">
+                        {/* Name — the single headline. Styled inline rather than via
+                            HeadlineSection only so it can align beside the portrait;
+                            the serif scale is kept matched to HeadlineSection by hand,
+                            so a HeadlineSection typography change must be mirrored here. */}
+                        <h1 className="font-serif text-[2rem] font-medium tracking-tight text-ink leading-snug">
+                          {post.title}
+                        </h1>
+                        {fcStr(post.feed_card, "lifespan") && (
+                          <p className="text-ink-muted text-xs font-mono mt-1">
+                            {fcStr(post.feed_card, "lifespan")}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    {/* Name — the single headline, same treatment as facts/concepts. */}
-                    <HeadlineSection content={post.title} />
-                    {/* Lifespan context line then one_line dek (LAYOUT_STANDARD s3). */}
-                    {fcStr(post.feed_card, "lifespan") && (
-                      <p className="px-6 -mt-3 mb-1.5 text-ink-muted text-xs font-mono">
-                        {fcStr(post.feed_card, "lifespan")}
-                      </p>
-                    )}
                     {fcStr(post.feed_card, "one_line") && (
                       <p className="px-6 mb-5 font-serif italic text-base text-ink-body leading-relaxed">
                         {fcStr(post.feed_card, "one_line")}
