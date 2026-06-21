@@ -162,8 +162,10 @@ it to keep the default dark Stage cover):
   cover, as a hex value (for example `#fcfbf7` for Thinking, Fast and Slow).
   Sample it once and store it; nothing is fetched at runtime.
 - `title_font`: a key naming a similar typeface the app loads, `cover-serif`
-  (the high-contrast display serif) or `stage-serif` (the default). Pick the one
-  that resembles the real title; do not try to match the exact face.
+  (an inscriptional Roman-capital serif, Cinzel, that renders the title in
+  capitals) or `stage-serif` (the default). Pick the one that resembles the real
+  title. The exact face of many covers is a commercial font whose file cannot be
+  bundled; borrow a similar open font, not the exact file.
 - `ink` (optional): override the title color. By default it is derived from the
   background (dark on a light cover, light on a dark one), so it is rarely needed.
 

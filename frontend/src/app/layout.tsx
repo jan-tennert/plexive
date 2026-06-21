@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Newsreader, Source_Sans_3, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Newsreader, Source_Sans_3, Geist_Mono, Cinzel } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import Providers from "./components/Providers";
@@ -22,11 +22,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// High-contrast display serif for the generated book cover title. It is a font
-// "similar to" a real cover's lettering, never a copy of any specific cover; only
-// the typeface (not protected) is borrowed. See GENERATED_COVER convention in
-// IMAGE_STANDARD.md. Exposed as --font-cover-serif, referenced by the cover hint.
-const coverSerif = Playfair_Display({
+// Inscriptional Roman-capital serif for the generated book cover title (Cinzel,
+// based on first-century Roman inscriptions). It is a font similar to the kind of
+// elegant inscriptional lettering many real covers use, never a copy of a specific
+// commercial face; only the typeface (not protected) is borrowed. See the
+// generated-cover convention in IMAGE_STANDARD.md. Exposed as --font-cover-serif,
+// referenced by the cover hint. Cinzel renders the title in capitals by design.
+const coverSerif = Cinzel({
   variable: "--font-cover-serif",
   subsets: ["latin"],
 });

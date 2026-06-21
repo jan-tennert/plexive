@@ -300,7 +300,10 @@ export default function GeneratedBookCover({
       <text
         x={PAD}
         y={titleTop}
-        fontFamily={`${titleFontFamily}, Georgia, serif`}
+        // font-family is set via style (CSS), not the SVG presentation attribute,
+        // because browsers do not resolve var() inside SVG attributes; the var
+        // would silently fall back to the generic serif otherwise.
+        style={{ fontFamily: `${titleFontFamily}, Georgia, serif` }}
         fontSize={titleSize}
         fontWeight={500}
         fill={pal.ink}
@@ -315,7 +318,7 @@ export default function GeneratedBookCover({
       <text
         x={PAD}
         y={titleBottom + 34}
-        fontFamily="var(--font-serif), Georgia, serif"
+        style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
         fontSize={15}
         fontStyle="italic"
         fill={pal.subInk}

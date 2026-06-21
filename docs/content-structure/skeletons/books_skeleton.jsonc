@@ -144,9 +144,11 @@
                                 // value (e.g. "#fcfbf7"). Nothing is fetched at
                                 // runtime.
         "title_font": "",       // string | omit. A key naming a similar typeface
-                                // the app loads: "cover-serif" (high-contrast
-                                // display serif) or "stage-serif" (the default).
-                                // A font similar to the real title, not a copy.
+                                // the app loads: "cover-serif" (inscriptional
+                                // Roman-capital serif, renders as capitals) or
+                                // "stage-serif" (the default). A font similar to
+                                // the real title, never the exact (often
+                                // commercial) font file.
         "ink": ""               // string | omit. Override the title color; by
                                 // default it is derived from the background so the
                                 // title always reads (dark on a light cover).
