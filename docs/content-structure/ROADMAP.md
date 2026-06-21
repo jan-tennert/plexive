@@ -57,26 +57,33 @@ the lookup later.
   contrast.
 - Per-format key section: each format designates the one section marked with the
   accent left-border (see `LAYOUT_STANDARD.md` section 7). Decide it in each
-  format's own chat. Facts (the surprises section) and Concepts (the how_to_apply
-  section) are decided and now rendered in the web frontend. The others: open.
+  format's own chat. Facts (the surprises section), Concepts (the how_to_apply
+  section), and Books (the heart section) are decided; facts and concepts are
+  rendered in the web frontend, and books is fixed in its skeleton and renders when
+  the books pass reaches the frontend. The others: open.
 - Latent-edge display: only a person edge can point at a post that does not exist
   yet, activating when that person's post is created. Non-person connections to a
   missing target are not stored at all. Anywhere edges surface, "Read next" now
   and the graph view later, a latent person edge whose target does not yet exist
   must be hidden or shown non-clickable, never a dead link. The stored person edge
   stays, and only its display is gated on the target existing.
-- Cover-format detail header: how the book cover (books) and portrait (people) sit
-  at the top of the detail page is settled when those formats get their pass.
+- Cover-format detail header: the people portrait sits in the flat detail header
+  (settled in the people pass). For books, the card and detail header carry a cover
+  in two tiers, a real free cover with a verified rights record when one exists and
+  otherwise a programmatically generated Stage cover, never copyrighted; the exact
+  placement in the detail header is settled when the books render lands.
+  LAYOUT_STANDARD section 1 and IMAGE_STANDARD sections 5 and 6 now carry this
+  two-tier books model.
 - Taxonomy (resolved): paleontology, botany, microbiology, and the optional
   `creativity` field have all been added; the taxonomy now holds 149 slugs in
   `backend/seed.py`, with no remaining flagged gaps.
 - Skeleton spec pointers (post-slim): the header line in the people,
-  books, questions, stories, and academy skeletons still sends the reader to
+  questions, stories, and academy skeletons still sends the reader to
   DEEPSCROLL_CONTENT_STRUCTURE.md for the full per-format spec, but the slim moved
   that spec into the skeleton itself; the doc now holds only the schema, the
   shared shapes, and the rationale. Reword each pointer to the facts skeleton's
   form ("Schema and rationale: DEEPSCROLL_CONTENT_STRUCTURE.md") when that format
-  gets its pass. The facts and concepts skeletons are already correct.
+  gets its pass. The facts, concepts, and books skeletons are already correct.
 - Detail-header dek: LAYOUT_STANDARD section 3 now carries an optional
   detail-header dek (added for concepts, which repeats the card dek because its
   body opens on a scene, not a definition). Still open: decide

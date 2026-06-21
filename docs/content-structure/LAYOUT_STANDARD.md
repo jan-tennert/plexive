@@ -17,9 +17,13 @@ built, its card and detail page follow this document.
 
 Which look a format uses is fixed, not per post.
 
-- **Cover formats** (books, people): the card shows a real image, a hochkant book
-  cover or a portrait, beside the headline. This is the current books and people
-  layout and does not change.
+- **Cover formats** (books, people): the card shows a cover-shaped image beside the
+  headline, never a field glyph. People always shows a real portrait, since portraits
+  of notable people are reliably free to license. Books shows a cover in two tiers: a
+  real cover when a genuinely free one exists (public domain, CC0, CC-BY) carried with
+  a verified rights record, and otherwise a programmatically generated cover in the
+  Stage design system. A copyrighted cover is never used. The people layout is
+  unchanged; the books card moves from an assumed real cover to this two-tier model.
 - **Story format** (stories): a story is a concrete real-world narrative, so it
   often has a genuine, evocative licensed image (an archival photo, the place, the
   object, a person involved). When one fits, the card carries it; this is real,
