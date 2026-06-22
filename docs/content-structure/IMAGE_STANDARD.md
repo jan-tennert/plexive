@@ -136,48 +136,47 @@ far.
 
 ---
 
-## 8. Generated book cover: borrowing color and typeface
+## 8. Generated book cover: a baked SVG that evokes the real cover
 
-When a book has no free real cover (the normal case), Stage draws an original
-cover from its title and author (the `GeneratedBookCover` component, deterministic
-per book, a single flat SVG, no external request). The drawn pattern is always
-original and is never traced from or modeled on any real cover.
+When a book has no free real cover (the normal case), it ships on a generated
+cover: a complete, bespoke SVG, written once per book and stored on
+`feed_card.cover.svg`, that the app renders as-is. Each book's cover is its own
+SVG, because each real cover is set differently; a single shared layout would make
+every book look identically arranged, which is wrong.
 
-Two things, and only two, may be borrowed from the book's real cover, because
-neither is protected by copyright: a single background color and the title
-typeface. The typeface is a font *similar to* the real lettering, never a
-reproduction of a specific face. Nothing else is taken: not the artwork, not the
-layout, not any graphic, illustration, or arrangement. This keeps the generated
-cover legally clear while letting it evoke the book a reader may recognize.
+What the generated cover takes from the real cover, and nothing else:
+
+- the dominant **background color** (sampled as a hex);
+- a **typeface** similar to the real title's, from the loaded cover fonts (the
+  exact face is often a commercial font whose file cannot be bundled, so use a
+  close open font, never the exact file);
+- the **typographic arrangement of the title text**: its line breaks, the relative
+  sizes within it (for example a small "and" between larger words), and where the
+  title and author sit on the cover.
+
+Never take any pictorial element: no illustration, photograph, graphic, ornament,
+or logo from the real cover, and never trace or embed any image from it. Color,
+typeface, and the typographic arrangement of the title are the whole of what is
+borrowed.
 
 This is the one place a card may be light rather than dark. The app is otherwise
 dark only, but a cover stands in for a real, physical book, so a light cover
-background is allowed; the title and author ink are derived from that background
-so they always read.
+background is correct; pick the ink so the title and author always read on it.
 
-When a `background` is borrowed, the generated cover switches to a text-only
-layout that echoes how a real cover is set: the title centered in the upper third
-(broken at commas, with connector words like "and" and "of" set smaller, the way
-covers do) and the author centered below, in the borrowed typeface, with no
-pattern and no rules. Books without a borrowed background keep the default dark
-Stage cover with its abstract pattern.
+The SVG is flat (no gradients, shadows, or filters), uses a 2:3 portrait viewBox,
+fills its box (`preserveAspectRatio` slice), and sets the title font through
+`style="font-family: var(--font-cover-...)"` (a CSS var resolves there; an SVG
+`font-family` attribute does not). The loaded cover fonts, each a free family
+exposed as a CSS var in `frontend/src/app/layout.tsx`, currently include:
 
-Carry the hint per book in `feed_card.cover.generated_style` (tier-2 only; omit
-it to keep the default dark Stage cover):
+- `--font-cover-serif` (Cinzel, inscriptional Roman capitals)
+- `--font-cover-didone` (Playfair Display, high-contrast modern serif)
+- `--font-cover-garamond` (EB Garamond, classical old-style serif)
+- `--font-cover-slab` (Zilla Slab)
+- `--font-cover-sans` (Inter, neo-grotesque sans)
+- `--font-cover-geometric` (Poppins, geometric sans)
 
-- `background`: the dominant background color sampled by hand from the real
-  cover, as a hex value (for example `#fcfbf7` for Thinking, Fast and Slow).
-  Sample it once and store it; nothing is fetched at runtime.
-- `title_font`: a key naming a similar typeface the app loads, `cover-serif`
-  (an inscriptional Roman-capital serif, Cinzel, that renders the title in
-  capitals) or `stage-serif` (the default). Pick the one that resembles the real
-  title. The exact face of many covers is a commercial font whose file cannot be
-  bundled; borrow a similar open font, not the exact file.
-- `ink` (optional): override the title color. By default it is derived from the
-  background (dark on a light cover, light on a dark one), so it is rarely needed.
-
-How to add one: open the real cover once, read off its dominant background color
-and the broad style of its title type, set `background` to that hex, and set
-`title_font` to whichever loaded font is closest. Add a new loaded font only when
-no existing one is close enough, and keep it a general-purpose family, never a
-font tied to a single cover.
+This is an extensible set: when no loaded font is close enough to a real cover,
+add the nearest free Google font as a new `--font-cover-*` var and use it. A book
+whose `feed_card.cover.svg` is absent falls back to a generic generated cover the
+frontend draws live; a baked SVG is the intended result.

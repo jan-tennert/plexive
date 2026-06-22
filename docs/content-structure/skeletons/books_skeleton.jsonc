@@ -112,9 +112,9 @@
                                 // (no retailer or Open Library scans), never a
                                 // field glyph.
       "image_url": "",          // string | null. The cover URL ONLY when the image
-                                // is free (CC0, CC BY, or public domain) and
-                                // verified on the file's own page. null when no
-                                // free cover exists; Stage then generates one.
+                                // is free (CC0, CC BY, CC BY-SA, or public domain)
+                                // and verified on the file's own page. null when no
+                                // free cover exists; ship the baked cover svg below.
                                 // Never invent a URL. Per IMAGE_STANDARD.md.
       "generated": false,       // boolean. HARD. true when image_url is null and
                                 // Stage generates the cover. Mutually exclusive
@@ -133,26 +133,22 @@
                                 // the license on the file page. A generator leaves
                                 // it false; a tier-1 cover is not seeded until it
                                 // is true.
-      "generated_style": {      // object | omit. Tier-2 only. Per-book hints that
-                                // make the GENERATED cover evoke the real one by
-                                // borrowing ONLY its background color and title
-                                // typeface (neither is protected); never its
-                                // artwork, layout, or any graphic. Omit to keep the
-                                // default dark Stage cover. See IMAGE_STANDARD.md.
-        "background": "",       // string | omit. The dominant background color
-                                // sampled by hand from the real cover, as a hex
-                                // value (e.g. "#fcfbf7"). Nothing is fetched at
-                                // runtime.
-        "title_font": "",       // string | omit. A key naming a similar typeface
-                                // the app loads: "cover-serif" (inscriptional
-                                // Roman-capital serif, renders as capitals) or
-                                // "stage-serif" (the default). A font similar to
-                                // the real title, never the exact (often
-                                // commercial) font file.
-        "ink": ""               // string | omit. Override the title color; by
-                                // default it is derived from the background so the
-                                // title always reads (dark on a light cover).
-      }
+      "svg": ""                 // string | omit. TIER 2 (the normal case), HARD when
+                                // image_url is null: the baked generated cover, a
+                                // complete bespoke <svg> that evokes the real cover.
+                                // It takes ONLY three things from the real cover and
+                                // nothing else: the dominant background color (a
+                                // hex), a similar loaded typeface, and the
+                                // typographic arrangement of the title (line breaks,
+                                // relative sizes such as a small "and", placement of
+                                // title and author). Never a pictorial element,
+                                // illustration, graphic, ornament, or logo, and
+                                // never an embedded/traced image. Flat (no
+                                // gradients/shadows/filters), 2:3 viewBox,
+                                // preserveAspectRatio slice; set the font via
+                                // style="font-family: var(--font-cover-...)". Full
+                                // rules + the loaded cover fonts: IMAGE_STANDARD.md
+                                // section 8.
     },
     "title": "",                // string. The book's title as commonly known.
     "author": "",               // string. Author as commonly credited. Rendered as

@@ -34,10 +34,7 @@
       "image_url": null,
       "generated": true,
       "verified_by_human": false,
-      "generated_style": {
-        "background": "#fcfbf7",
-        "title_font": "cover-serif"
-      }
+      "svg": "<svg viewBox='0 0 300 450' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMid slice'><rect width='300' height='450' fill='#fcfbf7'/><g style='font-family:var(--font-cover-serif), Georgia, serif' fill='#1a1a1a' text-anchor='middle'><text x='150' y='150' font-size='30' letter-spacing='2'><tspan x='150'>THINKING,</tspan><tspan x='150' dy='42'>FAST <tspan font-size='18'>AND</tspan> SLOW</tspan></text><text x='150' y='322' font-size='15' letter-spacing='3'>DANIEL KAHNEMAN</text></g></svg>"
     },
     "title": "Thinking, Fast and Slow",
     "author": "Daniel Kahneman",
