@@ -190,7 +190,7 @@ export default function SectionRenderer({ sections, isUserContent, postId, forma
           case "what_hangs_on_it":
             return <WhatHangsOnItSection key={i} content={c as string} />
           case "perspectives":
-            return <PerspectivesSection key={i} content={c as any} />
+            return <PerspectivesSection key={i} content={c as any} isUserContent={isUserContent} />
           case "where_they_clash":
             return <WhereTheyClashSection key={i} content={c as string} />
           case "what_science_says":

@@ -181,10 +181,13 @@ export interface AtAGlanceStoriesContent {
 
 export interface PerspectiveItem {
   position_name: string
-  school_or_thinker: string
+  school_or_thinker?: string
   body: string
   strongest_argument: string
-  concrete_example: string
+  concrete_example?: string
+  visual_svg?: string
+  image_url?: string
+  image_attribution?: string
 }
 
 export interface WhatScienceSaysContent {
