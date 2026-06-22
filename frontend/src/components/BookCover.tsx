@@ -2,13 +2,16 @@
 
 // The one entry point for a book's cover, used everywhere a book renders (the
 // feed card, the detail header, the my-posts list) so a given book always shows
-// the same cover. It resolves the two tiers through the shared resolver
-// (@/lib/bookCover): a real cover only on a complete, verified, freely licensed
-// rights record, otherwise the generated Stage cover. See IMAGE_STANDARD.md and
-// LAYOUT_STANDARD.md.
+// the same cover. It resolves the cover in this order (see @/lib/bookCover):
+//   1. a real cover, only on a complete, verified, freely licensed rights record;
+//   2. otherwise the baked generated cover SVG (cover.svg), a bespoke SVG that
+//      reproduces the real cover's arrangement in a similar loaded typeface on the
+//      sampled background color (the normal case);
+//   3. otherwise the live GeneratedBookCover fallback (for books with no baked svg).
+// See IMAGE_STANDARD.md and LAYOUT_STANDARD.md.
 
 import { useState } from "react"
-import { resolveBookCover, generatedCoverStyle } from "@/lib/bookCover"
+import { resolveBookCover, generatedCoverStyle, bakedCoverSvg } from "@/lib/bookCover"
 import { fcStr } from "@/types/post"
 import GeneratedBookCover from "./GeneratedBookCover"
 
@@ -19,9 +22,55 @@ interface Props {
   // Show the credit line beneath, per IMAGE_STANDARD.md s3, where the cover is at
   // readable size (the detail header). Off for small thumbnails.
   showCredit?: boolean
+  // The post's content origin, for the SVG security split on the baked cover.
+  isUserContent?: boolean
 }
 
-export default function BookCover({ feedCard, className, showCredit = false }: Props) {
+// btoa alone throws on non-ASCII; round-trip through UTF-8 bytes (same as SvgBlock).
+function toBase64Utf8(svg: string): string {
+  return btoa(unescape(encodeURIComponent(svg)))
+}
+
+// Render the baked cover SVG with the SVG security split, and without the legacy
+// accent re-palette SvgBlock applies (a cover carries its own sampled colors).
+// User content renders as a base64 <img> (no script execution); seed/official
+// content may use dangerouslySetInnerHTML.
+function BakedCover({
+  svg,
+  className,
+  isUserContent,
+}: {
+  svg: string
+  className?: string
+  isUserContent: boolean
+}) {
+  if (isUserContent) {
+    return (
+      <div className={className}>
+        <img
+          src={`data:image/svg+xml;base64,${toBase64Utf8(svg)}`}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    )
+  }
+  return (
+    <div
+      className={`${className ?? ""} [&_svg]:w-full [&_svg]:h-full [&_svg]:block`}
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  )
+}
+
+export default function BookCover({
+  feedCard,
+  className,
+  showCredit = false,
+  isUserContent = false,
+}: Props) {
   // If a real cover image fails to load, fall back to the generated cover so the
   // book is never blank. The credit is dropped in that case too, so a credit line
   // never sits under a generated cover.
@@ -30,12 +79,14 @@ export default function BookCover({ feedCard, className, showCredit = false }: P
   const decision = resolveBookCover(feedCard)
   const title = fcStr(feedCard, "title")
   const author = fcStr(feedCard, "author")
+  const baked = bakedCoverSvg(feedCard)
   const style = generatedCoverStyle(feedCard)
   const showReal = decision.kind === "real" && !imgFailed
 
-  const box = (
-    <div className={className}>
-      {showReal ? (
+  let cover
+  if (showReal) {
+    cover = (
+      <div className={className}>
         <img
           src={decision.url}
           alt=""
@@ -44,7 +95,13 @@ export default function BookCover({ feedCard, className, showCredit = false }: P
           className="w-full h-full object-cover"
           onError={() => setImgFailed(true)}
         />
-      ) : (
+      </div>
+    )
+  } else if (baked) {
+    cover = <BakedCover svg={baked} className={className} isUserContent={isUserContent} />
+  } else {
+    cover = (
+      <div className={className}>
         <GeneratedBookCover
           title={title}
           author={author}
@@ -53,14 +110,14 @@ export default function BookCover({ feedCard, className, showCredit = false }: P
           ink={style.ink}
           titleFont={style.titleFont}
         />
-      )}
-    </div>
-  )
+      </div>
+    )
+  }
 
   if (showCredit && showReal) {
     return (
       <div className="flex flex-col items-center gap-1.5">
-        {box}
+        {cover}
         <p className="text-[10px] text-ink-faint leading-snug text-center max-w-[240px]">
           {decision.attribution}
         </p>
@@ -68,5 +125,5 @@ export default function BookCover({ feedCard, className, showCredit = false }: P
     )
   }
 
-  return box
+  return cover
 }

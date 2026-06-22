@@ -480,6 +480,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     <div className="px-6 pt-3 flex justify-center">
                       <BookCover
                         feedCard={post.feed_card}
+                        isUserContent={post.is_user_content}
                         className="rounded-xl overflow-hidden w-32 h-48 bg-white/[0.06]"
                         showCredit
                       />

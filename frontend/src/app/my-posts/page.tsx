@@ -92,6 +92,7 @@ export default function MyPostsPage() {
                     {post.format === "books" ? (
                       <BookCover
                         feedCard={post.feed_card}
+                        isUserContent={post.is_user_content}
                         className="shrink-0 w-10 h-14 rounded-lg overflow-hidden bg-white/[0.06]"
                       />
                     ) : (

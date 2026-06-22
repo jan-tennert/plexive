@@ -380,6 +380,7 @@ export default function PostCard({ post, activeTabId }: { post: Post; activeTabI
                     the detail header. Thumbnail size, so no credit line here. */}
                 <BookCover
                   feedCard={fc}
+                  isUserContent={post.is_user_content}
                   className="shrink-0 rounded-xl overflow-hidden w-16 h-24 bg-white/[0.06]"
                 />
               </div>
