@@ -21,15 +21,14 @@ export default function PerspectivesSection({ content, isUserContent }: Props) {
           </div>
           <p className="prose-post">{p.body}</p>
           <div className="border-l-2 border-(--accent)/40 pl-3 flex flex-col gap-2">
-            {/* Readable secondary text, matching the quiz/sources kit treatment
-                (text-sm + text-ink-dim + leading-relaxed): clearly below the
-                position body but comfortably readable on the dark Stage. */}
-            <p className="text-sm text-ink-dim leading-relaxed">
+            {/* Running text matches the position body (prose-post: full body size
+                and ink-body contrast); only the bold labels set it apart. */}
+            <p className="prose-post">
               <span className="font-semibold text-(--accent)">Strongest argument: </span>
               {p.strongest_argument}
             </p>
             {p.concrete_example && (
-              <p className="text-sm text-ink-dim leading-relaxed">
+              <p className="prose-post">
                 <span className="font-semibold text-ink-body">Example: </span>
                 {p.concrete_example}
               </p>
