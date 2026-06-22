@@ -1,3 +1,4 @@
+import SectionLabel from "../SectionLabel"
 interface Props {
   content: string[]
 }
@@ -5,6 +6,7 @@ interface Props {
 export default function StructureSection({ content }: Props) {
   return (
     <div className="px-6 py-8">
+      <SectionLabel className="mb-3">How It Is Built</SectionLabel>
       <ol className="flex flex-col gap-3">
         {content.map((item, i) => (
           <li key={i} className="flex gap-3 items-start">

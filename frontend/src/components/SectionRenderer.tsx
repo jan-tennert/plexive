@@ -118,7 +118,7 @@ export default function SectionRenderer({ sections, isUserContent, postId, forma
           case "influence":
             return <InfluenceSection key={i} content={c as string} />
           case "voices":
-            return <VoicesSection key={i} content={c as any} label={format === "people" ? "In Their Own Words" : undefined} />
+            return <VoicesSection key={i} content={c as any} label={format === "people" ? "In Their Own Words" : format === "books" ? "Voices from the Book" : undefined} />
           case "at_a_glance":
             return <AtAGlanceSection key={i} content={c as any} />
           case "why_endures":

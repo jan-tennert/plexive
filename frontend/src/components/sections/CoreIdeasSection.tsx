@@ -1,5 +1,6 @@
 import type { CoreIdeaItem } from "../../types/post"
 import SvgBlock from "../SvgBlock"
+import SectionLabel from "../SectionLabel"
 
 interface Props {
   content: CoreIdeaItem[]
@@ -8,7 +9,9 @@ interface Props {
 
 export default function CoreIdeasSection({ content, isUserContent }: Props) {
   return (
-    <div className="px-6 py-8 flex flex-col gap-10">
+    <div className="px-6 py-8">
+      <SectionLabel className="mb-4">The Core Ideas</SectionLabel>
+      <div className="flex flex-col gap-10">
       {content.map((idea, i) => (
         <div key={i} className="flex flex-col gap-3">
           <h2 className="text-lg font-semibold text-(--accent) leading-snug">{idea.title}</h2>
@@ -56,6 +59,7 @@ export default function CoreIdeasSection({ content, isUserContent }: Props) {
           )}
         </div>
       ))}
+      </div>
     </div>
   )
 }

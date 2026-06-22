@@ -1,4 +1,5 @@
 import type { AuthorContextContent } from "../../types/post"
+import SectionLabel from "../SectionLabel"
 
 interface Props {
   content: AuthorContextContent
@@ -15,6 +16,7 @@ function ExternalLinkIcon() {
 export default function AuthorContextSection({ content }: Props) {
   return (
     <div className="px-6 py-8">
+      <SectionLabel className="mb-3">About the Author</SectionLabel>
       <div className={`flex gap-4 ${content.image_url ? "items-start" : ""}`}>
         {content.image_url && (
           <div className="shrink-0">
