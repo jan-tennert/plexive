@@ -13,49 +13,45 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.plexive.mobile.navigation.NavigationViewModel
 import com.plexive.mobile.navigation.Screen
+import org.koin.compose.KoinApplication
+import org.koin.compose.navigation3.koinEntryProvider
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
+import org.koin.dsl.koinConfiguration
 
+@OptIn(KoinExperimentalAPI::class)
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        Surface(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize()
-        ) {
-            NavDisplay(
-                backStack = navigationViewModel.backStack, // Your custom-managed back stack
-                modifier = modifier,
-                transitionSpec = { // Define custom transitions for screen changes
-                    fadeIn(tween(300)) togetherWith fadeOut(tween(300))
-                },
-                entryDecorators = listOf(
-                    // Add the default decorators for managing scenes and saving state
-                    rememberSceneSetupNavEntryDecorator(),
-                    rememberSavedStateNavEntryDecorator(),
-                ),
-                entryProvider = entryProvider {
-                    entry<Screen.FeedRoot> {
-                    }
-                    entry<Screen.Stats> {
-                    }
-                    entry<Screen.ChatList> {
-
-                    }
-                    entry<Screen.Profile> {
-
-                    }
-                    entry<Screen.Creator> {
-
-                    }
-                    entry<Screen.UserProfile> { (userId) ->
-
-                    }
-                }
-            )
+        KoinApplication(configuration = koinConfiguration {
+            
+        }) {
+            Surface(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .safeContentPadding()
+                    .fillMaxSize()
+            ) {
+                val viewModel = koinViewModel<NavigationViewModel>()
+                val entryProvider = koinEntryProvider<Any>()
+                NavDisplay(
+                    backStack = viewModel.backStack,
+                    modifier = Modifier,
+                    transitionSpec = {
+                        fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+                    },
+                    /*entryDecorators = listOf(
+                        rememberSceneSetupNavEntryDecorator(),
+                        rememberSavedStateNavEntryDecorator(),
+                    ),*/
+                    entryProvider = entryProvider
+                )
+            }
         }
     }
 }
